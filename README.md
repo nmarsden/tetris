@@ -1,3 +1,16 @@
+# Tetris
+
+## Specification
+
+- [Tetris Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)
+
+## UI Layout References
+
+- [Tetris n-blox](https://media.recordsetter.com/b4f5b069-0a97-4fcb-b30b-9bbf54fe1d92_TETRIS_xl.png)
+- [Game Boy Tetris](https://upload.wikimedia.org/wikipedia/en/4/4a/GB_Tetris.png)
+
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
