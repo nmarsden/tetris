@@ -3,7 +3,9 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, OrbitControls} from "@react-three/drei";
 import {suspend} from 'suspend-react'
+import * as THREE from 'three'
 import {Grid} from './components/grid/grid';
+import {Block} from "./components/block/block";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -13,9 +15,11 @@ const App = () => {
       position: [0, 0, -20],
       fov: 75,
     }}>
-      <ambientLight />
-      <pointLight position={[0, 1, -3]} />
       <Grid enabled={true}/>
+      <Block gridPos={{ col: 0, row: 0}} color={new THREE.Color("red")}/>
+      <Block gridPos={{ col: 9, row: 0}} color={new THREE.Color("yellow")}/>
+      <Block gridPos={{ col: 0, row: 24}} color={new THREE.Color("cyan")}/>
+      <Block gridPos={{ col: 9, row: 24}} color={new THREE.Color("green")}/>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls
