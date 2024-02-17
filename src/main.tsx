@@ -1,10 +1,19 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
 import './index.css'
+import {createRoot} from 'react-dom/client'
+import {Canvas} from '@react-three/fiber'
+import {Cube} from "./cube/cube";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+const App = () => {
+  return (
+    <Canvas camera={{
+      position: [5, 5, -5],
+      fov: 75,
+    }}>
+      <ambientLight />
+      <pointLight position={[0, 1, -3]} />
+      <Cube />
+    </Canvas>
+  )
+}
+
+createRoot(document.getElementById('root')!).render(<App />)
