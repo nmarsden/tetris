@@ -27,26 +27,51 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
 
 const START_POS: GridPos = { col: 4, row: 21};
 
+type GameState = {
+  piece: {
+    pos: GridPos;
+    type: PieceType;
+  }
+};
+
 class GameEngine {
   level = 1;
   timePerRowInMSecs = 1;
-  pieceType: PieceType = 'I';
   droppingBlockPositions: GridPos[] = [];
+  locked: boolean[] = [];
+  gameState: GameState = {
+    piece: { pos: {...START_POS}, type: 'I' }
+  };
 
-  start(): void {
+  start(): GameState {
     this.level = 1;
+    this.locked = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(false);
     this.timePerRowInMSecs = Math.pow((0.8-((this.level-1)*0.007)), (this.level-1)) * 1000;
-    this.pieceType = this.randomPieceType();
-    this.droppingBlockPositions = this.getDroppingBlockStartPositions(this.pieceType);
+
+    this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
+    this.droppingBlockPositions = this.getDroppingBlockStartPositions(this.gameState.piece.type);
+
+    return this.gameState;
   }
-  moveDown(): boolean {
+
+  step(): GameState {
     if (this.canMoveDown()) {
       this.droppingBlockPositions.forEach((pos, index) => {
         this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
       });
-      return true;
+      this.gameState.piece.pos.row--;
+      return this.gameState;
     }
-    return false;
+    // TODO mark droppingBlockPositions as locked
+    this.droppingBlockPositions.forEach(pos => {
+      const lockedIndex = (pos.row * TetrisConstants.numCols) + pos.col;
+      this.locked[lockedIndex] = true;
+    })
+    // TODO update piece & droppingBlockPositions
+    this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
+    this.droppingBlockPositions = this.getDroppingBlockStartPositions(this.gameState.piece.type);
+
+    return this.gameState;
   }
 
   private randomPieceType(): PieceType {
@@ -54,6 +79,7 @@ class GameEngine {
   }
   private getDroppingBlockStartPositions(type: PieceType): GridPos[] {
     const pieceData = PIECE_DATA.get(type) as PieceData;
+
     return pieceData.positions.map(position => ({ col: START_POS.col + position[0], row: START_POS.row + position[1]}));
   }
 
@@ -63,4 +89,4 @@ class GameEngine {
   }
 }
 
-export { GameEngine, START_POS, PIECE_DATA };
+export { GameEngine, PIECE_DATA };

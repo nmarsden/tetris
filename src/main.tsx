@@ -3,27 +3,27 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, OrbitControls} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Grid, GridPos} from './components/grid/grid';
+import {Grid} from './components/grid/grid';
 import {useCallback, useEffect, useState} from "react";
-import {GameEngine, START_POS} from "./gameEngine.ts";
+import {GameEngine} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
 const gameEngine = new GameEngine();
-gameEngine.start();
+const initialGameState = gameEngine.start();
 
 const App = () => {
-  const [gridPos, setGridPos] = useState<GridPos>(START_POS);
+  const [piece, setPiece] = useState({ pos: initialGameState.piece.pos, type: initialGameState.piece.type });
 
-  const movePieceDown = useCallback(() => {
-    if (gameEngine.moveDown()) {
-      setGridPos({col: gridPos.col, row: gridPos.row - 1});
-    }
-  }, [gridPos]);
+  const step = useCallback(() => {
+    const {piece} = gameEngine.step();
+
+    setPiece({ pos: {...piece.pos}, type: piece.type });
+  }, []);
 
   useEffect(() => {
-    setTimeout(() => { movePieceDown(); }, gameEngine.timePerRowInMSecs);
+    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
   })
 
   return (
@@ -32,7 +32,7 @@ const App = () => {
       fov: 75,
     }}>
       <Grid enabled={true}/>
-      <Piece gridPos={gridPos} type={gameEngine.pieceType} />
+      <Piece gridPos={piece.pos} type={piece.type} />
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls
