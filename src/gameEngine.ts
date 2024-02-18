@@ -1,5 +1,5 @@
-import {GridPos} from "./components/grid/grid.tsx";
-import {Color} from "three";
+import {GridPos, GridUtils} from "./components/grid/grid.tsx";
+import {Color, Vector3} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 
 const PIECE_TYPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as const;
@@ -16,13 +16,13 @@ export type PieceData = {
 const CZ = TetrisConstants.cellSize;
 
 const PIECE_DATA: Map<PieceType, PieceData> = new Map([
-  ['I', { color: new Color('cyan'), positions: [[-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0], [CZ*2, -CZ, 0]]  }],
-  ['O', { color: new Color('yellow'), positions: [[0, 0, 0], [CZ, 0, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
-  ['T', { color: new Color('purple'), positions: [[0, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
-  ['S', { color: new Color('green'), positions: [[0, 0, 0], [CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0]]  }],
-  ['Z', { color: new Color('red'), positions: [[-CZ, 0, 0], [0, 0, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
-  ['J', { color: new Color('blue'), positions: [[-CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
-  ['L', { color: new Color('orange'), positions: [[CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }]
+  ['I', { color: TetrisConstants.color.cyan, positions: [[-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0], [CZ*2, -CZ, 0]]  }],
+  ['O', { color: TetrisConstants.color.yellow, positions: [[0, 0, 0], [CZ, 0, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
+  ['T', { color: TetrisConstants.color.purple, positions: [[0, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
+  ['S', { color: TetrisConstants.color.green, positions: [[0, 0, 0], [CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0]]  }],
+  ['Z', { color: TetrisConstants.color.red, positions: [[-CZ, 0, 0], [0, 0, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
+  ['J', { color: TetrisConstants.color.blue, positions: [[-CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }],
+  ['L', { color: TetrisConstants.color.orange, positions: [[CZ, 0, 0], [-CZ, -CZ, 0], [0, -CZ, 0], [CZ, -CZ, 0]]  }]
 ]);
 
 const START_POS: GridPos = { col: 4, row: 21};
@@ -31,24 +31,26 @@ type GameState = {
   piece: {
     pos: GridPos;
     type: PieceType;
-  }
+  },
+  lockedColors: Color[];
 };
 
 class GameEngine {
   level = 1;
   timePerRowInMSecs = 1;
   droppingBlockPositions: GridPos[] = [];
-  locked: boolean[] = [];
   gameState: GameState = {
-    piece: { pos: {...START_POS}, type: 'I' }
+    piece: { pos: {...START_POS}, type: 'I' },
+    lockedColors: []
   };
 
   start(): GameState {
     this.level = 1;
-    this.locked = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(false);
     this.timePerRowInMSecs = Math.pow((0.8-((this.level-1)*0.007)), (this.level-1)) * 1000;
 
     this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
+    this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
+
     this.droppingBlockPositions = this.getDroppingBlockStartPositions(this.gameState.piece.type);
 
     return this.gameState;
@@ -56,19 +58,24 @@ class GameEngine {
 
   step(): GameState {
     if (this.canMoveDown()) {
+      // update gameState: piece moved down
+      this.gameState.piece.pos.row--;
+
+      // update droppingBlockPositions
       this.droppingBlockPositions.forEach((pos, index) => {
         this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
       });
-      this.gameState.piece.pos.row--;
+
       return this.gameState;
     }
-    // TODO mark droppingBlockPositions as locked
+    // update gameState: lockedColors & piece
+    const lockedColor = (PIECE_DATA.get(this.gameState.piece.type) as PieceData).color;
     this.droppingBlockPositions.forEach(pos => {
-      const lockedIndex = (pos.row * TetrisConstants.numCols) + pos.col;
-      this.locked[lockedIndex] = true;
+      this.gameState.lockedColors[LockedColorUtils.gridPosToIndex(pos)] = lockedColor;
     })
-    // TODO update piece & droppingBlockPositions
     this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
+
+    // update droppingBlockPositions with newly spawned piece
     this.droppingBlockPositions = this.getDroppingBlockStartPositions(this.gameState.piece.type);
 
     return this.gameState;
@@ -84,9 +91,26 @@ class GameEngine {
   }
 
   private canMoveDown(): boolean {
-    // TODO check against locked blocks
-    return this.droppingBlockPositions.every(pos => pos.row !== 0);
+    return this.droppingBlockPositions.every(pos => {
+      const newPos = { col: pos.col, row: pos.row - 1 };
+      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
+      return newPos.row > 19 || (newPos.row >= 0 && this.gameState.lockedColors[lockedColorIndex] === null);
+    });
   }
 }
 
-export { GameEngine, PIECE_DATA };
+class LockedColorUtils {
+  static gridPosToIndex(gridPos: GridPos): number {
+    return (gridPos.row * TetrisConstants.numCols) + gridPos.col;
+  }
+
+  static indexToScreen(index: number): Vector3 {
+    const gridPos = {
+      col: index % TetrisConstants.numCols,
+      row: Math.floor(index / TetrisConstants.numCols)
+    }
+    return GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5)
+  }
+}
+
+export { GameEngine, PIECE_DATA, LockedColorUtils };
