@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 
 const NUM_COLS = 10;
-const NUM_ROWS = 25;
+const NUM_ROWS = 20;
 const CELL_SIZE = 1;
 const GRID_WIDTH = NUM_COLS * CELL_SIZE;
 const GRID_HEIGHT = NUM_ROWS * CELL_SIZE;

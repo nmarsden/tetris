@@ -3,9 +3,8 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, OrbitControls} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import * as THREE from 'three'
 import {Grid} from './components/grid/grid';
-import {Block} from "./components/block/block";
+import {Piece} from "./components/piece/piece.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -16,10 +15,13 @@ const App = () => {
       fov: 75,
     }}>
       <Grid enabled={true}/>
-      <Block gridPos={{ col: 0, row: 0}} color={new THREE.Color("red")}/>
-      <Block gridPos={{ col: 9, row: 0}} color={new THREE.Color("yellow")}/>
-      <Block gridPos={{ col: 0, row: 24}} color={new THREE.Color("cyan")}/>
-      <Block gridPos={{ col: 9, row: 24}} color={new THREE.Color("green")}/>
+      <Piece gridPos={{ col: 4, row: 20}} type="I"/>
+      <Piece gridPos={{ col: 4, row: 19}} type="O"/>
+      <Piece gridPos={{ col: 4, row: 17}} type="T"/>
+      <Piece gridPos={{ col: 4, row: 15}} type="S"/>
+      <Piece gridPos={{ col: 4, row: 13}} type="Z"/>
+      <Piece gridPos={{ col: 4, row: 11}} type="J"/>
+      <Piece gridPos={{ col: 4, row: 9}} type="L"/>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls

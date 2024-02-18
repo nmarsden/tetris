@@ -1,16 +1,10 @@
-import {useMemo, useRef} from "react";
-import {Mesh, Color} from "three";
-import {GridPos, GridUtils} from "../grid/grid.tsx";
+import {Color} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 
-const Block = ({ gridPos, color } : { gridPos: GridPos, color: Color }) => {
-  const meshRef = useRef<Mesh>(null!)
-  const position = useMemo(() => {
-    return GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5);
-  }, [gridPos]);
+const Block = ({ position, color } : { position: [number, number, number], color: Color }) => {
   return (
-    <mesh ref={meshRef} position={position}>
-      <boxGeometry args={[1, 1, 1]} />
+    <mesh position={position}>
+      <boxGeometry args={[TetrisConstants.cellSize, TetrisConstants.cellSize, TetrisConstants.cellSize]} />
       <meshStandardMaterial
         metalness={0.45}
         roughness={0.75}
