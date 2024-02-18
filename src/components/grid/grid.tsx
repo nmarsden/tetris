@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import * as THREE from 'three'
 import {useMemo} from "react";
 import {Line} from "@react-three/drei";

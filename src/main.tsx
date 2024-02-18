@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import './index.css'
 import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
@@ -16,7 +17,7 @@ const initialGameState = gameEngine.start();
 
 const App = () => {
   const [piece, setPiece] = useState({ pos: initialGameState.piece.pos, type: initialGameState.piece.type });
-  const [lockedColors, setLockedColors] = useState(initialGameState.lockedColors);
+  const [lockedColors] = useState(initialGameState.lockedColors);
 
   const step = useCallback(() => {
     const {piece} = gameEngine.step();

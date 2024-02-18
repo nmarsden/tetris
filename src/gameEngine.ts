@@ -6,8 +6,6 @@ const PIECE_TYPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
 
-// export type PieceType = 'I' | 'O' | 'T' | 'S' | 'Z' | 'J' | 'L';
-
 export type PieceData = {
   color: Color,
   positions: [number, number, number][]
