@@ -1,5 +1,5 @@
 import {GridPos, GridUtils} from "./components/grid/grid.tsx";
-import {Color, Vector3} from "three";
+import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 
 const PIECE_TYPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as const;
@@ -104,12 +104,13 @@ class LockedColorUtils {
     return (gridPos.row * TetrisConstants.numCols) + gridPos.col;
   }
 
-  static indexToScreen(index: number): Vector3 {
+  static indexToScreen(index: number): [number, number, number] {
     const gridPos = {
       col: index % TetrisConstants.numCols,
       row: Math.floor(index / TetrisConstants.numCols)
     }
-    return GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5)
+    const screen = GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5);
+    return [screen.x, screen.y, screen.z];
   }
 }
 

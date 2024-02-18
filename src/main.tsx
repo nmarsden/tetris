@@ -36,14 +36,7 @@ const App = () => {
       <Grid enabled={true}/>
       <Piece gridPos={piece.pos} type={piece.type} />
       { lockedColors.map((lockedColor, index) => {
-          const position: [number, number, number] = [0, 0, 0];
-          if (lockedColor) {
-            const pos = LockedColorUtils.indexToScreen(index)
-            position[0] = pos.x;
-            position[1] = pos.y;
-            position[2] = pos.z;
-          }
-          return lockedColor === null ? null : <Block key={`${index}`} position={position} color={lockedColor}/>
+          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor}/>
         })
       }
       { /* @ts-ignore */ }
