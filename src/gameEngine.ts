@@ -1,6 +1,7 @@
 import {GridPos, GridUtils} from "./components/grid/grid.tsx";
 import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
+import {Movement} from "./hooks/useKeyboardControls.ts";
 
 const PIECE_TYPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
@@ -79,6 +80,30 @@ class GameEngine {
     return this.gameState;
   }
 
+  handleMovement(movement: Movement): GameState {
+    if (movement.left && this.canMoveLeft()) {
+      // update gameState: piece moved left
+      this.gameState.piece.pos.col--;
+
+      // update droppingBlockPositions
+      this.droppingBlockPositions.forEach((pos, index) => {
+        this.droppingBlockPositions[index] = { col: pos.col - 1, row: pos.row};
+      });
+      return this.gameState;
+    }
+    if (movement.right && this.canMoveRight()) {
+      // update gameState: piece moved left
+      this.gameState.piece.pos.col++;
+
+      // update droppingBlockPositions
+      this.droppingBlockPositions.forEach((pos, index) => {
+        this.droppingBlockPositions[index] = { col: pos.col + 1, row: pos.row};
+      });
+      return this.gameState;
+    }
+    return this.gameState;
+  }
+
   private randomPieceType(): PieceType {
     return PIECE_TYPES[Math.round(Math.random() * 6)];
   }
@@ -93,6 +118,22 @@ class GameEngine {
       const newPos = { col: pos.col, row: pos.row - 1 };
       const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
       return newPos.row > 19 || (newPos.row >= 0 && this.gameState.lockedColors[lockedColorIndex] === null);
+    });
+  }
+
+  private canMoveLeft(): boolean {
+    return this.droppingBlockPositions.every(pos => {
+      const newPos = { col: pos.col - 1, row: pos.row };
+      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
+      return newPos.col >= 0 && newPos.row <= 19 && this.gameState.lockedColors[lockedColorIndex] === null;
+    });
+  }
+
+  private canMoveRight(): boolean {
+    return this.droppingBlockPositions.every(pos => {
+      const newPos = { col: pos.col + 1, row: pos.row };
+      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
+      return newPos.col < TetrisConstants.numCols && newPos.row <= 19 && this.gameState.lockedColors[lockedColorIndex] === null;
     });
   }
 }

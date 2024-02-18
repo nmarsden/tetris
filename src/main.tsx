@@ -9,6 +9,7 @@ import {useCallback, useEffect, useState} from "react";
 import {GameEngine, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block} from "./components/block/block.tsx";
+import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -18,16 +19,23 @@ const initialGameState = gameEngine.start();
 const App = () => {
   const [piece, setPiece] = useState({ pos: initialGameState.piece.pos, type: initialGameState.piece.type });
   const [lockedColors] = useState(initialGameState.lockedColors);
+  const movement = useKeyboardControls();
 
   const step = useCallback(() => {
     const {piece} = gameEngine.step();
-
     setPiece({ pos: {...piece.pos}, type: piece.type });
+
+    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
   }, []);
 
   useEffect(() => {
-    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
-  })
+    step();
+  }, [step]);
+
+  useEffect(() => {
+    const {piece} = gameEngine.handleMovement(movement);
+    setPiece({ pos: {...piece.pos}, type: piece.type });
+  }, [movement]);
 
   return (
     <Canvas camera={{
