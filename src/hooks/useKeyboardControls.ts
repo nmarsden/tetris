@@ -1,23 +1,26 @@
 import {useEffect, useState} from "react";
 
 export type Movement = {
-  left: boolean;
-  right: boolean;
+  moveLeft: boolean;
+  moveRight: boolean;
+  rotateClockwise: boolean;
 };
 
 type MovementField = keyof Movement;
 
 const useKeyboardControls = (): Movement => {
   const keys = new Map<string, MovementField>([
-    ['ArrowLeft', 'left'],
-    ['ArrowRight', 'right']
+    ['ArrowLeft', 'moveLeft'],
+    ['ArrowRight', 'moveRight'],
+    ['ArrowUp', 'rotateClockwise']
   ]);
 
   const movementFieldByKey = (key: string): MovementField | undefined => keys.get(key);
 
-  const [movement, setMovement] = useState({
-    left: false,
-    right: false
+  const [movement, setMovement] = useState<Movement>({
+    moveLeft: false,
+    moveRight: false,
+    rotateClockwise: false
   });
 
   useEffect(() => {
