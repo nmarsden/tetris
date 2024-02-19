@@ -146,6 +146,17 @@ class GameEngine {
       });
       return this.gameState;
     }
+    if (movement.moveDown && this.canMoveDown()) {
+      // update gameState: piece moved down
+      this.gameState.piece.pos.row--;
+
+      // update droppingBlockPositions
+      this.droppingBlockPositions.forEach((pos, index) => {
+        this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
+      });
+
+      return this.gameState;
+    }
     if (movement.rotateClockwise) {
       // TODO check if can rotate
       // TODO introduce wall kicks

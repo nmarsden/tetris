@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 export type Movement = {
   moveLeft: boolean;
   moveRight: boolean;
+  moveDown: boolean;
   rotateClockwise: boolean;
 };
 
@@ -12,6 +13,7 @@ const useKeyboardControls = (): Movement => {
   const keys = new Map<string, MovementField>([
     ['ArrowLeft', 'moveLeft'],
     ['ArrowRight', 'moveRight'],
+    ['ArrowDown', 'moveDown'],
     ['ArrowUp', 'rotateClockwise']
   ]);
 
@@ -20,6 +22,7 @@ const useKeyboardControls = (): Movement => {
   const [movement, setMovement] = useState<Movement>({
     moveLeft: false,
     moveRight: false,
+    moveDown: false,
     rotateClockwise: false
   });
 
