@@ -33,7 +33,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    step();
+    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
   }, [step]);
 
   useEffect(() => {

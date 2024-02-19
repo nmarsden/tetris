@@ -31,7 +31,7 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
   ['I2', { color: TetrisConstants.color.cyan, positions: [[-CS, -CS, 0], [0, -CS, 0], [CS, -CS, 0], [CS*2, -CS, 0]] }],
   ['I3', { color: TetrisConstants.color.cyan, positions: [[0, CS, 0], [0, 0, 0], [0, -CS, 0], [0, -CS*2, 0]] }],
 
-  ['O',  { color: TetrisConstants.color.yellow, positions: [[0, 0, 0], [CS, 0, 0], [0, -CS, 0], [CS, -CS, 0]] }],
+  ['O',  { color: TetrisConstants.color.yellow, positions: [[0, CS, 0], [CS, CS, 0], [0, 0, 0], [CS, 0, 0]] }],
 
   ['T0', { color: TetrisConstants.color.purple, positions: [[0, CS, 0], [-CS, 0, 0], [0, 0, 0], [CS, 0, 0]] }],
   ['T1', { color: TetrisConstants.color.purple, positions: [[0, CS, 0], [0, -CS, 0], [0, 0, 0], [CS, 0, 0]] }],
@@ -59,7 +59,7 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
   ['L3', { color: TetrisConstants.color.orange, positions: [[-CS, CS, 0], [0, CS, 0], [0, 0, 0], [0, -CS, 0]] }]
 ]);
 
-const START_POS: GridPos = { col: 4, row: 21};
+const START_POS: GridPos = { col: 4, row: 20};
 
 type Piece = {
   pos: GridPos;
