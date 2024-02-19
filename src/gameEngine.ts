@@ -61,11 +61,14 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
 
 const START_POS: GridPos = { col: 4, row: 21};
 
+type Piece = {
+  pos: GridPos;
+  type: PieceType;
+};
+
 type GameState = {
-  piece: {
-    pos: GridPos;
-    type: PieceType;
-  },
+  piece: Piece,
+  ghostPiece: Piece,
   lockedColors: Color[];
 };
 
@@ -75,17 +78,20 @@ class GameEngine {
   droppingBlockPositions: GridPos[] = [];
   gameState: GameState = {
     piece: { pos: {...START_POS}, type: 'I0' },
+    ghostPiece: { pos: {...START_POS}, type: 'I0' },
     lockedColors: []
   };
 
   start(): GameState {
     this.level = 1;
     this.timePerRowInMSecs = Math.pow((0.8-((this.level-1)*0.007)), (this.level-1)) * 1000;
-
-    this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
 
-    this.droppingBlockPositions = this.getDroppingBlockPositions(START_POS, this.gameState.piece.type);
+    const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+    this.gameState.piece = newPiece
+    this.gameState.ghostPiece = this.ghostPiece(newPiece);
+
+    this.droppingBlockPositions = this.getBlockPositions(newPiece);
 
     return this.gameState;
   }
@@ -102,23 +108,26 @@ class GameEngine {
 
       return this.gameState;
     }
-    // update gameState: lockedColors & piece
+    // update gameState: lockedColors, piece & ghostPiece
     const lockedColor = (PIECE_DATA.get(this.gameState.piece.type) as PieceData).color;
     this.droppingBlockPositions.forEach(pos => {
       this.gameState.lockedColors[LockedColorUtils.gridPosToIndex(pos)] = lockedColor;
     })
-    this.gameState.piece = { pos: {...START_POS}, type: this.randomPieceType() };
+    const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+    this.gameState.piece = newPiece;
+    this.gameState.ghostPiece = this.ghostPiece(newPiece);
 
     // update droppingBlockPositions with newly spawned piece
-    this.droppingBlockPositions = this.getDroppingBlockPositions(START_POS, this.gameState.piece.type);
+    this.droppingBlockPositions = this.getBlockPositions(newPiece);
 
     return this.gameState;
   }
 
   handleMovement(movement: Movement): GameState {
     if (movement.moveLeft && this.canMoveLeft()) {
-      // update gameState: piece moved left
+      // update gameState: piece & ghostPiece moved left
       this.gameState.piece.pos.col--;
+      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
       this.droppingBlockPositions.forEach((pos, index) => {
@@ -127,8 +136,9 @@ class GameEngine {
       return this.gameState;
     }
     if (movement.moveRight && this.canMoveRight()) {
-      // update gameState: piece moved left
+      // update gameState: piece & ghostPiece moved left
       this.gameState.piece.pos.col++;
+      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
       this.droppingBlockPositions.forEach((pos, index) => {
@@ -139,24 +149,26 @@ class GameEngine {
     if (movement.rotateClockwise) {
       // TODO check if can rotate
       // TODO introduce wall kicks
-      // update gameState: piece rotated clockwise
+      // update gameState: rotate piece & ghost clockwise
       this.gameState.piece.type = getPieceTypeForRotateClockwise(this.gameState.piece.type);
+      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
-      this.droppingBlockPositions = this.getDroppingBlockPositions(this.gameState.piece.pos, this.gameState.piece.type);
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
       return this.gameState;
     }
     return this.gameState;
   }
 
   private randomPieceType(): PieceType {
-    return (SHAPES[Math.round(Math.random() * 6)] + '0') as PieceType;
+    const shape = SHAPES[Math.round(Math.random() * 6)];
+    return shape === 'O' ? shape : (shape + '0') as PieceType;
   }
 
-  private getDroppingBlockPositions(pos: GridPos, type: PieceType): GridPos[] {
-    const pieceData = PIECE_DATA.get(type) as PieceData;
+  private getBlockPositions(piece: Piece): GridPos[] {
+    const pieceData = PIECE_DATA.get(piece.type) as PieceData;
 
-    return pieceData.positions.map(position => ({ col: pos.col + position[0], row: pos.row + position[1]}));
+    return pieceData.positions.map(position => ({ col: piece.pos.col + position[0], row: piece.pos.row + position[1]}));
   }
 
   private canMoveDown(): boolean {
@@ -180,6 +192,25 @@ class GameEngine {
       const newPos = { col: pos.col + 1, row: pos.row };
       const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
       return newPos.col < TetrisConstants.numCols && newPos.row <= 19 && this.gameState.lockedColors[lockedColorIndex] === null;
+    });
+  }
+
+  private ghostPiece(piece: Piece): Piece {
+    // Find valid position for the ghost piece with the lowest row starting from the given piece's row or 18
+    const startingRow = piece.pos.row <= 18 ? piece.pos.row : 18;
+    const ghostPiece = { pos: { col: piece.pos.col, row: startingRow }, type: piece.type };
+    while(this.isValidPositions(ghostPiece)) {
+      ghostPiece.pos.row--;
+    }
+    ghostPiece.pos.row++;
+    return ghostPiece;
+  }
+
+  private isValidPositions(piece: Piece): boolean {
+    const positions = this.getBlockPositions(piece);
+    return positions.every(pos => {
+      const lockedColorIndex = LockedColorUtils.gridPosToIndex(pos);
+      return pos.row >=0 && this.gameState.lockedColors[lockedColorIndex] === null;
     });
   }
 }

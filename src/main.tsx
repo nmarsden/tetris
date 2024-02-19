@@ -2,7 +2,7 @@
 import './index.css'
 import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
-import {Environment, OrbitControls} from "@react-three/drei";
+import {Bounds, Environment, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
 import {Grid} from './components/grid/grid';
 import {useCallback, useEffect, useState} from "react";
@@ -17,13 +17,17 @@ const gameEngine = new GameEngine();
 const initialGameState = gameEngine.start();
 
 const App = () => {
-  const [piece, setPiece] = useState({ pos: initialGameState.piece.pos, type: initialGameState.piece.type });
+  const [pieces, setPieces] = useState({ piece: initialGameState.piece, ghostPiece: initialGameState.ghostPiece });
   const [lockedColors] = useState(initialGameState.lockedColors);
   const movement = useKeyboardControls();
 
   const step = useCallback(() => {
-    const {piece} = gameEngine.step();
-    setPiece({ pos: {...piece.pos}, type: piece.type });
+    const {piece, ghostPiece} = gameEngine.step();
+
+    setPieces({
+      piece: { pos: {...piece.pos}, type: piece.type },
+      ghostPiece: { pos: {...ghostPiece.pos}, type: ghostPiece.type }
+    });
 
     setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
   }, []);
@@ -33,24 +37,29 @@ const App = () => {
   }, [step]);
 
   useEffect(() => {
-    const {piece} = gameEngine.handleMovement(movement);
-    setPiece({ pos: {...piece.pos}, type: piece.type });
+    const {piece, ghostPiece } = gameEngine.handleMovement(movement);
+    setPieces({
+      piece: { pos: {...piece.pos}, type: piece.type },
+      ghostPiece: { pos: {...ghostPiece.pos}, type: ghostPiece.type },
+  });
   }, [movement]);
 
   return (
-    <Canvas camera={{
-      position: [0, 0, -20],
-      fov: 75,
-    }}>
-      <Grid enabled={true}/>
-      <Piece gridPos={piece.pos} type={piece.type} />
-      { lockedColors.map((lockedColor, index) => {
+    <Canvas>
+      <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
+      <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
+        <Grid enabled={true}/>
+        <Piece gridPos={pieces.piece.pos} type={pieces.piece.type} />
+        <Piece gridPos={pieces.ghostPiece.pos} type={pieces.ghostPiece.type} isGhost={true} />
+        { lockedColors.map((lockedColor, index) => {
           return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor}/>
         })
-      }
+        }
+      </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls
+        enabled={false}
         makeDefault={true}
         minAzimuthAngle={0}
         maxAzimuthAngle={0}
