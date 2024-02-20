@@ -15,6 +15,7 @@ const GREEN =  new Color('green');
 const RED = new Color('red');
 const BLUE = new Color('blue');
 const ORANGE = new Color('orange');
+const WHITE = new Color('white');
 
 export const TetrisConstants = {
   numCols: NUM_COLS,
@@ -30,6 +31,7 @@ export const TetrisConstants = {
     green: GREEN,
     red: RED,
     blue: BLUE,
-    orange: ORANGE
+    orange: ORANGE,
+    white: WHITE
   }
 };

@@ -10,6 +10,7 @@ import {GameEngine, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block} from "./components/block/block.tsx";
 import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
+import {TetrisConstants} from "./tetrisConstants.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -17,17 +18,12 @@ const gameEngine = new GameEngine();
 const initialGameState = gameEngine.start();
 
 const App = () => {
-  const [pieces, setPieces] = useState({ piece: initialGameState.piece, ghostPiece: initialGameState.ghostPiece });
-  const [lockedColors] = useState(initialGameState.lockedColors);
+  const [gameState, setGameState] = useState(initialGameState);
   const movement = useKeyboardControls();
 
   const step = useCallback(() => {
-    const {piece, ghostPiece} = gameEngine.step();
-
-    setPieces({
-      piece: { pos: {...piece.pos}, type: piece.type },
-      ghostPiece: { pos: {...ghostPiece.pos}, type: ghostPiece.type }
-    });
+    const gameState = gameEngine.step();
+    setGameState({...gameState});
 
     setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
   }, []);
@@ -37,11 +33,8 @@ const App = () => {
   }, [step]);
 
   useEffect(() => {
-    const {piece, ghostPiece } = gameEngine.handleMovement(movement);
-    setPieces({
-      piece: { pos: {...piece.pos}, type: piece.type },
-      ghostPiece: { pos: {...ghostPiece.pos}, type: ghostPiece.type },
-  });
+    const gameState = gameEngine.handleMovement(movement);
+    setGameState({...gameState});
   }, [movement]);
 
   return (
@@ -49,10 +42,12 @@ const App = () => {
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
       <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
         <Grid enabled={true}/>
-        <Piece gridPos={pieces.piece.pos} type={pieces.piece.type} />
-        <Piece gridPos={pieces.ghostPiece.pos} type={pieces.ghostPiece.type} isGhost={true} />
-        { lockedColors.map((lockedColor, index) => {
-          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor}/>
+        <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} />
+        <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} />
+        {gameState.lockedColors.map((lockedColor, index) => {
+          const gridPos = LockedColorUtils.indexToGridPos(index);
+          const color = (gameState.completedRows.includes(gridPos.row)) ? TetrisConstants.color.white : lockedColor;
+          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={color}/>
         })
         }
       </Bounds>

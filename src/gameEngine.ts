@@ -70,6 +70,7 @@ type GameState = {
   piece: Piece,
   ghostPiece: Piece,
   lockedColors: Color[];
+  completedRows: number[];
 };
 
 class GameEngine {
@@ -79,7 +80,8 @@ class GameEngine {
   gameState: GameState = {
     piece: { pos: {...START_POS}, type: 'I0' },
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
-    lockedColors: []
+    lockedColors: [],
+    completedRows: []
   };
 
   start(): GameState {
@@ -97,9 +99,17 @@ class GameEngine {
   }
 
   step(): GameState {
+    // check if there are completed rows to be removed
+    if (this.gameState.completedRows.length > 0) {
+      // update gameState: lockedColors, completedRows, & ghostPiece
+      this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
+      this.gameState.completedRows = [];
+      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
+    }
+
     if (this.canMoveDown()) {
       // update gameState: piece moved down
-      this.gameState.piece.pos.row--;
+      this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
 
       // update droppingBlockPositions
       this.droppingBlockPositions.forEach((pos, index) => {
@@ -108,11 +118,14 @@ class GameEngine {
 
       return this.gameState;
     }
-    // update gameState: lockedColors, piece & ghostPiece
+    // update gameState: lockedColors & completedRow
     const lockedColor = (PIECE_DATA.get(this.gameState.piece.type) as PieceData).color;
     this.droppingBlockPositions.forEach(pos => {
       this.gameState.lockedColors[LockedColorUtils.gridPosToIndex(pos)] = lockedColor;
     })
+    this.gameState.completedRows = this.getCompletedRows(this.gameState.lockedColors, this.droppingBlockPositions);
+
+    // update gameState: piece & ghostPiece
     const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
     this.gameState.piece = newPiece;
     this.gameState.ghostPiece = this.ghostPiece(newPiece);
@@ -126,7 +139,7 @@ class GameEngine {
   handleMovement(movement: Movement): GameState {
     if (movement.moveLeft && this.canMoveLeft()) {
       // update gameState: piece & ghostPiece moved left
-      this.gameState.piece.pos.col--;
+      this.gameState.piece = this.movePiece(this.gameState.piece, { col: -1, row: 0 });
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
@@ -137,7 +150,7 @@ class GameEngine {
     }
     if (movement.moveRight && this.canMoveRight()) {
       // update gameState: piece & ghostPiece moved left
-      this.gameState.piece.pos.col++;
+      this.gameState.piece = this.movePiece(this.gameState.piece, { col: 1, row: 0 });
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
@@ -148,7 +161,7 @@ class GameEngine {
     }
     if (movement.moveDown && this.canMoveDown()) {
       // update gameState: piece moved down
-      this.gameState.piece.pos.row--;
+      this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
 
       // update droppingBlockPositions
       this.droppingBlockPositions.forEach((pos, index) => {
@@ -206,6 +219,16 @@ class GameEngine {
     });
   }
 
+  private movePiece(piece: Piece, offset: GridPos): Piece {
+    return {
+      pos: {
+        col: piece.pos.col + offset.col,
+        row: piece.pos.row + offset.row
+      },
+      type: piece.type,
+    };
+  }
+
   private ghostPiece(piece: Piece): Piece {
     // Find valid position for the ghost piece with the lowest row starting from the given piece's row or 18
     const startingRow = piece.pos.row <= 18 ? piece.pos.row : 18;
@@ -224,6 +247,27 @@ class GameEngine {
       return pos.row >=0 && this.gameState.lockedColors[lockedColorIndex] === null;
     });
   }
+
+  private getCompletedRows(lockedColors: Color[], pieceBlockPositions: GridPos[]): number[] {
+    const completedRows: number[] = [];
+    const cols = [...Array(TetrisConstants.numCols).keys()];
+    const pieceRows = [...new Set(pieceBlockPositions.map(pos => pos.row))];
+    pieceRows.forEach(row => {
+      if (cols.every(col => lockedColors[LockedColorUtils.gridPosToIndex({ col, row })] !== null)) {
+        completedRows.push(row);
+      }
+    })
+    return completedRows;
+  }
+
+  private removeCompleteRows(lockedColors: Color[], completedRows: number[]): Color[] {
+    // remove completed rows from lockedColors and add empty rows to the end
+    completedRows.forEach(row => {
+      lockedColors.splice(LockedColorUtils.gridPosToIndex({ col: 0, row }), TetrisConstants.numCols);
+      lockedColors.push(...new Array(TetrisConstants.numCols).fill(null));
+    })
+    return lockedColors;
+  }
 }
 
 class LockedColorUtils {
@@ -231,11 +275,15 @@ class LockedColorUtils {
     return (gridPos.row * TetrisConstants.numCols) + gridPos.col;
   }
 
-  static indexToScreen(index: number): [number, number, number] {
-    const gridPos = {
+  static indexToGridPos(index: number): GridPos {
+    return {
       col: index % TetrisConstants.numCols,
       row: Math.floor(index / TetrisConstants.numCols)
-    }
+    };
+  }
+
+  static indexToScreen(index: number): [number, number, number] {
+    const gridPos = this.indexToGridPos(index);
     const screen = GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5);
     return [screen.x, screen.y, screen.z];
   }
