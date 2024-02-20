@@ -59,7 +59,7 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
   ['L3', { color: TetrisConstants.color.orange, positions: [[-CS, CS, 0], [0, CS, 0], [0, 0, 0], [0, -CS, 0]] }]
 ]);
 
-const START_POS: GridPos = { col: 4, row: 20};
+const START_POS: GridPos = { col: 4, row: 18};
 
 type Piece = {
   pos: GridPos;

@@ -29,7 +29,8 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
+    // auto-start game
+    setTimeout(() => { step(); }, 2000);
   }, [step]);
 
   useEffect(() => {
