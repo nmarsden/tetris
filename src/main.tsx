@@ -33,33 +33,43 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
   }
 };
 
+let timeoutId: number;
+
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
-  const movement = useKeyboardControls();
+  const action = useKeyboardControls();
 
   const step = useCallback(() => {
     const gameState = gameEngine.step();
     setGameState({...gameState});
 
-    setTimeout(() => { step(); }, gameEngine.timePerRowInMSecs);
+    // when lock mode is triggered, ensure it ends in 500ms
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
   }, []);
 
   useEffect(() => {
     // auto-start game
-    setTimeout(() => { step(); }, 2000);
+    timeoutId = setTimeout(() => { step(); }, 2000);
   }, [step]);
 
   useEffect(() => {
-    const gameState = gameEngine.handleMovement(movement);
+    const gameState = gameEngine.handleAction(action);
     setGameState({...gameState});
-  }, [movement]);
+
+    if (!gameState.previousIsLockMode && gameState.isLockMode) {
+      // when lock mode is triggered due to an action, ensure it ends in 500ms
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => { step(); }, 500);
+    }
+  }, [action, step]);
 
   return (
     <Canvas>
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
       <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
         <Grid enabled={true}/>
-        <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} />
+        {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
         <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} />
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);

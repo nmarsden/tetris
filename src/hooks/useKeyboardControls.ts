@@ -1,40 +1,43 @@
 import {useEffect, useState} from "react";
 
-export type Movement = {
+export type Action = {
   moveLeft: boolean;
   moveRight: boolean;
   moveDown: boolean;
   rotateClockwise: boolean;
+  pause: boolean;
 };
 
-type MovementField = keyof Movement;
+type ActionField = keyof Action;
 
-const useKeyboardControls = (): Movement => {
-  const keys = new Map<string, MovementField>([
+const useKeyboardControls = (): Action => {
+  const keys = new Map<string, ActionField>([
     ['ArrowLeft', 'moveLeft'],
     ['ArrowRight', 'moveRight'],
     ['ArrowDown', 'moveDown'],
-    ['ArrowUp', 'rotateClockwise']
+    ['ArrowUp', 'rotateClockwise'],
+    ['KeyP', 'pause']
   ]);
 
-  const movementFieldByKey = (key: string): MovementField | undefined => keys.get(key);
+  const actionFieldByKey = (key: string): ActionField | undefined => keys.get(key);
 
-  const [movement, setMovement] = useState<Movement>({
+  const [action, setAction] = useState<Action>({
     moveLeft: false,
     moveRight: false,
     moveDown: false,
-    rotateClockwise: false
+    rotateClockwise: false,
+    pause: false
   });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      setMovement((m) => {
-        return movementFieldByKey(e.code) ? ({ ...m, [movementFieldByKey(e.code) as string]: true }) : m;
+      setAction((m) => {
+        return actionFieldByKey(e.code) ? ({ ...m, [actionFieldByKey(e.code) as string]: true }) : m;
       })
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      setMovement((m) =>{
-        return movementFieldByKey(e.code) ? ({ ...m, [movementFieldByKey(e.code) as string]: false }) : m;
+      setAction((m) =>{
+        return actionFieldByKey(e.code) ? ({ ...m, [actionFieldByKey(e.code) as string]: false }) : m;
       })
     };
     document.addEventListener('keydown', handleKeyDown)
@@ -44,7 +47,7 @@ const useKeyboardControls = (): Movement => {
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
-  return movement
+  return action
 }
 
 export { useKeyboardControls }

@@ -1,7 +1,7 @@
 import {GridPos, GridUtils} from "./components/grid/grid.tsx";
 import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
-import {Movement} from "./hooks/useKeyboardControls.ts";
+import {Action} from "./hooks/useKeyboardControls.ts";
 
 const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 'S1', 'S2', 'S3', 'Z0', 'Z1', 'Z2', 'Z3', 'J0', 'J1', 'J2', 'J3', 'L0', 'L1', 'L2', 'L3'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
@@ -71,6 +71,9 @@ type GameState = {
   ghostPiece: Piece,
   lockedColors: Color[];
   completedRows: number[];
+  previousIsLockMode: boolean;
+  isLockMode: boolean;
+  isPaused: boolean;
 };
 
 class GameEngine {
@@ -81,7 +84,10 @@ class GameEngine {
     piece: { pos: {...START_POS}, type: 'I0' },
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
     lockedColors: [],
-    completedRows: []
+    completedRows: [],
+    previousIsLockMode: false,
+    isLockMode: false,
+    isPaused: false
   };
 
   start(): GameState {
@@ -114,6 +120,8 @@ class GameEngine {
     const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
     this.gameState.piece = newPiece
     this.gameState.ghostPiece = this.ghostPiece(newPiece);
+    this.setIsLockMode(false);
+    this.gameState.isPaused = false;
 
     this.droppingBlockPositions = this.getBlockPositions(newPiece);
 
@@ -121,6 +129,33 @@ class GameEngine {
   }
 
   step(): GameState {
+    if (this.gameState.isPaused) return this.gameState;
+
+    if (this.gameState.isLockMode) {
+      this.setIsLockMode(false);
+
+      if (!this.canMoveDown()) {
+        // -- Lock piece --
+        // update gameState: lockedColors & completedRow
+        const lockedColor = (PIECE_DATA.get(this.gameState.piece.type) as PieceData).color;
+        this.droppingBlockPositions.forEach(pos => {
+          this.gameState.lockedColors[LockedColorUtils.gridPosToIndex(pos)] = lockedColor;
+        })
+        this.gameState.completedRows = this.getCompletedRows(this.gameState.lockedColors, this.droppingBlockPositions);
+
+        if (this.gameState.completedRows.length === 0) {
+          // update gameState: piece & ghostPiece
+          const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+          this.gameState.piece = newPiece;
+          this.gameState.ghostPiece = this.ghostPiece(newPiece);
+
+          // update droppingBlockPositions with newly spawned piece
+          this.droppingBlockPositions = this.getBlockPositions(newPiece);
+        }
+
+         return this.gameState;
+      }
+    }
     // check if there are completed rows to be removed
     if (this.gameState.completedRows.length > 0) {
       // update gameState: lockedColors, completedRows, & ghostPiece
@@ -147,30 +182,26 @@ class GameEngine {
         this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
       });
 
+      if (!this.canMoveDown()) {
+        // LOCK DETECTED!!!
+        this.setIsLockMode(true);
+      }
+
       return this.gameState;
-    }
-    // update gameState: lockedColors & completedRow
-    const lockedColor = (PIECE_DATA.get(this.gameState.piece.type) as PieceData).color;
-    this.droppingBlockPositions.forEach(pos => {
-      this.gameState.lockedColors[LockedColorUtils.gridPosToIndex(pos)] = lockedColor;
-    })
-    this.gameState.completedRows = this.getCompletedRows(this.gameState.lockedColors, this.droppingBlockPositions);
-
-    if (this.gameState.completedRows.length === 0) {
-      // update gameState: piece & ghostPiece
-      const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
-      this.gameState.piece = newPiece;
-      this.gameState.ghostPiece = this.ghostPiece(newPiece);
-
-      // update droppingBlockPositions with newly spawned piece
-      this.droppingBlockPositions = this.getBlockPositions(newPiece);
     }
 
     return this.gameState;
   }
 
-  handleMovement(movement: Movement): GameState {
-    if (movement.moveLeft && this.canMoveLeft()) {
+  handleAction(action: Action): GameState {
+    if (action.pause) {
+      this.gameState.isPaused = !this.gameState.isPaused;
+
+      return this.gameState;
+    }
+    if (this.gameState.isPaused) return this.gameState;
+
+    if (action.moveLeft && this.canMoveLeft()) {
       // update gameState: piece & ghostPiece moved left
       this.gameState.piece = this.movePiece(this.gameState.piece, { col: -1, row: 0 });
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
@@ -179,9 +210,14 @@ class GameEngine {
       this.droppingBlockPositions.forEach((pos, index) => {
         this.droppingBlockPositions[index] = { col: pos.col - 1, row: pos.row};
       });
+
+      if (!this.canMoveDown()) {
+        // LOCK DETECTED!!!
+        this.setIsLockMode(true);
+      }
       return this.gameState;
     }
-    if (movement.moveRight && this.canMoveRight()) {
+    if (action.moveRight && this.canMoveRight()) {
       // update gameState: piece & ghostPiece moved left
       this.gameState.piece = this.movePiece(this.gameState.piece, { col: 1, row: 0 });
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
@@ -190,9 +226,14 @@ class GameEngine {
       this.droppingBlockPositions.forEach((pos, index) => {
         this.droppingBlockPositions[index] = { col: pos.col + 1, row: pos.row};
       });
+
+      if (!this.canMoveDown()) {
+        // LOCK DETECTED!!!
+        this.setIsLockMode(true);
+      }
       return this.gameState;
     }
-    if (movement.moveDown && this.canMoveDown()) {
+    if (action.moveDown && this.canMoveDown()) {
       // update gameState: piece moved down
       this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
 
@@ -201,9 +242,13 @@ class GameEngine {
         this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
       });
 
+      if (!this.canMoveDown()) {
+        // LOCK DETECTED!!!
+        this.setIsLockMode(true);
+      }
       return this.gameState;
     }
-    if (movement.rotateClockwise) {
+    if (action.rotateClockwise) {
       // TODO check if can rotate
       // TODO introduce wall kicks
       // update gameState: rotate piece & ghost clockwise
@@ -212,7 +257,19 @@ class GameEngine {
 
       // update droppingBlockPositions
       this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+
+      if (!this.canMoveDown()) {
+        // LOCK DETECTED!!!
+        this.setIsLockMode(true);
+      }
       return this.gameState;
+    }
+
+    if (this.gameState.isLockMode) {
+      // -- Hack alert --
+      // When already in lock mode and not able to move, ensure previousIsLockMode and isLockMode are both true.
+      // This prevents the timeout being reset so that lock mode will end after 500ms.
+      this.setIsLockMode(true);
     }
     return this.gameState;
   }
@@ -300,6 +357,11 @@ class GameEngine {
       lockedColors.push(...new Array(TetrisConstants.numCols).fill(null));
     })
     return lockedColors;
+  }
+
+  private setIsLockMode(isLockMode: boolean): void {
+    this.gameState.previousIsLockMode = this.gameState.isLockMode;
+    this.gameState.isLockMode = isLockMode;
   }
 }
 
