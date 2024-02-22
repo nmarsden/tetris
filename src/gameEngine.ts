@@ -89,6 +89,28 @@ class GameEngine {
     this.timePerRowInMSecs = Math.pow((0.8-((this.level-1)*0.007)), (this.level-1)) * 1000;
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
 
+    // DEBUG: uncomment below to easily complete a row
+    // this.gameState.lockedColors[0] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[1] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[2] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[3] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[4] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[5] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[6] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[7] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[10] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[11] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[12] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[13] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[14] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[15] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[16] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[17] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[22] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[23] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[32] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[33] = TetrisConstants.color.yellow;
+
     const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
     this.gameState.piece = newPiece
     this.gameState.ghostPiece = this.ghostPiece(newPiece);
@@ -104,7 +126,16 @@ class GameEngine {
       // update gameState: lockedColors, completedRows, & ghostPiece
       this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
       this.gameState.completedRows = [];
-      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
+
+      // update gameState: piece & ghostPiece
+      const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+      this.gameState.piece = newPiece;
+      this.gameState.ghostPiece = this.ghostPiece(newPiece);
+
+      // update droppingBlockPositions with newly spawned piece
+      this.droppingBlockPositions = this.getBlockPositions(newPiece);
+
+      return this.gameState;
     }
 
     if (this.canMoveDown()) {
@@ -125,13 +156,15 @@ class GameEngine {
     })
     this.gameState.completedRows = this.getCompletedRows(this.gameState.lockedColors, this.droppingBlockPositions);
 
-    // update gameState: piece & ghostPiece
-    const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
-    this.gameState.piece = newPiece;
-    this.gameState.ghostPiece = this.ghostPiece(newPiece);
+    if (this.gameState.completedRows.length === 0) {
+      // update gameState: piece & ghostPiece
+      const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+      this.gameState.piece = newPiece;
+      this.gameState.ghostPiece = this.ghostPiece(newPiece);
 
-    // update droppingBlockPositions with newly spawned piece
-    this.droppingBlockPositions = this.getBlockPositions(newPiece);
+      // update droppingBlockPositions with newly spawned piece
+      this.droppingBlockPositions = this.getBlockPositions(newPiece);
+    }
 
     return this.gameState;
   }

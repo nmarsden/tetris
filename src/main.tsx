@@ -8,14 +8,30 @@ import {Grid} from './components/grid/grid';
 import {useCallback, useEffect, useState} from "react";
 import {GameEngine, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
-import {Block} from "./components/block/block.tsx";
+import {Block, BlockMode} from "./components/block/block.tsx";
 import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
-import {TetrisConstants} from "./tetrisConstants.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
 const gameEngine = new GameEngine();
 const initialGameState = gameEngine.start();
+
+const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
+  if (completedRows.length === 0) {
+    return 'STANDARD';
+  }
+  if (completedRows.includes(row)) {
+    return 'CLEAR';
+  }
+  const shift = completedRows.filter(r => r < row).length;
+  switch(shift) {
+    case 1: return 'SHIFT_ONE';
+    case 2: return 'SHIFT_TWO';
+    case 3: return 'SHIFT_THREE';
+    case 4: return 'SHIFT_FOUR';
+    default: return 'STANDARD';
+  }
+};
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
@@ -47,8 +63,8 @@ const App = () => {
         <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} />
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);
-          const color = (gameState.completedRows.includes(gridPos.row)) ? TetrisConstants.color.white : lockedColor;
-          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={color}/>
+          const blockMode = rowBlockMode(gridPos.row, gameState.completedRows);
+          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor} mode={blockMode}/>
         })
         }
       </Bounds>
