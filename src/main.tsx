@@ -38,11 +38,8 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
 let timeoutId: number;
 
 // TODO score combos
-// TODO next piece
 // TODO game over
-// TODO level up
 // TODO count down on start or un-pause
-// TODO 7-bag random generator
 // TODO hard drop
 // TODO proper rotation - prevent invalid & support wall kicks
 // TODO sound effects

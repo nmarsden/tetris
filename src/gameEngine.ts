@@ -130,7 +130,7 @@ class GameEngine {
     this.gameState.score = 0;
     this.gameState.level = 1;
     this.gameState.lines = 0;
-    this.timePerRowInMSecs = Math.pow((0.8-((this.gameState.level-1)*0.007)), (this.gameState.level-1)) * 1000;
+    this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
 
     // DEBUG: uncomment below to easily complete a row
@@ -201,6 +201,12 @@ class GameEngine {
       // update gameState: score & lines
       this.gameState.score = this.gameState.score + this.calcCompletedRowsScore(this.gameState.completedRows.length, this.gameState.level);
       this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
+
+      // update gameState: level
+      if (this.isLevelUp(this.gameState.level, this.gameState.lines)) {
+        this.gameState.level++;
+        this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
+      }
 
       // update gameState: lockedColors, completedRows, & ghostPiece
       this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
@@ -320,6 +326,14 @@ class GameEngine {
       this.setIsLockMode(true);
     }
     return this.gameState;
+  }
+
+  private calcTimePerRow(level: number): number {
+    return Math.pow((0.8-((level-1)*0.007)), (this.gameState.level-1)) * 1000;
+  }
+
+  private isLevelUp(level: number, lines: number): boolean {
+    return lines >= (level * 10);
   }
 
   private getBlockPositions(piece: Piece): GridPos[] {
