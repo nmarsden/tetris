@@ -4,12 +4,12 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Bounds, Environment, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Grid} from './components/grid/grid';
 import {useCallback, useEffect, useState} from "react";
 import {GameEngine, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
+import {Playfield} from "./components/playfield/playfield.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -68,9 +68,9 @@ const App = () => {
     <Canvas>
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
       <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
-        <Grid enabled={true}/>
+        <Playfield enableGrid={false}/>
         {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
-        <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} />
+        {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);
           const blockMode = rowBlockMode(gridPos.row, gameState.completedRows);

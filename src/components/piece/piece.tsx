@@ -1,5 +1,5 @@
 import {useMemo} from "react";
-import {GridPos, GridUtils} from "../grid/grid.tsx";
+import {GridPos, GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {Block, BlockMode} from "../block/block.tsx";
 import {PIECE_DATA, PieceData, PieceType} from "../../gameEngine.ts";

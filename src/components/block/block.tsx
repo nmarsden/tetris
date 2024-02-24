@@ -2,6 +2,7 @@ import {animated, config, useSpring} from "@react-spring/three";
 import {Color} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useEffect} from "react";
+import {RoundedBox} from "@react-three/drei";
 
 export type BlockMode = 'STANDARD' | 'GHOST' | 'LOCK' | 'CLEAR' | 'SHIFT_ONE' | 'SHIFT_TWO' | 'SHIFT_THREE' | 'SHIFT_FOUR';
 
@@ -36,14 +37,21 @@ const Block = ({ position, color, mode='STANDARD' } : { position: [number, numbe
       scale={scale}
     >
       <animated.mesh position-y={positionY}>
-        <boxGeometry args={[TetrisConstants.cellSize, TetrisConstants.cellSize, TetrisConstants.cellSize]} />
-        <animated.meshStandardMaterial
-          metalness={0.45}
-          roughness={0.75}
-          color={blockColor}
-          opacity={opacity}
-          transparent={true}
-        />
+        <RoundedBox
+          args={[TetrisConstants.cellSize, TetrisConstants.cellSize, TetrisConstants.cellSize]} // Width, height, depth. Default is [1, 1, 1]
+          radius={0.2} // Radius of the rounded corners. Default is 0.05
+          smoothness={4} // The number of curve segments. Default is 4
+          bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
+          creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
+        >
+          <animated.meshStandardMaterial
+            metalness={0.45}
+            roughness={0.75}
+            color={blockColor}
+            opacity={opacity}
+            transparent={true}
+          />
+        </RoundedBox>
       </animated.mesh>
     </animated.group>
   )

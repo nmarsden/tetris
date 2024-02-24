@@ -8,13 +8,13 @@ const GRID_WIDTH = NUM_COLS * CELL_SIZE;
 const GRID_HEIGHT = NUM_ROWS * CELL_SIZE;
 const GRID_ORIGIN: THREE.Vector3 = new THREE.Vector3(GRID_WIDTH * -0.5, GRID_HEIGHT * -0.5, 0);
 
-const CYAN = new Color('cyan');
-const YELLOW = new Color('yellow');
-const PURPLE = new Color('purple');
-const GREEN =  new Color('green');
-const RED = new Color('red');
-const BLUE = new Color('blue');
-const ORANGE = new Color('orange');
+const CYAN = new Color(0x00B7B4);
+const YELLOW = new Color(0xF8F200);
+const PURPLE = new Color(0x7E06F8);
+const GREEN =  new Color(0x18B543);
+const RED = new Color(0xE42129);
+const BLUE = new Color(0x02A0E3);
+const ORANGE = new Color(0xFE8129);
 const WHITE = new Color('white');
 
 export const TetrisConstants = {

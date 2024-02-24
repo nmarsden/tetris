@@ -1,7 +1,8 @@
 # Tetris
 
-## Specification
+## Terminology & Guidelines
 
+- [Tetris Terminology](https://tetris.fandom.com/wiki/Glossary)
 - [Tetris Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)
 
 ## UI Layout References

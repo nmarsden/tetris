@@ -1,4 +1,4 @@
-import {GridPos, GridUtils} from "./components/grid/grid.tsx";
+import {GridPos, GridUtils} from "./components/playfield/playfield.tsx";
 import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Action} from "./hooks/useKeyboardControls.ts";
