@@ -10,6 +10,8 @@ import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 import {Playfield} from "./components/playfield/playfield.tsx";
+import {TetrisConstants} from "./tetrisConstants.ts";
+import {Info} from "./components/info/info.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -34,6 +36,18 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
 };
 
 let timeoutId: number;
+
+// TODO score combos
+// TODO next piece
+// TODO game over
+// TODO level up
+// TODO count down on start or un-pause
+// TODO 7-bag random generator
+// TODO hard drop
+// TODO proper rotation - prevent invalid & support wall kicks
+// TODO sound effects
+// TODO Roger Dean's Tetris logo
+// TODO Korobeiniki music
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
@@ -69,14 +83,21 @@ const App = () => {
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
       <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
         <Playfield enableGrid={false}/>
+        {/* Active Piece */}
         {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
+        {/* Ghost Piece */}
         {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+        {/* Stack */}
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);
           const blockMode = rowBlockMode(gridPos.row, gameState.completedRows);
           return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor} mode={blockMode}/>
         })
         }
+        {/* Info */}
+        <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score}/>
+        <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
+        <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
       </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>

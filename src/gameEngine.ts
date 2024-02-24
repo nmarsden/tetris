@@ -74,10 +74,12 @@ type GameState = {
   previousIsLockMode: boolean;
   isLockMode: boolean;
   isPaused: boolean;
+  score: number;
+  level: number;
+  lines: number;
 };
 
 class GameEngine {
-  level = 1;
   timePerRowInMSecs = 1;
   droppingBlockPositions: GridPos[] = [];
   gameState: GameState = {
@@ -87,12 +89,17 @@ class GameEngine {
     completedRows: [],
     previousIsLockMode: false,
     isLockMode: false,
-    isPaused: false
+    isPaused: false,
+    score: 0,
+    level: 1,
+    lines: 0
   };
 
   start(): GameState {
-    this.level = 1;
-    this.timePerRowInMSecs = Math.pow((0.8-((this.level-1)*0.007)), (this.level-1)) * 1000;
+    this.gameState.score = 0;
+    this.gameState.level = 1;
+    this.gameState.lines = 0;
+    this.timePerRowInMSecs = Math.pow((0.8-((this.gameState.level-1)*0.007)), (this.gameState.level-1)) * 1000;
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
 
     // DEBUG: uncomment below to easily complete a row
@@ -158,6 +165,10 @@ class GameEngine {
     }
     // check if there are completed rows to be removed
     if (this.gameState.completedRows.length > 0) {
+      // update gameState: score & lines
+      this.gameState.score = this.gameState.score + this.calcCompletedRowsScore(this.gameState.completedRows.length, this.gameState.level);
+      this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
+
       // update gameState: lockedColors, completedRows, & ghostPiece
       this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
       this.gameState.completedRows = [];
@@ -241,6 +252,9 @@ class GameEngine {
       this.droppingBlockPositions.forEach((pos, index) => {
         this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
       });
+
+      // update score
+      this.gameState.score = this.gameState.score + 1;
 
       if (!this.canMoveDown()) {
         // LOCK DETECTED!!!
@@ -362,6 +376,16 @@ class GameEngine {
   private setIsLockMode(isLockMode: boolean): void {
     this.gameState.previousIsLockMode = this.gameState.isLockMode;
     this.gameState.isLockMode = isLockMode;
+  }
+
+  private calcCompletedRowsScore(completedRows: number, level: number): number {
+    switch(completedRows) {
+      case 1: return 100 * level;
+      case 2: return 300 * level;
+      case 3: return 500 * level;
+      case 4: return 800 * level;
+      default: return 0;
+    }
   }
 }
 
