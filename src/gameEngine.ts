@@ -7,7 +7,35 @@ const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
 
-const SHAPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+
+class RandomPieceBag {
+  pieces: PieceType[] = ['I0', 'O', 'T0', 'S0', 'Z0', 'J0', 'L0'];
+  pieceIndex = 0;
+
+  constructor() {
+    this.pieces = this.shuffle(this.pieces);
+  }
+
+  pick(): PieceType {
+    const piece = this.pieces[this.pieceIndex];
+    this.pieceIndex++;
+    if (this.pieceIndex === 7) {
+      this.pieces = this.shuffle(this.pieces);
+      this.pieceIndex = 0;
+    }
+    return piece;
+  }
+
+  private shuffle(a: PieceType[]): PieceType[] {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const x = a[i];
+      a[i] = a[j];
+      a[j] = x;
+    }
+    return a;
+  }
+}
 
 export type PieceData = {
   color: Color,
@@ -69,6 +97,7 @@ type Piece = {
 type GameState = {
   piece: Piece,
   ghostPiece: Piece,
+  nextPieceType: PieceType,
   lockedColors: Color[];
   completedRows: number[];
   previousIsLockMode: boolean;
@@ -82,9 +111,11 @@ type GameState = {
 class GameEngine {
   timePerRowInMSecs = 1;
   droppingBlockPositions: GridPos[] = [];
+  pieceBag: RandomPieceBag = new RandomPieceBag();
   gameState: GameState = {
     piece: { pos: {...START_POS}, type: 'I0' },
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
+    nextPieceType: 'I0',
     lockedColors: [],
     completedRows: [],
     previousIsLockMode: false,
@@ -124,9 +155,10 @@ class GameEngine {
     // this.gameState.lockedColors[32] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[33] = TetrisConstants.color.yellow;
 
-    const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+    const newPiece = { pos: {...START_POS}, type: this.pieceBag.pick() };
     this.gameState.piece = newPiece
     this.gameState.ghostPiece = this.ghostPiece(newPiece);
+    this.gameState.nextPieceType = this.pieceBag.pick();
     this.setIsLockMode(false);
     this.gameState.isPaused = false;
 
@@ -152,9 +184,10 @@ class GameEngine {
 
         if (this.gameState.completedRows.length === 0) {
           // update gameState: piece & ghostPiece
-          const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+          const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
           this.gameState.piece = newPiece;
           this.gameState.ghostPiece = this.ghostPiece(newPiece);
+          this.gameState.nextPieceType = this.pieceBag.pick();
 
           // update droppingBlockPositions with newly spawned piece
           this.droppingBlockPositions = this.getBlockPositions(newPiece);
@@ -174,9 +207,10 @@ class GameEngine {
       this.gameState.completedRows = [];
 
       // update gameState: piece & ghostPiece
-      const newPiece = { pos: {...START_POS}, type: this.randomPieceType() };
+      const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
       this.gameState.piece = newPiece;
       this.gameState.ghostPiece = this.ghostPiece(newPiece);
+      this.gameState.nextPieceType = this.pieceBag.pick();
 
       // update droppingBlockPositions with newly spawned piece
       this.droppingBlockPositions = this.getBlockPositions(newPiece);
@@ -286,11 +320,6 @@ class GameEngine {
       this.setIsLockMode(true);
     }
     return this.gameState;
-  }
-
-  private randomPieceType(): PieceType {
-    const shape = SHAPES[Math.round(Math.random() * 6)];
-    return shape === 'O' ? shape : (shape + '0') as PieceType;
   }
 
   private getBlockPositions(piece: Piece): GridPos[] {

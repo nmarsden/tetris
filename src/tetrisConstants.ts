@@ -42,5 +42,7 @@ export const TetrisConstants = {
   levelCol: INFO_COL,
   levelRow: INFO_ROW - 3,
   linesCol: INFO_COL,
-  linesRow: INFO_ROW - 6
+  linesRow: INFO_ROW - 6,
+  nextCol: INFO_COL,
+  nextRow: INFO_ROW - 9
 };
