@@ -1,11 +1,13 @@
 import {Plane, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
+import {Button} from "../button/button.tsx";
 
 const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
-const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 3});
+const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 3, z: 3});
+const BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 3});
 
-const Home = () => {
+const Home = ({ onStart }: { onStart: () => void }) => {
   return (
     <>
       <Plane position={OVERLAY_POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>
@@ -25,6 +27,7 @@ const Home = () => {
         />
         {'TETRIS'}
       </Text>
+      <Button position={BUTTON_POSITION} label={'START'} onButtonClick={onStart} />
     </>
   )
 }

@@ -55,8 +55,8 @@ const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
   const action = useKeyboardControls();
 
-  const step = useCallback(() => {
-    const gameState = gameEngine.step();
+  const step = useCallback((isStart: boolean = false) => {
+    const gameState = isStart ? gameEngine.start() : gameEngine.step();
     setGameState({...gameState});
 
     // check for game over
@@ -67,6 +67,10 @@ const App = () => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
   }, []);
+
+  const onStartOrRetry = useCallback(() => {
+    step(true);
+  }, [step]);
 
   useEffect(() => {
     const gameState = gameEngine.handleAction(action);
@@ -105,8 +109,8 @@ const App = () => {
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
-        {gameState.mode === 'HOME' ? <Home /> : null}
-        {gameState.mode === 'GAME_OVER' ? <GameOver /> : null}
+        {gameState.mode === 'HOME' ? <Home onStart={onStartOrRetry}/> : null}
+        {gameState.mode === 'GAME_OVER' ? <GameOver onRetry={onStartOrRetry} /> : null}
       </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
