@@ -12,6 +12,7 @@ import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 import {Playfield} from "./components/playfield/playfield.tsx";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Info} from "./components/info/info.tsx";
+import {GameOver} from "./components/gameOver/gameOver.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -38,7 +39,8 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
 let timeoutId: number;
 
 // TODO score combos
-// TODO game over
+// TODO start
+// TODO re-start
 // TODO count down on start or un-pause
 // TODO hard drop
 // TODO proper rotation - prevent invalid & support wall kicks
@@ -54,6 +56,10 @@ const App = () => {
     const gameState = gameEngine.step();
     setGameState({...gameState});
 
+    // check for game over
+    if (gameState.isGameOver) {
+      return;
+    }
     // when lock mode is triggered, ensure it ends in 500ms
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
@@ -96,6 +102,7 @@ const App = () => {
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
         <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/>
+        {gameState.isGameOver ? <GameOver /> : null}
       </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>

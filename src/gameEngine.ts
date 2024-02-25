@@ -106,6 +106,7 @@ type GameState = {
   score: number;
   level: number;
   lines: number;
+  isGameOver: boolean;
 };
 
 class GameEngine {
@@ -123,15 +124,18 @@ class GameEngine {
     isPaused: false,
     score: 0,
     level: 1,
-    lines: 0
+    lines: 0,
+    isGameOver: false
   };
 
   start(): GameState {
     this.gameState.score = 0;
     this.gameState.level = 1;
     this.gameState.lines = 0;
+    this.gameState.isGameOver = false;
     this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
+    this.pieceBag = new RandomPieceBag();
 
     // DEBUG: uncomment below to easily complete a row
     // this.gameState.lockedColors[0] = TetrisConstants.color.yellow;
@@ -185,12 +189,25 @@ class GameEngine {
         if (this.gameState.completedRows.length === 0) {
           // update gameState: piece & ghostPiece
           const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
+
+          // check if game over
+          if (this.isGameOver(newPiece)) {
+            this.gameState.isGameOver = true;
+            return this.gameState;
+          }
+
           this.gameState.piece = newPiece;
           this.gameState.ghostPiece = this.ghostPiece(newPiece);
           this.gameState.nextPieceType = this.pieceBag.pick();
 
           // update droppingBlockPositions with newly spawned piece
           this.droppingBlockPositions = this.getBlockPositions(newPiece);
+
+          // check for new piece immediately in lockMode
+          if (!this.canMoveDown()) {
+            // LOCK DETECTED!!!
+            this.setIsLockMode(true);
+          }
         }
 
          return this.gameState;
@@ -214,6 +231,13 @@ class GameEngine {
 
       // update gameState: piece & ghostPiece
       const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
+
+      // check if game over
+      if (this.isGameOver(newPiece)) {
+        this.gameState.isGameOver = true;
+        return this.gameState;
+      }
+
       this.gameState.piece = newPiece;
       this.gameState.ghostPiece = this.ghostPiece(newPiece);
       this.gameState.nextPieceType = this.pieceBag.pick();
@@ -332,6 +356,10 @@ class GameEngine {
     return Math.pow((0.8-((level-1)*0.007)), (this.gameState.level-1)) * 1000;
   }
 
+  private isGameOver(piece: Piece): boolean {
+    return !this.getBlockPositions(piece).every(pos => this.isValidPos(pos));
+  }
+
   private isLevelUp(level: number, lines: number): boolean {
     return lines >= (level * 10);
   }
@@ -344,26 +372,25 @@ class GameEngine {
 
   private canMoveDown(): boolean {
     return this.droppingBlockPositions.every(pos => {
-      const newPos = { col: pos.col, row: pos.row - 1 };
-      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
-      return newPos.row > 19 || (newPos.row >= 0 && this.gameState.lockedColors[lockedColorIndex] === null);
+      return this.isValidPos({ col: pos.col, row: pos.row - 1 });
     });
   }
 
   private canMoveLeft(): boolean {
     return this.droppingBlockPositions.every(pos => {
-      const newPos = { col: pos.col - 1, row: pos.row };
-      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
-      return newPos.col >= 0 && newPos.row <= 19 && this.gameState.lockedColors[lockedColorIndex] === null;
+      return this.isValidPos({ col: pos.col - 1, row: pos.row });
     });
   }
 
   private canMoveRight(): boolean {
     return this.droppingBlockPositions.every(pos => {
-      const newPos = { col: pos.col + 1, row: pos.row };
-      const lockedColorIndex = LockedColorUtils.gridPosToIndex(newPos);
-      return newPos.col < TetrisConstants.numCols && newPos.row <= 19 && this.gameState.lockedColors[lockedColorIndex] === null;
+      return this.isValidPos({ col: pos.col + 1, row: pos.row });
     });
+  }
+
+  private isValidPos(pos: GridPos): boolean {
+    const lockedColorIndex = LockedColorUtils.gridPosToIndex(pos);
+    return (pos.row >= 0 && pos.col >= 0 && pos.col < TetrisConstants.numCols && this.gameState.lockedColors[lockedColorIndex] === null);
   }
 
   private movePiece(piece: Piece, offset: GridPos): Piece {

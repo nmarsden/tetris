@@ -36,7 +36,7 @@ const Label = ({ gridPos, label } : { gridPos: GridPos, label: string }) => {
 const Value = ({ gridPos, value } : { gridPos: GridPos, value: number | PieceType }) => {
   const isPieceValue = !Number.isInteger(value);
   const position = GridUtils.gridPosToScreen({ col: gridPos.col, row: gridPos.row });
-  const valueBoxWidth = TetrisConstants.cellSize * 4.5;
+  const valueBoxWidth = TetrisConstants.infoWidth;
   const valueBoxHeight = TetrisConstants.cellSize * (isPieceValue ? 2.7 : 1.4);
   const borderPosition = position.clone().add({ x: -valueBoxWidth * 0.5, y: TetrisConstants.cellSize * 0.3, z: 0})
   const textPosition = position.clone().add({ x: 0, y: -TetrisConstants.cellSize * 0.5, z: 0})
