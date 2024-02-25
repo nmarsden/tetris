@@ -6,6 +6,7 @@ export type Action = {
   moveDown: boolean;
   rotateClockwise: boolean;
   pause: boolean;
+  start: boolean;
 };
 
 type ActionField = keyof Action;
@@ -16,7 +17,8 @@ const useKeyboardControls = (): Action => {
     ['ArrowRight', 'moveRight'],
     ['ArrowDown', 'moveDown'],
     ['ArrowUp', 'rotateClockwise'],
-    ['KeyP', 'pause']
+    ['KeyP', 'pause'],
+    ['Enter', 'start']
   ]);
 
   const actionFieldByKey = (key: string): ActionField | undefined => keys.get(key);
@@ -26,7 +28,8 @@ const useKeyboardControls = (): Action => {
     moveRight: false,
     moveDown: false,
     rotateClockwise: false,
-    pause: false
+    pause: false,
+    start: false
   });
 
   useEffect(() => {

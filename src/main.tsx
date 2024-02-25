@@ -5,7 +5,7 @@ import {Canvas} from '@react-three/fiber'
 import {Bounds, Environment, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
 import {useCallback, useEffect, useState} from "react";
-import {GameEngine, LockedColorUtils} from "./gameEngine.ts";
+import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
@@ -13,11 +13,13 @@ import {Playfield} from "./components/playfield/playfield.tsx";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Info} from "./components/info/info.tsx";
 import {GameOver} from "./components/gameOver/gameOver.tsx";
+import {Home} from "./components/home/home.tsx";
+import {Background} from "./components/background/background.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
 const gameEngine = new GameEngine();
-const initialGameState = gameEngine.start();
+const initialGameState = gameEngine.initialState();
 
 const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
   if (completedRows.length === 0) {
@@ -36,17 +38,18 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
   }
 };
 
+const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
+  return completedRows.length === 0 && mode !== 'HOME';
+};
+
 let timeoutId: number;
 
 // TODO score combos
-// TODO start
-// TODO re-start
 // TODO count down on start or un-pause
 // TODO hard drop
 // TODO proper rotation - prevent invalid & support wall kicks
 // TODO sound effects
-// TODO Roger Dean's Tetris logo
-// TODO Korobeiniki music
+// TODO mobile controls
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
@@ -57,7 +60,7 @@ const App = () => {
     setGameState({...gameState});
 
     // check for game over
-    if (gameState.isGameOver) {
+    if (gameState.mode === 'GAME_OVER') {
       return;
     }
     // when lock mode is triggered, ensure it ends in 500ms
@@ -66,14 +69,13 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // auto-start game
-    timeoutId = setTimeout(() => { step(); }, 2000);
-  }, [step]);
-
-  useEffect(() => {
     const gameState = gameEngine.handleAction(action);
     setGameState({...gameState});
 
+    if (gameState.mode === 'START') {
+      step();
+      return;
+    }
     if (!gameState.previousIsLockMode && gameState.isLockMode) {
       // when lock mode is triggered due to an action, ensure it ends in 500ms
       clearTimeout(timeoutId);
@@ -84,12 +86,13 @@ const App = () => {
   return (
     <Canvas>
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
-      <Bounds fit clip observe margin={1.2} maxDuration={0.1}>
+      <Bounds fit clip observe margin={1} maxDuration={0.1}>
+        <Background />
         <Playfield enableGrid={false}/>
         {/* Active Piece */}
-        {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
+        {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
         {/* Ghost Piece */}
-        {gameState.completedRows.length === 0 ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+        {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
         {/* Stack */}
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);
@@ -101,8 +104,9 @@ const App = () => {
         <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score}/>
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
-        <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/>
-        {gameState.isGameOver ? <GameOver /> : null}
+        {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
+        {gameState.mode === 'HOME' ? <Home /> : null}
+        {gameState.mode === 'GAME_OVER' ? <GameOver /> : null}
       </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>

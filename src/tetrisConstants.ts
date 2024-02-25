@@ -11,7 +11,8 @@ const GRID_ORIGIN: THREE.Vector3 = new THREE.Vector3(GRID_WIDTH * -0.5, GRID_HEI
 const INFO_LEFT_PADDING_CELLS = 0.5;
 const INFO_WIDTH_CELLS = 4.5
 
-const GAME_WIDTH_CELLS = (NUM_COLS + INFO_LEFT_PADDING_CELLS + INFO_WIDTH_CELLS);
+const GAME_WIDTH_CELLS = NUM_COLS + INFO_LEFT_PADDING_CELLS + INFO_WIDTH_CELLS + 2;
+const GAME_HEIGHT_CELLS = NUM_ROWS + 2;
 
 const INFO_COL = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS * 0.5);
 const INFO_ROW = NUM_ROWS - 0.5;
@@ -53,7 +54,7 @@ export const TetrisConstants = {
   linesRow: INFO_ROW - 6,
   nextCol: INFO_COL,
   nextRow: INFO_ROW - 9,
-  center: { col: (GAME_WIDTH_CELLS) * 0.5, row: NUM_ROWS * 0.5 },
+  center: { col: GAME_WIDTH_CELLS * 0.5, row: GAME_HEIGHT_CELLS * 0.5 },
   gameWidth: GAME_WIDTH_CELLS * CELL_SIZE,
-  gameHeight: NUM_ROWS * CELL_SIZE
+  gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE
 };

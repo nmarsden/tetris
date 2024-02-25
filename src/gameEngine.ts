@@ -3,6 +3,8 @@ import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Action} from "./hooks/useKeyboardControls.ts";
 
+export type GameMode = 'HOME' | 'START' | 'PLAYING' | 'PAUSED' | 'GAME_OVER';
+
 const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 'S1', 'S2', 'S3', 'Z0', 'Z1', 'Z2', 'Z3', 'J0', 'J1', 'J2', 'J3', 'L0', 'L1', 'L2', 'L3'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
@@ -95,6 +97,7 @@ type Piece = {
 };
 
 type GameState = {
+  mode: GameMode,
   piece: Piece,
   ghostPiece: Piece,
   nextPieceType: PieceType,
@@ -102,11 +105,9 @@ type GameState = {
   completedRows: number[];
   previousIsLockMode: boolean;
   isLockMode: boolean;
-  isPaused: boolean;
   score: number;
   level: number;
   lines: number;
-  isGameOver: boolean;
 };
 
 class GameEngine {
@@ -114,6 +115,7 @@ class GameEngine {
   droppingBlockPositions: GridPos[] = [];
   pieceBag: RandomPieceBag = new RandomPieceBag();
   gameState: GameState = {
+    mode: 'HOME',
     piece: { pos: {...START_POS}, type: 'I0' },
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
     nextPieceType: 'I0',
@@ -121,18 +123,20 @@ class GameEngine {
     completedRows: [],
     previousIsLockMode: false,
     isLockMode: false,
-    isPaused: false,
     score: 0,
     level: 1,
-    lines: 0,
-    isGameOver: false
+    lines: 0
   };
 
+  initialState(): GameState {
+    return this.gameState;
+  }
+
   start(): GameState {
+    this.gameState.mode = 'PLAYING';
     this.gameState.score = 0;
     this.gameState.level = 1;
     this.gameState.lines = 0;
-    this.gameState.isGameOver = false;
     this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
     this.pieceBag = new RandomPieceBag();
@@ -164,7 +168,6 @@ class GameEngine {
     this.gameState.ghostPiece = this.ghostPiece(newPiece);
     this.gameState.nextPieceType = this.pieceBag.pick();
     this.setIsLockMode(false);
-    this.gameState.isPaused = false;
 
     this.droppingBlockPositions = this.getBlockPositions(newPiece);
 
@@ -172,7 +175,10 @@ class GameEngine {
   }
 
   step(): GameState {
-    if (this.gameState.isPaused) return this.gameState;
+    if (this.gameState.mode === 'START') {
+      return this.start();
+    }
+    if (this.gameState.mode !== 'PLAYING') return this.gameState;
 
     if (this.gameState.isLockMode) {
       this.setIsLockMode(false);
@@ -192,7 +198,7 @@ class GameEngine {
 
           // check if game over
           if (this.isGameOver(newPiece)) {
-            this.gameState.isGameOver = true;
+            this.gameState.mode = 'GAME_OVER';
             return this.gameState;
           }
 
@@ -234,7 +240,7 @@ class GameEngine {
 
       // check if game over
       if (this.isGameOver(newPiece)) {
-        this.gameState.isGameOver = true;
+        this.gameState.mode = 'GAME_OVER';
         return this.gameState;
       }
 
@@ -270,11 +276,19 @@ class GameEngine {
 
   handleAction(action: Action): GameState {
     if (action.pause) {
-      this.gameState.isPaused = !this.gameState.isPaused;
-
+      if (this.gameState.mode === 'PAUSED') {
+        this.gameState.mode = 'PLAYING';
+      } else if (this.gameState.mode === 'PLAYING') {
+        this.gameState.mode = 'PAUSED';
+      }
       return this.gameState;
     }
-    if (this.gameState.isPaused) return this.gameState;
+    if (this.gameState.mode === 'PAUSED') return this.gameState;
+
+    if (action.start && ['HOME', 'GAME_OVER'].includes(this.gameState.mode)) {
+      this.gameState.mode = 'START';
+      return this.gameState;
+    }
 
     if (action.moveLeft && this.canMoveLeft()) {
       // update gameState: piece & ghostPiece moved left
