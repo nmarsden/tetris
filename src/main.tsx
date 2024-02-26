@@ -47,7 +47,6 @@ let timeoutId: number;
 // TODO score combos
 // TODO count down on start or un-pause
 // TODO hard drop
-// TODO proper rotation - prevent invalid & support wall kicks
 // TODO sound effects
 // TODO mobile controls
 

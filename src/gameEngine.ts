@@ -89,6 +89,17 @@ const PIECE_DATA: Map<PieceType, PieceData> = new Map([
   ['L3', { color: TetrisConstants.color.orange, positions: [[-CS, CS, 0], [0, CS, 0], [0, 0, 0], [0, -CS, 0]] }]
 ]);
 
+const WALL_KICK_OFFSETS: Map<string, GridPos[]> = new Map([
+  ['I01', [{ col: -2, row: 0 }, { col: 1,  row: 0  }, { col: -2, row: 1  }, { col: 1,  row: -2 }]],
+  ['I12', [{ col: -1, row: 0 }, { col: 2,  row: 0  }, { col: -1, row: -2 }, { col: 2,  row: 1  }]],
+  ['I23', [{ col: 2,  row: 0 }, { col: -1, row: 0  }, { col: 2,  row: -1 }, { col: -1, row: 2  }]],
+  ['I30', [{ col: 1,  row: 0 }, { col: -2, row: 0  }, { col: 1,  row: 2  }, { col: -2, row: -1 }]],
+  ['01',  [{ col: -1, row: 0 }, { col: -1, row: -1 }, { col: 0,  row: 2  }, { col: -1, row: 2  }]],
+  ['12',  [{ col: 1,  row: 0 }, { col: 1,  row: 1  }, { col: 0,  row: -2 }, { col: 1,  row: -2 }]],
+  ['23',  [{ col: 1,  row: 0 }, { col: 1,  row: -1 }, { col: 0,  row: 2  }, { col: 1,  row: 2  }]],
+  ['30',  [{ col: -1, row: 0 }, { col: -1, row: 1  }, { col: 0,  row: -2 }, { col: -1, row: -2 }]],
+]);
+
 const START_POS: GridPos = { col: 4, row: 18};
 
 type Piece = {
@@ -142,6 +153,40 @@ class GameEngine {
     this.pieceBag = new RandomPieceBag();
 
     // DEBUG: uncomment below to easily complete a row
+    // -- row 0
+    // this.gameState.lockedColors[0] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[1] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[2] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[3] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[4] = TetrisConstants.color.yellow;
+    // // this.gameState.lockedColors[5] = null;
+    // this.gameState.lockedColors[6] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[7] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[8] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[9] = TetrisConstants.color.yellow;
+    // // -- row 1
+    // this.gameState.lockedColors[10] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[11] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[12] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[13] = TetrisConstants.color.yellow;
+    // // this.gameState.lockedColors[14] = null;
+    // // this.gameState.lockedColors[15] = null;
+    // // this.gameState.lockedColors[16] = null;
+    // this.gameState.lockedColors[17] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[18] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[19] = TetrisConstants.color.yellow;
+    // // -- row 2
+    // // this.gameState.lockedColors[20] = null;
+    // // this.gameState.lockedColors[21] = null;
+    // // this.gameState.lockedColors[22] = null;
+    // // this.gameState.lockedColors[23] = null;
+    // // this.gameState.lockedColors[24] = null;
+    // // this.gameState.lockedColors[25] = null;
+    // this.gameState.lockedColors[26] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[27] = TetrisConstants.color.yellow;
+    // // this.gameState.lockedColors[28] = null;
+    // // this.gameState.lockedColors[29] = null;
+
     // this.gameState.lockedColors[0] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[1] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[2] = TetrisConstants.color.yellow;
@@ -341,11 +386,13 @@ class GameEngine {
       return this.gameState;
     }
     if (action.rotateClockwise) {
-      // TODO check if can rotate
-      // TODO introduce wall kicks
+      const rotatedPiece = this.getValidPieceRotatedClockwise(this.gameState.piece);
+      if (rotatedPiece === null) {
+        return this.gameState;
+      }
       // update gameState: rotate piece & ghost clockwise
-      this.gameState.piece.type = getPieceTypeForRotateClockwise(this.gameState.piece.type);
-      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
+      this.gameState.piece = rotatedPiece;
+      this.gameState.ghostPiece = this.ghostPiece(rotatedPiece);
 
       // update droppingBlockPositions
       this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
@@ -400,6 +447,28 @@ class GameEngine {
     return this.droppingBlockPositions.every(pos => {
       return this.isValidPos({ col: pos.col + 1, row: pos.row });
     });
+  }
+
+  private getValidPieceRotatedClockwise(piece: Piece): Piece | null {
+    if (this.gameState.piece.type === 'O') return piece;
+    const newPieceType = getPieceTypeForRotateClockwise(piece.type);
+    const blockPositions = this.getBlockPositions({ pos: piece.pos, type: newPieceType });
+    if (blockPositions.every(pos => this.isValidPos(pos))) {
+      return { pos: piece.pos, type: newPieceType };
+    } else {
+      // check for valid wall kicks
+      let newPiece = null;
+      const wallKickOffsets = this.getWallKickOffsets(piece.type, newPieceType);
+      for (const offset of wallKickOffsets) {
+        const kickedPos = { col: piece.pos.col + offset.col, row: piece.pos.row + offset.row };
+        const blockPositions = this.getBlockPositions({ pos: kickedPos, type: newPieceType });
+        if (blockPositions.every(pos => this.isValidPos(pos))) {
+          newPiece = { pos: kickedPos, type: newPieceType};
+          break;
+        }
+      }
+      return newPiece;
+    }
   }
 
   private isValidPos(pos: GridPos): boolean {
@@ -470,6 +539,15 @@ class GameEngine {
       case 4: return 800 * level;
       default: return 0;
     }
+  }
+
+  private getWallKickOffsets(from: PieceType, to: PieceType): GridPos[] {
+    const shape = from[0];
+    const fromOrientation = from[1];
+    const toOrientation = to[1];
+
+    const wallKickKey = (shape === 'I' ? shape : '') + fromOrientation + toOrientation;
+    return WALL_KICK_OFFSETS.get(wallKickKey) as GridPos[];
   }
 }
 
