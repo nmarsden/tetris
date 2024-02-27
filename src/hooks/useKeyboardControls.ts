@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 
 export type Action = {
   moveLeft: boolean;
@@ -6,7 +6,6 @@ export type Action = {
   moveDown: boolean;
   rotateClockwise: boolean;
   pause: boolean;
-  start: boolean;
 };
 
 type ActionField = keyof Action;
@@ -17,8 +16,7 @@ const useKeyboardControls = (): Action => {
     ['ArrowRight', 'moveRight'],
     ['ArrowDown', 'moveDown'],
     ['ArrowUp', 'rotateClockwise'],
-    ['KeyP', 'pause'],
-    ['Enter', 'start']
+    ['KeyP', 'pause']
   ]);
 
   const actionFieldByKey = (key: string): ActionField | undefined => keys.get(key);
@@ -28,20 +26,21 @@ const useKeyboardControls = (): Action => {
     moveRight: false,
     moveDown: false,
     rotateClockwise: false,
-    pause: false,
-    start: false
+    pause: false
   });
+
+  const setActionValue = useCallback((keyCode: string, isKeyDown: boolean) => {
+    setAction((m) => {
+      return actionFieldByKey(keyCode) ? ({ ...m, [actionFieldByKey(keyCode) as string]: isKeyDown }) : m;
+    })
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      setAction((m) => {
-        return actionFieldByKey(e.code) ? ({ ...m, [actionFieldByKey(e.code) as string]: true }) : m;
-      })
+      setActionValue(e.code, true);
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      setAction((m) =>{
-        return actionFieldByKey(e.code) ? ({ ...m, [actionFieldByKey(e.code) as string]: false }) : m;
-      })
+      setActionValue(e.code, false);
     };
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('keyup', handleKeyUp)
@@ -50,7 +49,7 @@ const useKeyboardControls = (): Action => {
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
-  return action
+  return action;
 }
 
 export { useKeyboardControls }

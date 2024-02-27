@@ -15,6 +15,8 @@ import {Info} from "./components/info/info.tsx";
 import {GameOver} from "./components/gameOver/gameOver.tsx";
 import {Home} from "./components/home/home.tsx";
 import {Background} from "./components/background/background.tsx";
+import {Countdown} from "./components/countdown/countdown.tsx";
+import {Paused} from "./components/paused/paused.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -45,17 +47,19 @@ const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
 let timeoutId: number;
 
 // TODO score combos
-// TODO count down on start or un-pause
 // TODO hard drop
 // TODO sound effects
 // TODO mobile controls
 
+type StepMode = 'START' | 'NEXT' | 'RESUME';
+
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
+  const [showCountdown, setShowCountdown] = useState(false);
   const action = useKeyboardControls();
 
-  const step = useCallback((isStart: boolean = false) => {
-    const gameState = isStart ? gameEngine.start() : gameEngine.step();
+  const step = useCallback((mode: StepMode = 'NEXT') => {
+    const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
     setGameState({...gameState});
 
     // check for game over
@@ -68,7 +72,23 @@ const App = () => {
   }, []);
 
   const onStartOrRetry = useCallback(() => {
-    step(true);
+    setShowCountdown(true);
+  }, []);
+
+  const onResume = useCallback(() => {
+    setShowCountdown(true);
+  }, []);
+
+  const onCountdownDoneStart = useCallback(() => {
+    setShowCountdown(false);
+    // start game
+    step('START');
+  }, [step]);
+
+  const onCountdownDoneResume = useCallback(() => {
+    setShowCountdown(false);
+    // resume game
+    step('RESUME');
   }, [step]);
 
   useEffect(() => {
@@ -108,8 +128,11 @@ const App = () => {
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
-        {gameState.mode === 'HOME' ? <Home onStart={onStartOrRetry}/> : null}
-        {gameState.mode === 'GAME_OVER' ? <GameOver onRetry={onStartOrRetry} /> : null}
+        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry}/> : null}
+        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume}/> : null}
+        {gameState.mode === 'GAME_OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} /> : null}
+        {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
+        {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
       </Bounds>
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>

@@ -219,6 +219,11 @@ class GameEngine {
     return this.gameState;
   }
 
+  resume(): GameState {
+    this.gameState.mode = 'PLAYING';
+    return this.step();
+  }
+
   step(): GameState {
     if (this.gameState.mode === 'START') {
       return this.start();
@@ -320,20 +325,11 @@ class GameEngine {
   }
 
   handleAction(action: Action): GameState {
-    if (action.pause) {
-      if (this.gameState.mode === 'PAUSED') {
-        this.gameState.mode = 'PLAYING';
-      } else if (this.gameState.mode === 'PLAYING') {
-        this.gameState.mode = 'PAUSED';
-      }
+    if (action.pause && this.gameState.mode === 'PLAYING') {
+      this.gameState.mode = 'PAUSED';
       return this.gameState;
     }
     if (this.gameState.mode === 'PAUSED') return this.gameState;
-
-    if (action.start && ['HOME', 'GAME_OVER'].includes(this.gameState.mode)) {
-      this.gameState.mode = 'START';
-      return this.gameState;
-    }
 
     if (action.moveLeft && this.canMoveLeft()) {
       // update gameState: piece & ghostPiece moved left
