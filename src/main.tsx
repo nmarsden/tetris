@@ -17,6 +17,7 @@ import {Home} from "./components/home/home.tsx";
 import {Background} from "./components/background/background.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
 import {Paused} from "./components/paused/paused.tsx";
+import {Toasts} from "./components/toast/toast.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -123,6 +124,8 @@ const App = () => {
           return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor} mode={blockMode}/>
         })
         }
+        {/* Toasts */}
+        <Toasts toasts={gameState.toasts} />
         {/* Info */}
         <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score}/>
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>

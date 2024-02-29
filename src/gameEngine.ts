@@ -107,11 +107,19 @@ type Piece = {
   type: PieceType;
 };
 
+type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS';
+
+export type ToastDetails = {
+  row: number;
+  achievement: Achievement;
+  points: number;
+};
+
 type GameState = {
-  mode: GameMode,
-  piece: Piece,
-  ghostPiece: Piece,
-  nextPieceType: PieceType,
+  mode: GameMode;
+  piece: Piece;
+  ghostPiece: Piece;
+  nextPieceType: PieceType;
   lockedColors: Color[];
   completedRows: number[];
   previousIsLockMode: boolean;
@@ -119,6 +127,7 @@ type GameState = {
   score: number;
   level: number;
   lines: number;
+  toasts: ToastDetails[];
 };
 
 class GameEngine {
@@ -136,7 +145,8 @@ class GameEngine {
     isLockMode: false,
     score: 0,
     level: 1,
-    lines: 0
+    lines: 0,
+    toasts: []
   };
 
   initialState(): GameState {
@@ -148,6 +158,7 @@ class GameEngine {
     this.gameState.score = 0;
     this.gameState.level = 1;
     this.gameState.lines = 0;
+    this.gameState.toasts = [];
     this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
     this.pieceBag = new RandomPieceBag();
@@ -242,7 +253,14 @@ class GameEngine {
         })
         this.gameState.completedRows = this.getCompletedRows(this.gameState.lockedColors, this.droppingBlockPositions);
 
-        if (this.gameState.completedRows.length === 0) {
+        if (this.gameState.completedRows.length > 0) {
+          // update gameState: toasts
+          this.gameState.toasts = [...this.gameState.toasts, {
+            row: this.gameState.completedRows[0],
+            achievement: this.calcCompletedRowsAchievement(this.gameState.completedRows.length),
+            points: this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level)
+          }];
+        } else {
           // update gameState: piece & ghostPiece
           const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
 
@@ -272,7 +290,7 @@ class GameEngine {
     // check if there are completed rows to be removed
     if (this.gameState.completedRows.length > 0) {
       // update gameState: score & lines
-      this.gameState.score = this.gameState.score + this.calcCompletedRowsScore(this.gameState.completedRows.length, this.gameState.level);
+      this.gameState.score = this.gameState.score + this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level);
       this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
 
       // update gameState: level
@@ -527,13 +545,23 @@ class GameEngine {
     this.gameState.isLockMode = isLockMode;
   }
 
-  private calcCompletedRowsScore(completedRows: number, level: number): number {
+  private calcCompletedRowsPoints(completedRows: number, level: number): number {
     switch(completedRows) {
       case 1: return 100 * level;
       case 2: return 300 * level;
       case 3: return 500 * level;
       case 4: return 800 * level;
       default: return 0;
+    }
+  }
+
+  private calcCompletedRowsAchievement(completedRows: number): Achievement {
+    switch(completedRows) {
+      case 1: return 'SINGLE';
+      case 2: return 'DOUBLE';
+      case 3: return 'TRIPLE';
+      case 4: return 'TETRIS';
+      default: return 'SINGLE';
     }
   }
 
