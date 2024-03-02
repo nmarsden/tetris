@@ -170,42 +170,13 @@ class GameEngine {
     // this.gameState.lockedColors[2] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[3] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[4] = TetrisConstants.color.yellow;
-    // // this.gameState.lockedColors[5] = null;
-    // this.gameState.lockedColors[6] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[7] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[8] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[9] = TetrisConstants.color.yellow;
-    // // -- row 1
-    // this.gameState.lockedColors[10] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[11] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[12] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[13] = TetrisConstants.color.yellow;
-    // // this.gameState.lockedColors[14] = null;
-    // // this.gameState.lockedColors[15] = null;
-    // // this.gameState.lockedColors[16] = null;
-    // this.gameState.lockedColors[17] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[18] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[19] = TetrisConstants.color.yellow;
-    // // -- row 2
-    // // this.gameState.lockedColors[20] = null;
-    // // this.gameState.lockedColors[21] = null;
-    // // this.gameState.lockedColors[22] = null;
-    // // this.gameState.lockedColors[23] = null;
-    // // this.gameState.lockedColors[24] = null;
-    // // this.gameState.lockedColors[25] = null;
-    // this.gameState.lockedColors[26] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[27] = TetrisConstants.color.yellow;
-    // // this.gameState.lockedColors[28] = null;
-    // // this.gameState.lockedColors[29] = null;
-
-    // this.gameState.lockedColors[0] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[1] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[2] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[3] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[4] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[5] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[6] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[7] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[8] = null;
+    // this.gameState.lockedColors[9] = TetrisConstants.color.yellow;
+
+    // -- row 1
     // this.gameState.lockedColors[10] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[11] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[12] = TetrisConstants.color.yellow;
@@ -214,10 +185,8 @@ class GameEngine {
     // this.gameState.lockedColors[15] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[16] = TetrisConstants.color.yellow;
     // this.gameState.lockedColors[17] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[22] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[23] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[32] = TetrisConstants.color.yellow;
-    // this.gameState.lockedColors[33] = TetrisConstants.color.yellow;
+    // this.gameState.lockedColors[18] = null;
+    // this.gameState.lockedColors[19] = null;
 
     const newPiece = { pos: {...START_POS}, type: this.pieceBag.pick() };
     this.gameState.piece = newPiece
@@ -327,9 +296,7 @@ class GameEngine {
       this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
 
       // update droppingBlockPositions
-      this.droppingBlockPositions.forEach((pos, index) => {
-        this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
-      });
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
       if (!this.canMoveDown()) {
         // LOCK DETECTED!!!
@@ -355,9 +322,7 @@ class GameEngine {
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
-      this.droppingBlockPositions.forEach((pos, index) => {
-        this.droppingBlockPositions[index] = { col: pos.col - 1, row: pos.row};
-      });
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
       if (!this.canMoveDown()) {
         // LOCK DETECTED!!!
@@ -371,9 +336,7 @@ class GameEngine {
       this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
       // update droppingBlockPositions
-      this.droppingBlockPositions.forEach((pos, index) => {
-        this.droppingBlockPositions[index] = { col: pos.col + 1, row: pos.row};
-      });
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
       if (!this.canMoveDown()) {
         // LOCK DETECTED!!!
@@ -386,9 +349,7 @@ class GameEngine {
       this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
 
       // update droppingBlockPositions
-      this.droppingBlockPositions.forEach((pos, index) => {
-        this.droppingBlockPositions[index] = { col: pos.col, row: pos.row - 1};
-      });
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
       // update score
       this.gameState.score = this.gameState.score + 1;
@@ -522,17 +483,20 @@ class GameEngine {
   private getCompletedRows(lockedColors: Color[], pieceBlockPositions: GridPos[]): number[] {
     const completedRows: number[] = [];
     const cols = [...Array(TetrisConstants.numCols).keys()];
-    const pieceRows = [...new Set(pieceBlockPositions.map(pos => pos.row))];
+    // Note: pieceRows is sorted highest to lowest
+    const pieceRows = [...new Set(pieceBlockPositions.map(pos => pos.row))].sort().reverse();
     pieceRows.forEach(row => {
       if (cols.every(col => lockedColors[LockedColorUtils.gridPosToIndex({ col, row })] !== null)) {
         completedRows.push(row);
       }
     })
+    // Note: returns completedRows ordered from highest to lowest
     return completedRows;
   }
 
   private removeCompleteRows(lockedColors: Color[], completedRows: number[]): Color[] {
     // remove completed rows from lockedColors and add empty rows to the end
+    // Note: this assumes completedRows are highest to lowest
     completedRows.forEach(row => {
       lockedColors.splice(LockedColorUtils.gridPosToIndex({ col: 0, row }), TetrisConstants.numCols);
       lockedColors.push(...new Array(TetrisConstants.numCols).fill(null));
