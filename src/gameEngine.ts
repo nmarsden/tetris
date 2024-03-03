@@ -3,12 +3,13 @@ import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Action} from "./hooks/useKeyboardControls.ts";
 
-export type GameMode = 'HOME' | 'START' | 'PLAYING' | 'PAUSED' | 'GAME_OVER';
+export type GameMode = 'HOME' | 'START' | 'PLAYING' | 'PAUSED' | 'GAME OVER';
 
 const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 'S1', 'S2', 'S3', 'Z0', 'Z1', 'Z2', 'Z3', 'J0', 'J1', 'J2', 'J3', 'L0', 'L1', 'L2', 'L3'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
 
+type PieceAction = 'MOVE' | 'ROTATE' | 'SOFT DROP' | 'LOCK' | 'BLOCKED' | null;
 
 class RandomPieceBag {
   pieces: PieceType[] = ['I0', 'O', 'T0', 'S0', 'Z0', 'J0', 'L0'];
@@ -107,7 +108,7 @@ type Piece = {
   type: PieceType;
 };
 
-type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS';
+type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP';
 
 export type ToastDetails = {
   row: number;
@@ -118,6 +119,7 @@ export type ToastDetails = {
 type GameState = {
   mode: GameMode;
   piece: Piece;
+  pieceAction: PieceAction;
   ghostPiece: Piece;
   nextPieceType: PieceType;
   lockedColors: Color[];
@@ -137,6 +139,7 @@ class GameEngine {
   gameState: GameState = {
     mode: 'HOME',
     piece: { pos: {...START_POS}, type: 'I0' },
+    pieceAction: null,
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
     nextPieceType: 'I0',
     lockedColors: [],
@@ -212,6 +215,7 @@ class GameEngine {
 
     if (this.gameState.isLockMode) {
       this.setIsLockMode(false);
+      this.gameState.pieceAction = null;
 
       if (!this.canMoveDown()) {
         // -- Lock piece --
@@ -235,7 +239,7 @@ class GameEngine {
 
           // check if game over
           if (this.isGameOver(newPiece)) {
-            this.gameState.mode = 'GAME_OVER';
+            this.gameState.mode = 'GAME OVER';
             return this.gameState;
           }
 
@@ -249,6 +253,7 @@ class GameEngine {
           // check for new piece immediately in lockMode
           if (!this.canMoveDown()) {
             // LOCK DETECTED!!!
+            this.gameState.pieceAction = 'LOCK';
             this.setIsLockMode(true);
           }
         }
@@ -262,10 +267,15 @@ class GameEngine {
       this.gameState.score = this.gameState.score + this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level);
       this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
 
-      // update gameState: level
+      // update gameState: level & toasts
       if (this.isLevelUp(this.gameState.level, this.gameState.lines)) {
         this.gameState.level++;
         this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
+        this.gameState.toasts = [...this.gameState.toasts, {
+          row: TetrisConstants.numRows * 0.5,
+          achievement: 'LEVEL UP',
+          points: 0
+        }];
       }
 
       // update gameState: lockedColors, completedRows, & ghostPiece
@@ -277,7 +287,7 @@ class GameEngine {
 
       // check if game over
       if (this.isGameOver(newPiece)) {
-        this.gameState.mode = 'GAME_OVER';
+        this.gameState.mode = 'GAME OVER';
         return this.gameState;
       }
 
@@ -300,6 +310,7 @@ class GameEngine {
 
       if (!this.canMoveDown()) {
         // LOCK DETECTED!!!
+        this.gameState.pieceAction = 'LOCK';
         this.setIsLockMode(true);
       }
 
@@ -316,67 +327,91 @@ class GameEngine {
     }
     if (this.gameState.mode === 'PAUSED') return this.gameState;
 
-    if (action.moveLeft && this.canMoveLeft()) {
-      // update gameState: piece & ghostPiece moved left
-      this.gameState.piece = this.movePiece(this.gameState.piece, { col: -1, row: 0 });
-      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
+    if (action.moveLeft) {
+      if (!this.canMoveLeft()) {
+        this.gameState.pieceAction = 'BLOCKED';
+      } else {
+        // update gameState: piece & ghostPiece moved left
+        this.gameState.piece = this.movePiece(this.gameState.piece, {col: -1, row: 0});
+        this.gameState.pieceAction = 'MOVE';
+        this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
-      // update droppingBlockPositions
-      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+        // update droppingBlockPositions
+        this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
-      if (!this.canMoveDown()) {
-        // LOCK DETECTED!!!
-        this.setIsLockMode(true);
+        if (!this.canMoveDown()) {
+          // LOCK DETECTED!!!
+          this.gameState.pieceAction = 'LOCK';
+          this.setIsLockMode(true);
+        }
+        return this.gameState;
       }
-      return this.gameState;
     }
-    if (action.moveRight && this.canMoveRight()) {
-      // update gameState: piece & ghostPiece moved left
-      this.gameState.piece = this.movePiece(this.gameState.piece, { col: 1, row: 0 });
-      this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
+    if (action.moveRight) {
+      if (!this.canMoveRight()) {
+        this.gameState.pieceAction = 'BLOCKED';
+      } else {
+        // update gameState: piece & ghostPiece moved left
+        this.gameState.piece = this.movePiece(this.gameState.piece, {col: 1, row: 0});
+        this.gameState.pieceAction = 'MOVE';
+        this.gameState.ghostPiece = this.ghostPiece(this.gameState.piece);
 
-      // update droppingBlockPositions
-      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+        // update droppingBlockPositions
+        this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
-      if (!this.canMoveDown()) {
-        // LOCK DETECTED!!!
-        this.setIsLockMode(true);
+        if (!this.canMoveDown()) {
+          // LOCK DETECTED!!!
+          this.gameState.pieceAction = 'LOCK';
+          this.setIsLockMode(true);
+        }
+        return this.gameState;
       }
-      return this.gameState;
     }
-    if (action.moveDown && this.canMoveDown()) {
-      // update gameState: piece moved down
-      this.gameState.piece = this.movePiece(this.gameState.piece, { col: 0, row: -1 });
-
-      // update droppingBlockPositions
-      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
-
-      // update score
-      this.gameState.score = this.gameState.score + 1;
-
+    if (action.moveDown) {
       if (!this.canMoveDown()) {
-        // LOCK DETECTED!!!
-        this.setIsLockMode(true);
+        if (!this.gameState.isLockMode) {
+          this.gameState.pieceAction = 'BLOCKED';
+        }
+      } else {
+        // update gameState: piece moved down
+        this.gameState.piece = this.movePiece(this.gameState.piece, {col: 0, row: -1});
+        this.gameState.pieceAction = 'SOFT DROP';
+
+        // update droppingBlockPositions
+        this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+
+        // update score
+        this.gameState.score = this.gameState.score + 1;
+
+        if (!this.canMoveDown()) {
+          // LOCK DETECTED!!!
+          this.gameState.pieceAction = 'LOCK';
+          this.setIsLockMode(true);
+        }
+        return this.gameState;
       }
-      return this.gameState;
     }
     if (action.rotateClockwise) {
       const rotatedPiece = this.getValidPieceRotatedClockwise(this.gameState.piece);
       if (rotatedPiece === null) {
+        this.gameState.pieceAction = 'BLOCKED';
+        // return this.gameState;
+      } else {
+        // update gameState: rotate piece & ghost clockwise
+        this.gameState.piece = rotatedPiece;
+        this.gameState.pieceAction = 'ROTATE';
+        this.gameState.ghostPiece = this.ghostPiece(rotatedPiece);
+
+        // update droppingBlockPositions
+        this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+
+        if (!this.canMoveDown()) {
+          // LOCK DETECTED!!!
+          this.gameState.pieceAction = 'LOCK';
+          this.setIsLockMode(true);
+        }
         return this.gameState;
       }
-      // update gameState: rotate piece & ghost clockwise
-      this.gameState.piece = rotatedPiece;
-      this.gameState.ghostPiece = this.ghostPiece(rotatedPiece);
-
-      // update droppingBlockPositions
-      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
-
-      if (!this.canMoveDown()) {
-        // LOCK DETECTED!!!
-        this.setIsLockMode(true);
-      }
-      return this.gameState;
     }
 
     if (this.gameState.isLockMode) {

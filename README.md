@@ -1,10 +1,11 @@
 # Tetris
 
-## Terminology & Guidelines
+## Tetris Guideline
 
-- [Tetris Terminology](https://tetris.fandom.com/wiki/Glossary)
-- [Tetris Guideline](https://tetris.fandom.com/wiki/Tetris_Guideline)
-
+- [testris.wiki](https://tetris.wiki/Tetris_Guideline)
+- [harddrop.com](https://harddrop.com/wiki/Tetris_Guideline)
+- [tetris.fandom.com](https://tetris.fandom.com/wiki/Tetris_Guideline)
+ 
 ## UI Layout References
 
 - [Tetris n-blox](https://media.recordsetter.com/b4f5b069-0a97-4fcb-b30b-9bbf54fe1d92_TETRIS_xl.png)

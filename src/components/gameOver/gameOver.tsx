@@ -2,12 +2,19 @@ import {Plane, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {Button} from "../button/button.tsx";
+import {useEffect} from "react";
+import {Sound} from "../../sound.ts";
 
 const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
 const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 2.5, z: 3});
 const BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 3});
 
 const GameOver = ({ onRetry }: { onRetry: () => void }) => {
+
+  useEffect(() => {
+    Sound.getInstance().play('GAME OVER');
+  }, []);
+
   return (
     <>
       <Plane position={OVERLAY_POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>

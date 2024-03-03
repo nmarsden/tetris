@@ -4,6 +4,7 @@ import {GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useSpring, animated, config, AnimationResult} from '@react-spring/three'
 import {useCallback, useEffect, useState} from "react";
+import {Sound} from "../../sound.ts";
 
 const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
 const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 3});
@@ -33,6 +34,7 @@ const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
 
   useEffect(() => {
     api.start(animation)
+    Sound.getInstance().play('COUNT');
   }, [count]);
 
   return <>

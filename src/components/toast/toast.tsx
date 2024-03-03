@@ -5,6 +5,7 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {ToastDetails} from "../../gameEngine.ts";
 import {useCallback, useEffect, useState} from "react";
 import {animated, useSpring} from "@react-spring/three";
+import {Sound} from "../../sound.ts";
 
 type DisplayedToast = {
   key: number;
@@ -30,6 +31,7 @@ const Toast = ({ details }: { details: ToastDetails }) => {
 
   useEffect(() => {
     api.start(animation)
+    Sound.getInstance().play(details.achievement);
   }, []);
 
   return (
@@ -49,7 +51,7 @@ const Toast = ({ details }: { details: ToastDetails }) => {
         />
         {details.achievement}
       </Text>
-      <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.05} outlineColor={0xFFFFFF}>
+      {details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.05} outlineColor={0xFFFFFF}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
@@ -58,7 +60,7 @@ const Toast = ({ details }: { details: ToastDetails }) => {
           transparent={true}
         />
         {`+${details.points}`}
-      </Text>
+      </Text> : null}
     </animated.group>
   );
 }

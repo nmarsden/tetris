@@ -18,11 +18,15 @@ import {Background} from "./components/background/background.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
 import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
+import {Sound} from "./sound.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
 const gameEngine = new GameEngine();
 const initialGameState = gameEngine.initialState();
+
+// Load audio
+Sound.getInstance();
 
 const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
   if (completedRows.length === 0) {
@@ -47,9 +51,40 @@ const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
 
 let timeoutId: number;
 
-// TODO score combos
+// TODO reward Perfect Clear Bonus: completely clearing the playfield
+//  Note: These points must be added to those earned from regular line clears
+//  Action	                            Points
+//  Single-line perfect clear	          800 × level
+//  Double-line perfect clear	          1200 × level
+//  Triple-line perfect clear	          1800 × level
+//  Tetris perfect clear	              2000 × level
+//  Back-to-back Tetris perfect clear	  3200 × level
+
+// TODO reward T-spin move
+//   Lines	 Mini T-spin   T-spin
+//   0	     100	         400
+//   1	     200	         800
+//   2	     400	         1200
+//   3	     N/A	         1600
+
+// TODO reward Back-2-Back (B2B) line clears: any combination of two or more "difficult" line clears without an "easy" line clear between them.  Reward is x1.5 normal points
+//   Clear Type	     "difficult"
+//   Single	         No
+//   Double	         No
+//   Triple	         No
+//   Tetris	         Yes
+//   T-Spin Single	 Yes
+//   T-Spin Double	 Yes
+//   T-Spin Triple	 Yes
+
+// TODO reward combo: reward multiple line clears in quick succession
+//   For every placed piece that clears at least one line, the combo counter is increased by +1.
+//   If a placed piece doesn't clear a line, the combo counter is reset to -1.
+//   That means 2 consecutive line clears result in a 1-combo, 3 consecutive line clears result in a 2-combo and so on.
+//   Each time the combo counter is increased beyond 0, the player receives a reward: combo-counter*50 points.
+
 // TODO hard drop
-// TODO sound effects
+
 // TODO mobile controls
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
@@ -63,8 +98,12 @@ const App = () => {
     const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
     setGameState({...gameState});
 
+    if (gameState.pieceAction === 'LOCK') {
+      Sound.getInstance().play(gameState.pieceAction);
+    }
+
     // check for game over
-    if (gameState.mode === 'GAME_OVER') {
+    if (gameState.mode === 'GAME OVER') {
       return;
     }
     // when lock mode is triggered, ensure it ends in 500ms
@@ -96,11 +135,15 @@ const App = () => {
     const gameState = gameEngine.handleAction(action);
     setGameState({...gameState});
 
+    if (gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
+      Sound.getInstance().play(gameState.pieceAction);
+    }
     if (gameState.mode === 'START') {
       step();
       return;
     }
     if (!gameState.previousIsLockMode && gameState.isLockMode) {
+      Sound.getInstance().play('LOCK');
       // when lock mode is triggered due to an action, ensure it ends in 500ms
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => { step(); }, 500);
@@ -133,7 +176,7 @@ const App = () => {
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
         {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry}/> : null}
         {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume}/> : null}
-        {gameState.mode === 'GAME_OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} /> : null}
+        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
       </Bounds>

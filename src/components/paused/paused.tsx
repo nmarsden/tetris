@@ -4,6 +4,7 @@ import {GridUtils} from "../playfield/playfield.tsx";
 import {Button} from "../button/button.tsx";
 import {animated, useSpring} from "@react-spring/three";
 import {useEffect} from "react";
+import {Sound} from "../../sound.ts";
 
 const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
 const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 3, z: 3});
@@ -19,7 +20,8 @@ const Paused = ({ onResume }: { onResume: () => void }) => {
 
   useEffect(() => {
     api.start({ to: { opacity: 0.8 } });
-  });
+    Sound.getInstance().play('PAUSE');
+  }, []);
 
   return (
     <>

@@ -13,12 +13,14 @@
     "@react-spring/three": "^9.7.3",
     "@react-three/drei": "^9.97.6",
     "@react-three/fiber": "^8.15.16",
+    "howler": "^2.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "three": "^0.161.0"
   },
   "devDependencies": {
     "@pmndrs/assets": "^1.6.0",
+    "@types/howler": "^2.2.11",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@types/three": "^0.161.2",
