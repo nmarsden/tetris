@@ -108,7 +108,7 @@ type Piece = {
   type: PieceType;
 };
 
-type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP';
+type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR';
 
 export type ToastDetails = {
   row: number;
@@ -267,8 +267,8 @@ class GameEngine {
       this.gameState.score = this.gameState.score + this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level);
       this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
 
-      // update gameState: level & toasts
       if (this.isLevelUp(this.gameState.level, this.gameState.lines)) {
+        // update gameState: level & toasts
         this.gameState.level++;
         this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
         this.gameState.toasts = [...this.gameState.toasts, {
@@ -278,8 +278,21 @@ class GameEngine {
         }];
       }
 
-      // update gameState: lockedColors, completedRows, & ghostPiece
+      // update gameState: lockedColors
       this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
+
+      if (this.isPerfectClear(this.gameState.lockedColors)) {
+        // update gameState: score & toasts
+        const perfectClearPoints = this.calcPerfectClearPoints(this.gameState.completedRows.length, this.gameState.level);
+        this.gameState.score = this.gameState.score + perfectClearPoints;
+        this.gameState.toasts = [...this.gameState.toasts, {
+          row: this.gameState.completedRows[0] + 3,
+          achievement: 'PERFECT CLEAR',
+          points: perfectClearPoints
+        }];
+      }
+
+      // update gameState: completedRows
       this.gameState.completedRows = [];
 
       // update gameState: piece & ghostPiece
@@ -435,6 +448,10 @@ class GameEngine {
     return lines >= (level * 10);
   }
 
+  private isPerfectClear(lockedColors: Color[]): boolean {
+    return lockedColors.every(color => color === null);
+  }
+
   private getBlockPositions(piece: Piece): GridPos[] {
     const pieceData = PIECE_DATA.get(piece.type) as PieceData;
 
@@ -550,6 +567,16 @@ class GameEngine {
       case 2: return 300 * level;
       case 3: return 500 * level;
       case 4: return 800 * level;
+      default: return 0;
+    }
+  }
+
+  private calcPerfectClearPoints(completedRows: number, level: number): number {
+    switch(completedRows) {
+      case 1: return 800 * level;
+      case 2: return 1200 * level;
+      case 3: return 1800 * level;
+      case 4: return 2000 * level;
       default: return 0;
     }
   }

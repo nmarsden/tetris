@@ -67,18 +67,27 @@ const Toast = ({ details }: { details: ToastDetails }) => {
 
 const Toasts = ({ toasts }: { toasts: ToastDetails[] }) => {
   const [displayedToasts, setDisplayedToasts] = useState<DisplayedToast[]>([]);
-  const [key, setKey] = useState(0);
+  const [toastCount, setToastCount] = useState(0);
 
   useEffect(() => {
-    if (toasts.length === 0) return;
+    if (toasts.length === toastCount) return;
 
-    const nextKey = key + 1;
-    setKey(nextKey);
-    setDisplayedToasts([...displayedToasts, { key: nextKey, toast: toasts[toasts.length - 1] }]);
-    // remove displayed toast after 2 second
-    setTimeout(() => setDisplayedToasts(displayedToasts.filter(displayedToast => displayedToast.key !== nextKey)), 2000);
+    setToastCount(toasts.length);
 
-  }, [toasts]);
+    for (let i=toastCount; i<toasts.length; i++) {
+      setDisplayedToasts((prevDisplayToasts) => {
+        const newDisplayToasts = [...prevDisplayToasts, { key: i, toast: toasts[i] }];
+        // remove displayToast after 2 seconds
+        setTimeout(() => {
+          setDisplayedToasts((prevDisplayToasts) => {
+            return prevDisplayToasts.filter(dt => dt.key !== i)
+          })
+        }, 2000);
+
+        return newDisplayToasts;
+      });
+    }
+  }, [toasts, toastCount]);
 
   return (
     <>

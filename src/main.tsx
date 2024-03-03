@@ -52,12 +52,7 @@ const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
 let timeoutId: number;
 
 // TODO reward Perfect Clear Bonus: completely clearing the playfield
-//  Note: These points must be added to those earned from regular line clears
 //  Action	                            Points
-//  Single-line perfect clear	          800 × level
-//  Double-line perfect clear	          1200 × level
-//  Triple-line perfect clear	          1800 × level
-//  Tetris perfect clear	              2000 × level
 //  Back-to-back Tetris perfect clear	  3200 × level
 
 // TODO reward T-spin move
