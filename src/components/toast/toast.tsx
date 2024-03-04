@@ -7,6 +7,8 @@ import {useCallback, useEffect, useState} from "react";
 import {animated, useSpring} from "@react-spring/three";
 import {Sound} from "../../sound.ts";
 
+const DELAY_BETWEEN_TOASTS_MSECS = 1000;
+
 type DisplayedToast = {
   key: number;
   toast: ToastDetails;
@@ -74,18 +76,25 @@ const Toasts = ({ toasts }: { toasts: ToastDetails[] }) => {
 
     setToastCount(toasts.length);
 
-    for (let i=toastCount; i<toasts.length; i++) {
-      setDisplayedToasts((prevDisplayToasts) => {
-        const newDisplayToasts = [...prevDisplayToasts, { key: i, toast: toasts[i] }];
-        // remove displayToast after 2 seconds
-        setTimeout(() => {
-          setDisplayedToasts((prevDisplayToasts) => {
-            return prevDisplayToasts.filter(dt => dt.key !== i)
-          })
-        }, 2000);
+    // Note: no delay for the first toast when no toasts are currently displayed
+    let delay = displayedToasts.length * DELAY_BETWEEN_TOASTS_MSECS;
 
-        return newDisplayToasts;
-      });
+    // display each toast after delay
+    for (let i=toastCount; i<toasts.length; i++) {
+      setTimeout(() => {
+        setDisplayedToasts((prevDisplayToasts) => {
+          const newDisplayToasts = [...prevDisplayToasts, { key: i, toast: toasts[i] }];
+          // remove displayToast after 2 seconds
+          setTimeout(() => {
+            setDisplayedToasts((prevDisplayToasts) => {
+              return prevDisplayToasts.filter(dt => dt.key !== i)
+            })
+          }, 2000);
+
+          return newDisplayToasts;
+        });
+      }, delay);
+      delay = delay + DELAY_BETWEEN_TOASTS_MSECS;
     }
   }, [toasts, toastCount]);
 

@@ -108,7 +108,7 @@ type Piece = {
   type: PieceType;
 };
 
-type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR';
+type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR' | 'COMBO';
 
 export type ToastDetails = {
   row: number;
@@ -136,6 +136,7 @@ class GameEngine {
   timePerRowInMSecs = 1;
   droppingBlockPositions: GridPos[] = [];
   pieceBag: RandomPieceBag = new RandomPieceBag();
+  comboCounter = -1;
   gameState: GameState = {
     mode: 'HOME',
     piece: { pos: {...START_POS}, type: 'I0' },
@@ -165,6 +166,7 @@ class GameEngine {
     this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
     this.gameState.lockedColors = new Array(TetrisConstants.numRows * TetrisConstants.numCols).fill(null);
     this.pieceBag = new RandomPieceBag();
+    this.comboCounter = -1;
 
     // DEBUG: uncomment below to easily complete a row
     // -- row 0
@@ -233,9 +235,14 @@ class GameEngine {
             achievement: this.calcCompletedRowsAchievement(this.gameState.completedRows.length),
             points: this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level)
           }];
+          // increase comboCounter
+          this.comboCounter++;
         } else {
           // update gameState: piece & ghostPiece
           const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
+
+          // reset comboCounter
+          this.comboCounter = -1;
 
           // check if game over
           if (this.isGameOver(newPiece)) {
@@ -272,7 +279,7 @@ class GameEngine {
         this.gameState.level++;
         this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
         this.gameState.toasts = [...this.gameState.toasts, {
-          row: TetrisConstants.numRows * 0.5,
+          row: this.gameState.completedRows[0],
           achievement: 'LEVEL UP',
           points: 0
         }];
@@ -281,12 +288,24 @@ class GameEngine {
       // update gameState: lockedColors
       this.gameState.lockedColors = this.removeCompleteRows(this.gameState.lockedColors, this.gameState.completedRows);
 
+      // check for combo
+      if (this.comboCounter > 0) {
+        // update gameState: score & toasts
+        const comboPoints = this.comboCounter * 50 * this.gameState.level;
+        this.gameState.score = this.gameState.score + comboPoints;
+        this.gameState.toasts = [...this.gameState.toasts, {
+          row: this.gameState.completedRows[0],
+          achievement: 'COMBO',
+          points: comboPoints
+        }];
+      }
+
       if (this.isPerfectClear(this.gameState.lockedColors)) {
         // update gameState: score & toasts
         const perfectClearPoints = this.calcPerfectClearPoints(this.gameState.completedRows.length, this.gameState.level);
         this.gameState.score = this.gameState.score + perfectClearPoints;
         this.gameState.toasts = [...this.gameState.toasts, {
-          row: this.gameState.completedRows[0] + 3,
+          row: this.gameState.completedRows[0],
           achievement: 'PERFECT CLEAR',
           points: perfectClearPoints
         }];
