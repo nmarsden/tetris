@@ -1,6 +1,6 @@
 import { Howl } from 'howler';
 
-type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO';
+type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO';
 
 class Sound {
   static instance: Sound;
@@ -24,6 +24,7 @@ class Sound {
       ['COUNT',          new Howl({ src: ['/tetris/audio/se_game_count.wav']})],
       ['MOVE',           new Howl({ src: ['/tetris/audio/se_game_move.wav']})],
       ['SOFT DROP',      new Howl({ src: ['/tetris/audio/se_game_softdrop.wav']})],
+      ['HARD DROP',      new Howl({ src: ['/tetris/audio/se_game_harddrop.wav']})],
       ['ROTATE',         new Howl({ src: ['/tetris/audio/se_game_rotate.wav']})],
       ['LOCK',           new Howl({ src: ['/tetris/audio/se_game_landing.wav']})],
       ['BLOCKED',        new Howl({ src: ['/tetris/audio/se_game_landing.wav'], volume: 0.3, rate: 0.2 })],

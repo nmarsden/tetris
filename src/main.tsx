@@ -72,14 +72,6 @@ let timeoutId: number;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO reward combo: reward multiple line clears in quick succession
-//   For every placed piece that clears at least one line, the combo counter is increased by +1.
-//   If a placed piece doesn't clear a line, the combo counter is reset to -1.
-//   That means 2 consecutive line clears result in a 1-combo, 3 consecutive line clears result in a 2-combo and so on.
-//   Each time the combo counter is increased beyond 0, the player receives a reward: combo-counter*50 points.
-
-// TODO hard drop
-
 // TODO mobile controls
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
@@ -133,6 +125,11 @@ const App = () => {
     if (gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
       Sound.getInstance().play(gameState.pieceAction);
     }
+    if (gameState.pieceAction === 'HARD DROP') {
+      // give time to render blurred piece before next step
+      setTimeout(() => { step(); }, 50);
+    }
+
     if (gameState.mode === 'START') {
       step();
       return;
@@ -151,10 +148,18 @@ const App = () => {
       <Bounds fit clip observe margin={1} maxDuration={0.1}>
         <Background />
         <Playfield enableGrid={false}/>
-        {/* Active Piece */}
-        {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
-        {/* Ghost Piece */}
-        {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+        {gameState.pieceAction === 'HARD DROP' ?
+        <>
+          {/* Active Piece */}
+          <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} rowsDropped={gameState.pieceRowsDropped}/>
+        </>
+        :
+        <>
+          {/* Active Piece */}
+          {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
+          {/* Ghost Piece */}
+          {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+        </>}
         {/* Stack */}
         {gameState.lockedColors.map((lockedColor, index) => {
           const gridPos = LockedColorUtils.indexToGridPos(index);

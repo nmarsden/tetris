@@ -9,7 +9,7 @@ const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
 
-type PieceAction = 'MOVE' | 'ROTATE' | 'SOFT DROP' | 'LOCK' | 'BLOCKED' | null;
+type PieceAction = 'MOVE' | 'ROTATE' | 'SOFT DROP' | 'HARD DROP' | 'LOCK' | 'BLOCKED' | null;
 
 class RandomPieceBag {
   pieces: PieceType[] = ['I0', 'O', 'T0', 'S0', 'Z0', 'J0', 'L0'];
@@ -120,6 +120,7 @@ type GameState = {
   mode: GameMode;
   piece: Piece;
   pieceAction: PieceAction;
+  pieceRowsDropped: number;
   ghostPiece: Piece;
   nextPieceType: PieceType;
   lockedColors: Color[];
@@ -141,6 +142,7 @@ class GameEngine {
     mode: 'HOME',
     piece: { pos: {...START_POS}, type: 'I0' },
     pieceAction: null,
+    pieceRowsDropped: 0,
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
     nextPieceType: 'I0',
     lockedColors: [],
@@ -218,6 +220,7 @@ class GameEngine {
     if (this.gameState.isLockMode) {
       this.setIsLockMode(false);
       this.gameState.pieceAction = null;
+      this.gameState.pieceRowsDropped = 0;
 
       if (!this.canMoveDown()) {
         // -- Lock piece --
@@ -444,6 +447,20 @@ class GameEngine {
         }
         return this.gameState;
       }
+    }
+    if (action.hardDrop && this.canMoveDown()) {
+      const numRowsDropped = (this.gameState.piece.pos.row - this.gameState.ghostPiece.pos.row);
+      // update score
+      this.gameState.score = this.gameState.score + (2 * numRowsDropped);
+      // update piece
+      this.gameState.piece = this.gameState.ghostPiece;
+      this.gameState.pieceAction = 'HARD DROP';
+      this.gameState.pieceRowsDropped = numRowsDropped
+      // update droppingBlockPositions
+      this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
+      // update lockMode
+      this.setIsLockMode(true);
+      return this.gameState;
     }
 
     if (this.gameState.isLockMode) {

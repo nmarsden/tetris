@@ -5,6 +5,7 @@ export type Action = {
   moveRight: boolean;
   moveDown: boolean;
   rotateClockwise: boolean;
+  hardDrop: boolean;
   pause: boolean;
 };
 
@@ -16,6 +17,7 @@ const useKeyboardControls = (): Action => {
     ['ArrowRight', 'moveRight'],
     ['ArrowDown', 'moveDown'],
     ['ArrowUp', 'rotateClockwise'],
+    ['Space', 'hardDrop'],
     ['KeyP', 'pause']
   ]);
 
@@ -26,6 +28,7 @@ const useKeyboardControls = (): Action => {
     moveRight: false,
     moveDown: false,
     rotateClockwise: false,
+    hardDrop: false,
     pause: false
   });
 
