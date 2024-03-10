@@ -8,7 +8,7 @@ import {useCallback, useEffect, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
-import {useKeyboardControls} from "./hooks/useKeyboardControls.ts";
+import {ActionField, useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 import {Playfield} from "./components/playfield/playfield.tsx";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Info} from "./components/info/info.tsx";
@@ -18,6 +18,7 @@ import {Background} from "./components/background/background.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
 import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
+import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
@@ -73,13 +74,26 @@ let timeoutId: number;
 //   T-Spin Triple	 Yes
 
 // TODO mobile controls
+//  move right - touch and drag right
+//  move left  - touch and drag left
+//  rotate     - tap
+//  soft drop  - touch and drag down
+//  hard drop  - touch and swipe down
+//  pause      - tap the pause button
+//  * package: npm install @use-gesture/react
+//  * reference: https://use-gesture.netlify.app/
+
+// TODO help
+//  - desktop controls (keyboard)
+//  - mobile controls (touch)
+//  - scoring
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
   const [showCountdown, setShowCountdown] = useState(false);
-  const action = useKeyboardControls();
+  const [action, setActionField] = useKeyboardControls();
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
     const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
@@ -117,6 +131,11 @@ const App = () => {
     // resume game
     step('RESUME');
   }, [step]);
+
+  const onTouchActionField = useCallback((actionField: ActionField) => {
+    setActionField(actionField, true);
+    setTimeout(() => setActionField(actionField, false), 50);
+  }, []);
 
   useEffect(() => {
     const gameState = gameEngine.handleAction(action);
@@ -180,6 +199,7 @@ const App = () => {
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
       </Bounds>
+      {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls

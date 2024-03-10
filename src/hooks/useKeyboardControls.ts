@@ -9,9 +9,9 @@ export type Action = {
   pause: boolean;
 };
 
-type ActionField = keyof Action;
+export type ActionField = keyof Action;
 
-const useKeyboardControls = (): Action => {
+const useKeyboardControls = (): [ Action, (actionField: ActionField, value: boolean) => void ] => {
   const keys = new Map<string, ActionField>([
     ['ArrowLeft', 'moveLeft'],
     ['ArrowRight', 'moveRight'],
@@ -31,6 +31,12 @@ const useKeyboardControls = (): Action => {
     hardDrop: false,
     pause: false
   });
+
+  const setActionField = useCallback((actionField: ActionField, value: boolean) => {
+    setAction((m) => {
+      return actionField ? ({ ...m, [actionField]: value }) : m;
+    })
+  }, []);
 
   const setActionValue = useCallback((keyCode: string, isKeyDown: boolean) => {
     setAction((m) => {
@@ -52,7 +58,7 @@ const useKeyboardControls = (): Action => {
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
-  return action;
+  return [ action, setActionField ];
 }
 
 export { useKeyboardControls }
