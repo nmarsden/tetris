@@ -28,8 +28,8 @@ const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false
   return (
     <group position={position}>
       {/* Blur effect */}
-      {blurData.map(blur =>
-        <Plane position={blur.position} args={[TetrisConstants.cellSize, blur.numRows]}>
+      {blurData.map((blur, index) =>
+        <Plane key={`${index}`} position={blur.position} args={[TetrisConstants.cellSize, blur.numRows]}>
           <meshBasicMaterial opacity={0.2} transparent={true}>
             <GradientTexture
               stops={[0, 1]} // As many stops as you want
