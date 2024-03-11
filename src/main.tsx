@@ -89,6 +89,24 @@ let timeoutId: number;
 //  - mobile controls (touch)
 //  - scoring
 
+// TODO change Home, GameOver, and Paused
+//   - show a Tetris image
+//   - does not cover the entire screen
+//   - options button
+//   - help button
+//   - quit button (if paused)
+
+// TODO music
+
+// TODO high score
+//  - show high score underneath current score with a trophy icon
+//  - save/retrieve high score to/from local storage
+//  - on game over, show new high score
+
+// TODO options
+//  - sound volume
+//  - music volume
+
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 
 const App = () => {
