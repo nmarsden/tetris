@@ -54,6 +54,8 @@ export const TetrisConstants = {
   linesRow: INFO_ROW - 6,
   nextCol: INFO_COL,
   nextRow: INFO_ROW - 9,
+  pauseCol: INFO_COL,
+  pauseRow: INFO_ROW - 14,
   center: { col: GAME_WIDTH_CELLS * 0.5, row: GAME_HEIGHT_CELLS * 0.5 },
   gameWidth: GAME_WIDTH_CELLS * CELL_SIZE,
   gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE

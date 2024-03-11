@@ -20,6 +20,7 @@ import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
+import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -132,6 +133,11 @@ const App = () => {
     step('RESUME');
   }, [step]);
 
+  const onPause = useCallback(() => {
+    setActionField('pause', true);
+    setTimeout(() => setActionField('pause', false), 50);
+  }, []);
+
   const onTouchActionField = useCallback((actionField: ActionField) => {
     setActionField(actionField, true);
     setTimeout(() => setActionField(actionField, false), 50);
@@ -200,6 +206,7 @@ const App = () => {
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
       </Bounds>
       {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
+      {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls
