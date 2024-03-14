@@ -21,6 +21,7 @@ import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
+import {Help} from './components/help/help.tsx';
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -107,11 +108,23 @@ let timeoutId: number;
 //  - sound volume
 //  - music volume
 
+// TODO fix bug - pausing when piece is locking continues to play locking sound
+
+// TODO fix intelliJ CPU performance problem
+//   - Try enabling the new TypeScript Engine...
+//     - Command + Shift + A
+//     - search for "Registry"
+//     - type "typescript.compiler.evaluation"
+//     - check to enable
+//   - see: https://youtrack.jetbrains.com/issue/WEB-57701/High-CPU-usage-on-TS-conditional-types
+//   - see: https://blog.jetbrains.com/webstorm/2023/12/try-the-future-typescript-engine-with-the-webstorm-next-program/#update
+
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [action, setActionField] = useKeyboardControls();
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
@@ -129,6 +142,10 @@ const App = () => {
     // when lock mode is triggered, ensure it ends in 500ms
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
+  }, []);
+
+  const onHelp = useCallback(() => {
+    setShowHelp(true);
   }, []);
 
   const onStartOrRetry = useCallback(() => {
@@ -217,14 +234,17 @@ const App = () => {
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
-        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry}/> : null}
-        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume}/> : null}
-        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} /> : null}
+        {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
+        {/* Overlays */}
+        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onHelp={onHelp} /> : null}
+        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onHelp={onHelp} /> : null}
+        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onHelp={onHelp} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
+        {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
       </Bounds>
+      {/* Touch */}
       {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
-      {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
       { /* @ts-ignore */ }
       <Environment files={suspend(warehouse)}/>
       <OrbitControls

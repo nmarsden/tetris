@@ -1,8 +1,9 @@
 import {Vector3} from "three";
-import {Line, Text} from "@react-three/drei";
+import {Text} from "@react-three/drei";
 import {GridPos, GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {PieceType} from "../../gameEngine.ts";
+import {Border} from "../border/border.tsx";
 import {Piece} from "../piece/piece.tsx";
 
 const CustomText = ({ position, size, text, color, outlineColor } : { position: Vector3, size: number, text: string, color: string | number, outlineColor: string | number }) => {
@@ -18,16 +19,6 @@ const CustomText = ({ position, size, text, color, outlineColor } : { position: 
   )
 }
 
-const ValueBox = ({ position, width, height } : { position: Vector3, width: number, height: number }) => {
-  return (
-    <>
-      <Line position={position} points={[[0, 0          ], [0, -height    ]]} color={"grey"} lineWidth={2} dashed={false} />
-      <Line position={position} points={[[0, -height    ], [width, -height]]} color={"grey"} lineWidth={2} dashed={false} />
-      <Line position={position} points={[[width, -height], [width, 0      ]]} color={"grey"} lineWidth={2} dashed={false} />
-      <Line position={position} points={[[width, 0      ], [0, 0          ]]} color={"grey"} lineWidth={2} dashed={false} />
-    </>
-  )
-}
 const Label = ({ gridPos, label } : { gridPos: GridPos, label: string }) => {
   const position = GridUtils.gridPosToScreen({ col: gridPos.col, row: gridPos.row });
   return <CustomText position={position} size={1} text={label} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
@@ -44,7 +35,7 @@ const Value = ({ gridPos, value } : { gridPos: GridPos, value: number | PieceTyp
   const pieceGridPos = { col: pieceCol, row: gridPos.row - 2 };
   return (
     <>
-      <ValueBox position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
+      <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
       { isPieceValue ?
         <Piece gridPos={pieceGridPos} type={value as PieceType} /> :
         <CustomText position={textPosition} size={1} text={value.toString(10)} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
