@@ -2,7 +2,7 @@ import {Line, Plane, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {animated, SpringValue, useSpring} from "@react-spring/three";
 import {GridUtils} from "../playfield/playfield.tsx";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {Border} from "../border/border.tsx";
 import {Button, ButtonType} from "../button/button.tsx";
 import {Vector3} from "three";
@@ -13,23 +13,34 @@ const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
 const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: 5});
 const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: 4});
 
-const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -3.5, y: -1 +6.5, z: 4});
-const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -3.5, y: -1 +5.5, z: 5});
-const HOW_TO_PLAY_CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: 4});
+const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +6.5, z: 4});
+const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +5.8, z: 5});
 
-const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +3.5, y: -1 +6.5, z: 4});
-const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +3.5, y: -1 +5.5, z: 5});
-const CONTROLS_CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +3, z: 4});
+const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +6.5, z: 4});
+const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.8, z: 5});
 
-const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8.5, z: 4});
+const SCORING_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +6.5, z: 4});
+const SCORING_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +5.8, z: 5});
 
-const HOW_TO_PLAY_TEXT_ONE = [
+const CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: 4});
+
+const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: 4});
+
+const HOW_TO_PLAY_TEXT = [
   'Arrange falling blocks to complete',
-  'lines. Speed increases as the game',
-  'progresses. Aim for a high score.'
+  'lines and scores points.',
+  '',
+  'Every 10 lines cleared, levels up and',
+  'increases the game speed.',
+  '',
+  'Prevent blocks piling up to the top',
+  'and ending the game.',
+  '',
+  'Aim for a high score.'
 ];
-const HOW_TO_PLAY_TEXT_TWO = [
-  ['Action',    'Points'],
+
+const SCORING_TEXT = [
+  ['ACTION',    'POINTS'],
   ['Single',    '100*'],
   ['Double',    '300*'],
   ['Triple',    '500*'],
@@ -42,11 +53,11 @@ const HOW_TO_PLAY_TEXT_TWO = [
 
 const CONTROLS_TEXT: [string, string, string][] = [
   ['ACTION',     'MOBILE',     'DESKTOP'],
-  ['move left',  'drag left',  'left arrow'],
-  ['move right', 'drag right', 'right arrow'],
-  ['rotate',     'tap',        'up arrow'],
-  ['soft drop',  'drag down',  'down arrow'],
-  ['hard drop',  'swipe down', 'space'],
+  ['Move left',  'Drag left',  'Left arrow'],
+  ['Move right', 'Drag right', 'Right arrow'],
+  ['Rotate',     'Tap',        'Up arrow'],
+  ['Soft drop',  'Drag down',  'Down arrow'],
+  ['Hard drop',  'Swipe down', 'Space'],
 ];
 
 const Heading = ({ position, opacity, text }: { position: Vector3, opacity: SpringValue<number>, text: string }) => {
@@ -64,7 +75,7 @@ const Heading = ({ position, opacity, text }: { position: Vector3, opacity: Spri
   );
 };
 
-type Tab = 'HOW_TO_PLAY' | 'CONTROLS';
+type Tab = 'HOW_TO_PLAY' | 'SCORING' | 'CONTROLS';
 
 const Tabs = ({ onTabChanged }: { onTabChanged: (tab: Tab) => void }) => {
   const [selected, setSelected] = useState<Tab>('HOW_TO_PLAY');
@@ -78,14 +89,20 @@ const Tabs = ({ onTabChanged }: { onTabChanged: (tab: Tab) => void }) => {
     return tab === selected ? 'TAB' : 'TAB_UNSELECTED';
   }, [selected]);
 
+  const linePosition = useMemo((): Vector3 => {
+    switch(selected) {
+      case 'HOW_TO_PLAY': return HOW_TO_PLAY_LINE_POSITION;
+      case 'SCORING': return SCORING_LINE_POSITION;
+      case 'CONTROLS': return CONTROLS_LINE_POSITION;
+    }
+  }, [selected]);
+
   return (
     <>
       <Button position={HOW_TO_PLAY_BUTTON_POSITION} label={'HOW TO PLAY'} type={buttonType('HOW_TO_PLAY')} onButtonClick={() => changeTab('HOW_TO_PLAY')} />
       <Button position={CONTROLS_BUTTON_POSITION} label={'CONTROLS'} type={buttonType('CONTROLS')} onButtonClick={() => changeTab('CONTROLS')} />
-      {selected === 'HOW_TO_PLAY' ?
-        <Line key={'line1'} position={HOW_TO_PLAY_LINE_POSITION} points={[[-3.3, 0], [3.3, 0]]} color={"grey"} lineWidth={2} dashed={false} /> :
-        <Line key={'line2'} position={CONTROLS_LINE_POSITION} points={[[-3.3, 0], [3.3, 0]]} color={"grey"} lineWidth={2} dashed={false} />
-      }
+      <Button position={SCORING_BUTTON_POSITION} label={'SCORING'} type={buttonType('SCORING')} onButtonClick={() => changeTab('SCORING')} />
+      <Line key={selected} position={linePosition} points={[[-2.5, 0], [2.5, 0]]} color={"grey"} lineWidth={2} dashed={false} />
     </>
   );
 };
@@ -106,23 +123,29 @@ const Content = ({ position, opacity, text, fontSize=0.6, isBold=false }: { posi
 };
 
 const HowToPlay = ({ opacity }: { opacity: SpringValue<number> }) => {
-  const yOffset = -HOW_TO_PLAY_TEXT_ONE.length * 1.1
   return (
     <>
-      {HOW_TO_PLAY_TEXT_ONE.map((text, index) => {
-          const pos1 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: 0,  y: -index * 1, z: 0});
+      {HOW_TO_PLAY_TEXT.map((text, index) => {
+          const pos1 = CONTENT_POSITION.clone().add({x: 0, y: -index, z: 0});
           return (
               <Content key={`${index}`} position={pos1} opacity={opacity} text={text} />
           )
       })}
-      {HOW_TO_PLAY_TEXT_TWO.map((text, index) => {
+    </>
+  )
+};
+
+const Scoring = ({ opacity }: { opacity: SpringValue<number> }) => {
+  return (
+    <>
+      {SCORING_TEXT.map((text, index) => {
         const isBold = (index === 0);
-        const pos0 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: -3, y: yOffset - index * 0.9, z: 0});
-        const pos1 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: +3, y: yOffset - index * 0.9, z: 0});
+        const pos0 = CONTENT_POSITION.clone().add({x: -3, y: -index, z: 0});
+        const pos1 = CONTENT_POSITION.clone().add({x: +3, y: -index, z: 0});
         return (
           <group key={`${index}`}>
-            <Content position={pos0} opacity={opacity} text={text[0]} fontSize={0.5} isBold={isBold} />
-            <Content position={pos1} opacity={opacity} text={text[1]} fontSize={0.5} isBold={isBold} />
+            <Content position={pos0} opacity={opacity} text={text[0]} isBold={isBold} />
+            <Content position={pos1} opacity={opacity} text={text[1]} isBold={isBold} />
           </group>
         )
       })}
@@ -135,9 +158,9 @@ const Controls = ({ opacity }: { opacity: SpringValue<number> }) => {
     <>
       {CONTROLS_TEXT.map((text, index) => {
           const isBold = (index === 0);
-          const pos0 = CONTROLS_CONTENT_POSITION.clone().add({x: -4.5, y: -index * 1, z: 0});
-          const pos1 = CONTROLS_CONTENT_POSITION.clone().add({x: 0,    y: -index * 1, z: 0});
-          const pos2 = CONTROLS_CONTENT_POSITION.clone().add({x: 4.5,  y: -index * 1, z: 0});
+          const pos0 = CONTENT_POSITION.clone().add({x: -4.5, y: -index, z: 0});
+          const pos1 = CONTENT_POSITION.clone().add({x: 0,    y: -index, z: 0});
+          const pos2 = CONTENT_POSITION.clone().add({x: 4.5,  y: -index, z: 0});
           return (
             <group key={`${index}`}>
               <Content position={pos0} opacity={opacity} text={text[0]} isBold={isBold} />
@@ -151,7 +174,7 @@ const Controls = ({ opacity }: { opacity: SpringValue<number> }) => {
 };
 
 const Help = ({ onClose }: { onClose: () => void }) => {
-  const [isShowControls, setShowControls] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<Tab>('HOW_TO_PLAY');
   const [{ opacity }, api] = useSpring(() => ({
     from: { opacity: 0 },
     config: {
@@ -160,7 +183,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
   }));
 
   const onTabChanged = useCallback((tab: Tab) => {
-    setShowControls(tab === 'CONTROLS');
+    setSelectedTab(tab);
   }, []);
 
   useEffect(() => {
@@ -184,7 +207,9 @@ const Help = ({ onClose }: { onClose: () => void }) => {
 
       <Tabs onTabChanged={onTabChanged} />
 
-      {isShowControls ? <Controls opacity={opacity} /> : <HowToPlay opacity={opacity} />}
+      {selectedTab === 'HOW_TO_PLAY' ? <HowToPlay opacity={opacity} />  : null}
+      {selectedTab === 'SCORING' ? <Scoring opacity={opacity} /> : null}
+      {selectedTab === 'CONTROLS' ? <Controls opacity={opacity} /> : null}
 
       <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} onButtonClick={onClose} />
     </>

@@ -75,28 +75,6 @@ let timeoutId: number;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO mobile controls
-//  move right - touch and drag right
-//  move left  - touch and drag left
-//  rotate     - tap
-//  soft drop  - touch and drag down
-//  hard drop  - touch and swipe down
-//  pause      - tap the pause button
-//  * package: npm install @use-gesture/react
-//  * reference: https://use-gesture.netlify.app/
-
-// TODO help
-//  - desktop controls (keyboard)
-//  - mobile controls (touch)
-//  - scoring
-
-// TODO change Home, GameOver, and Paused
-//   - show a Tetris image
-//   - does not cover the entire screen
-//   - options button
-//   - help button
-//   - quit button (if paused)
-
 // TODO music
 
 // TODO high score

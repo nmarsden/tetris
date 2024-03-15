@@ -1,6 +1,7 @@
 import {Vector3, Color} from "three";
 import {RoundedBox, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
+import {useMemo} from "react";
 
 export type ButtonType = 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -8,20 +9,24 @@ type ButtonInfo = {
   scale: number;
   width: number;
   fontSize: number;
+  outlineWidth: number;
+  outlineColor: Color;
   textColor: Color;
   bgColor: Color;
 };
 
 const BUTTON_INFO: Map<ButtonType, ButtonInfo> = new Map([
-  [ 'LARGE',          { scale: 1,    width: 5, fontSize: 1,   textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
-  [ 'MEDIUM',         { scale: 0.8,  width: 5, fontSize: 0.8, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.blue } ],
-  [ 'INFO',           { scale: 0.9,  width: 5, fontSize: 1,   textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
-  [ 'TAB',            { scale: 0.8,  width: 8, fontSize: 1,   textColor: TetrisConstants.color.white, bgColor: TetrisConstants.color.black } ],
-  [ 'TAB_UNSELECTED', { scale: 0.75, width: 8, fontSize: 1,   textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
+  [ 'LARGE',          { scale: 1,    width: 5,   fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
+  [ 'MEDIUM',         { scale: 0.8,  width: 5,   fontSize: 0.8, outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.blue } ],
+  [ 'INFO',           { scale: 0.9,  width: 5,   fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
+  [ 'TAB',            { scale: 0.55, width: 8.5, fontSize: 1,   outlineWidth: 0.07, outlineColor: TetrisConstants.color.white, textColor: TetrisConstants.color.white, bgColor: TetrisConstants.color.black } ],
+  [ 'TAB_UNSELECTED', { scale: 0.5,  width: 8.5, fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.grey,  textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
 ]);
 
 const Button = ({ position, label, type='LARGE', onButtonClick }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void }) => {
-  const { scale, width, fontSize, textColor, bgColor } = BUTTON_INFO.get(type) as ButtonInfo;
+  const { scale, width, fontSize, outlineWidth, outlineColor, textColor, bgColor } = useMemo(() => {
+    return BUTTON_INFO.get(type) as ButtonInfo;
+  }, [type]);
 
   return <group scale={scale} position={position}>
     <RoundedBox
@@ -37,7 +42,7 @@ const Button = ({ position, label, type='LARGE', onButtonClick }: { position: Ve
         roughness={0.75}
         color={bgColor}
       />
-      <Text position={[0,0,1]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={0.05} outlineColor={TetrisConstants.color.black}>
+      <Text key={type} position={[0,0,1]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth} outlineColor={outlineColor}>
         <meshStandardMaterial
           metalness={1}
           roughness={1}
