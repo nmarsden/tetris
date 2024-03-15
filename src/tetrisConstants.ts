@@ -26,6 +26,7 @@ const BLUE = new Color(0x02A0E3);
 const ORANGE = new Color(0xFE8129);
 const WHITE = new Color(0xFFFFFF);
 const BLACK = new Color(0x000000);
+const GREY = new Color(0xBBBBBB);
 
 export const TetrisConstants = {
   numCols: NUM_COLS,
@@ -43,7 +44,8 @@ export const TetrisConstants = {
     blue: BLUE,
     orange: ORANGE,
     white: WHITE,
-    black: BLACK
+    black: BLACK,
+    grey: GREY
   },
   infoWidth: INFO_WIDTH_CELLS * CELL_SIZE,
   scoreCol: INFO_COL,
