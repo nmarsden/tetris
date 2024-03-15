@@ -12,17 +12,32 @@ const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
 const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: 5});
 const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: 4});
+
 const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -3.5, y: -1 +6.5, z: 4});
 const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -3.5, y: -1 +5.5, z: 5});
+const HOW_TO_PLAY_CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: 4});
+
 const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +3.5, y: -1 +6.5, z: 4});
 const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +3.5, y: -1 +5.5, z: 5});
-const CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +3, z: 4});
+const CONTROLS_CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +3, z: 4});
+
 const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8.5, z: 4});
 
-const HOW_TO_PLAY_TEXT = [
+const HOW_TO_PLAY_TEXT_ONE = [
   'Arrange falling blocks to complete',
   'lines. Speed increases as the game',
   'progresses. Aim for a high score.'
+];
+const HOW_TO_PLAY_TEXT_TWO = [
+  ['Action',    'Points'],
+  ['Single',    '100*'],
+  ['Double',    '300*'],
+  ['Triple',    '500*'],
+  ['Tetris',    '800*'],
+  ['Combo',     '50 × combo count*'],
+  ['Soft drop', '1 per cell'],
+  ['Hard drop', '2 per cell'],
+  ['',          '(* multiplied by level)']
 ];
 
 const CONTROLS_TEXT: [string, string, string][] = [
@@ -75,9 +90,9 @@ const Tabs = ({ onTabChanged }: { onTabChanged: (tab: Tab) => void }) => {
   );
 };
 
-const Content = ({ position, opacity, text, isBold=false }: { position: Vector3, opacity: SpringValue<number>, text: string, isBold?: boolean }) => {
+const Content = ({ position, opacity, text, fontSize=0.6, isBold=false }: { position: Vector3, opacity: SpringValue<number>, text: string, fontSize?: number, isBold?: boolean }) => {
   return (
-    <Text position={position} fontSize={0.7} letterSpacing={isBold ? 0.1 : 0.05} outlineWidth={isBold ? 0.04 : 0.01} outlineColor={0xFFFFFF}>
+    <Text position={position} fontSize={fontSize} letterSpacing={isBold ? 0.1 : 0.05} outlineWidth={isBold ? 0.04 : 0.01} outlineColor={0xFFFFFF}>
       <animated.meshStandardMaterial
         metalness={1}
         roughness={1}
@@ -91,13 +106,25 @@ const Content = ({ position, opacity, text, isBold=false }: { position: Vector3,
 };
 
 const HowToPlay = ({ opacity }: { opacity: SpringValue<number> }) => {
+  const yOffset = -HOW_TO_PLAY_TEXT_ONE.length * 1.1
   return (
     <>
-      {HOW_TO_PLAY_TEXT.map((text, index) => {
-          const pos1 = CONTENT_POSITION.clone().add({x: 0,  y: -index * 1.1, z: 0});
+      {HOW_TO_PLAY_TEXT_ONE.map((text, index) => {
+          const pos1 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: 0,  y: -index * 1, z: 0});
           return (
               <Content key={`${index}`} position={pos1} opacity={opacity} text={text} />
           )
+      })}
+      {HOW_TO_PLAY_TEXT_TWO.map((text, index) => {
+        const isBold = (index === 0);
+        const pos0 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: -3, y: yOffset - index * 0.9, z: 0});
+        const pos1 = HOW_TO_PLAY_CONTENT_POSITION.clone().add({x: +3, y: yOffset - index * 0.9, z: 0});
+        return (
+          <group key={`${index}`}>
+            <Content position={pos0} opacity={opacity} text={text[0]} fontSize={0.5} isBold={isBold} />
+            <Content position={pos1} opacity={opacity} text={text[1]} fontSize={0.5} isBold={isBold} />
+          </group>
+        )
       })}
     </>
   )
@@ -108,9 +135,9 @@ const Controls = ({ opacity }: { opacity: SpringValue<number> }) => {
     <>
       {CONTROLS_TEXT.map((text, index) => {
           const isBold = (index === 0);
-          const pos0 = CONTENT_POSITION.clone().add({x: -5, y: -index * 1.1, z: 0});
-          const pos1 = CONTENT_POSITION.clone().add({x: 0,  y: -index * 1.1, z: 0});
-          const pos2 = CONTENT_POSITION.clone().add({x: 5,  y: -index * 1.1, z: 0});
+          const pos0 = CONTROLS_CONTENT_POSITION.clone().add({x: -4.5, y: -index * 1, z: 0});
+          const pos1 = CONTROLS_CONTENT_POSITION.clone().add({x: 0,    y: -index * 1, z: 0});
+          const pos2 = CONTROLS_CONTENT_POSITION.clone().add({x: 4.5,  y: -index * 1, z: 0});
           return (
             <group key={`${index}`}>
               <Content position={pos0} opacity={opacity} text={text[0]} isBold={isBold} />
