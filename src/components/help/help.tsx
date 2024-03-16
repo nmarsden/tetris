@@ -30,25 +30,26 @@ const HOW_TO_PLAY_TEXT = [
   'Arrange falling blocks to complete',
   'lines and scores points.',
   '',
-  'Every 10 lines cleared, levels up and',
-  'increases the game speed.',
+  'Every 10 lines cleared will level up',
+  'and increase the game speed.',
   '',
-  'Prevent blocks piling up to the top',
-  'and ending the game.',
+  'Try to avoid blocks piling up to the',
+  'top and ending the game.',
   '',
   'Aim for a high score.'
 ];
 
 const SCORING_TEXT = [
   ['ACTION',    'POINTS'],
-  ['Single',    '100*'],
-  ['Double',    '300*'],
-  ['Triple',    '500*'],
-  ['Tetris',    '800*'],
-  ['Combo',     '50 × combo count*'],
+  ['Single',    '100 *'],
+  ['Double',    '300 *'],
+  ['Triple',    '500 *'],
+  ['Tetris',    '800 *'],
+  ['Combo',     '(50 × combo count) *'],
+  ['Perfect Clear', '(400 + (cleared × 400)) *'],
   ['Soft drop', '1 per cell'],
   ['Hard drop', '2 per cell'],
-  ['',          '(* multiplied by level)']
+  ['',          'Note: * multiplied by level']
 ];
 
 const CONTROLS_TEXT: [string, string, string][] = [

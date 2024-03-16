@@ -608,13 +608,7 @@ class GameEngine {
   }
 
   private calcPerfectClearPoints(completedRows: number, level: number): number {
-    switch(completedRows) {
-      case 1: return 800 * level;
-      case 2: return 1200 * level;
-      case 3: return 1800 * level;
-      case 4: return 2000 * level;
-      default: return 0;
-    }
+    return (400 + (completedRows * 400)) * level;
   }
 
   private calcCompletedRowsAchievement(completedRows: number): Achievement {
