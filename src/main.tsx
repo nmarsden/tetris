@@ -22,6 +22,7 @@ import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 import {Help} from './components/help/help.tsx';
+import {Options} from "./components/options/options.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -102,6 +103,7 @@ type StepMode = 'START' | 'NEXT' | 'RESUME';
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [action, setActionField] = useKeyboardControls();
 
@@ -120,6 +122,10 @@ const App = () => {
     // when lock mode is triggered, ensure it ends in 500ms
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
+  }, []);
+
+  const onOptions = useCallback(() => {
+    setShowOptions(true);
   }, []);
 
   const onHelp = useCallback(() => {
@@ -214,11 +220,12 @@ const App = () => {
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
         {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
         {/* Overlays */}
-        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onHelp={onHelp} /> : null}
-        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onHelp={onHelp} /> : null}
-        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onHelp={onHelp} /> : null}
+        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} /> : null}
+        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} /> : null}
+        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
+        {showOptions ? <Options onClose={() => setShowOptions(false)}/> : null}
         {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
       </Bounds>
       {/* Touch */}
