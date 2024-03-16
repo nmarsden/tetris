@@ -1,7 +1,8 @@
 import {Vector3, Color} from "three";
 import {RoundedBox, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
-import {useMemo} from "react";
+import {useCallback, useMemo} from "react";
+import {Sound} from "../../sound.ts";
 
 export type ButtonType = 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -23,10 +24,15 @@ const BUTTON_INFO: Map<ButtonType, ButtonInfo> = new Map([
   [ 'TAB_UNSELECTED', { scale: 0.5,  width: 8.5, fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.grey,  textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
 ]);
 
-const Button = ({ position, label, type='LARGE', onButtonClick }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void }) => {
+const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void, enableSound?:boolean }) => {
   const { scale, width, fontSize, outlineWidth, outlineColor, textColor, bgColor } = useMemo(() => {
     return BUTTON_INFO.get(type) as ButtonInfo;
   }, [type]);
+
+  const onPointerDown = useCallback(() => {
+    if (enableSound) Sound.getInstance().play('BUTTON');
+    onButtonClick();
+  }, [onButtonClick]);
 
   return <group scale={scale} position={position}>
     <RoundedBox
@@ -35,7 +41,7 @@ const Button = ({ position, label, type='LARGE', onButtonClick }: { position: Ve
       smoothness={4} // The number of curve segments. Default is 4
       bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
       creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
-      onPointerDown={onButtonClick}
+      onPointerDown={onPointerDown}
     >
       <meshStandardMaterial
         metalness={0.45}

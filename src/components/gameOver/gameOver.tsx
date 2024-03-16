@@ -19,7 +19,7 @@ const GameOver = ({ onRetry, onOptions, onHelp }: { onRetry: () => void, onOptio
       <Overlay subHeading={'GAME OVER'} />
       <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} />
       <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} />
-      <Button position={RETRY_BUTTON_POSITION} label={'RETRY'} onButtonClick={onRetry} />
+      <Button position={RETRY_BUTTON_POSITION} label={'RETRY'} onButtonClick={onRetry} enableSound={false} />
     </>
   )
 }

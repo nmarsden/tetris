@@ -19,7 +19,7 @@ const Paused = ({ onResume, onOptions, onHelp }: { onResume: () => void, onOptio
       <Overlay subHeading={'PAUSED'}/>
       <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} />
       <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} />
-      <Button position={RESUME_BUTTON_POSITION} label={'RESUME'} onButtonClick={onResume} />
+      <Button position={RESUME_BUTTON_POSITION} label={'RESUME'} onButtonClick={onResume} enableSound={false} />
     </>
   )
 }

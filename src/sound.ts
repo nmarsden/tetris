@@ -1,6 +1,6 @@
 import { Howl } from 'howler';
 
-type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO';
+type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO' | 'BUTTON';
 
 class Sound {
   static instance: Sound;
@@ -32,6 +32,7 @@ class Sound {
       ['GAME OVER',      new Howl({ src: ['/tetris/audio/ses_sys_save.wav'] })],
       ['PERFECT CLEAR',  new Howl({ src: ['/tetris/audio/se_game_perfect.wav'] })],
       ['COMBO',          new Howl({ src: ['/tetris/audio/se_game_kbcomp.wav'] })],
+      ['BUTTON',         new Howl({ src: ['/tetris/audio/se_sys_cursor2.wav'] })],
     ])
   }
 

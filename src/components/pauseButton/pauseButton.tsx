@@ -5,7 +5,7 @@ const PauseButton = ({ gridPos, onPause }: { gridPos: GridPos, onPause: () => vo
   const position = GridUtils.gridPosToScreen({ col: gridPos.col, row: gridPos.row });
 
   return (
-    <Button position={position} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} />
+    <Button position={position} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} />
   )
 }
 

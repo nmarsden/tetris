@@ -13,7 +13,7 @@ const Home = ({ onStart, onOptions, onHelp }: { onStart: () => void, onOptions: 
       <Overlay />
       <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} />
       <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} />
-      <Button position={START_BUTTON_POSITION} label={'START'} onButtonClick={onStart} />
+      <Button position={START_BUTTON_POSITION} label={'START'} onButtonClick={onStart} enableSound={false} />
     </>
   )
 }
