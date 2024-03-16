@@ -19,7 +19,7 @@ const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false
   const { pieceData, blurData } = useMemo(() => {
     const pieceData = PIECE_DATA.get(type) as PieceData;
     const blurHeight = rowsDropped;
-    const blurData: Blur[] = rowsDropped === 0 ? [] : pieceData.positions.map(pos => ({ position: new Vector3(pos[0], pos[1] + (blurHeight * 0.5), 0), numRows: blurHeight }));
+    const blurData: Blur[] = rowsDropped === 0 ? [] : pieceData.positions.map(pos => ({ position: new Vector3(pos[0], pos[1] + (blurHeight * 0.5), TetrisConstants.z.main), numRows: blurHeight }));
     return { pieceData, blurData };
   }, [type, rowsDropped]);
 

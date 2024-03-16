@@ -3,9 +3,9 @@ import {GridUtils} from "../playfield/playfield.tsx";
 import {Overlay} from "../overlay/overlay.tsx";
 import {Button} from "../button/button.tsx";
 
-const OPTIONS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -2.4, y: -1 -2.5, z: 3});
-const HELP_BUTTON_POSITION    = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +2.4, y: -1 -2.5, z: 3});
-const START_BUTTON_POSITION   = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1,      y: -1 -5,   z: 3});
+const OPTIONS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
+const HELP_BUTTON_POSITION    = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
+const START_BUTTON_POSITION   = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1,      y: -1 -5,   z: TetrisConstants.z.overlay3Offset});
 
 const Home = ({ onStart, onOptions, onHelp }: { onStart: () => void, onOptions: () => void, onHelp: () => void }) => {
   return (

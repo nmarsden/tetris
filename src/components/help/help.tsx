@@ -7,24 +7,24 @@ import {Border} from "../border/border.tsx";
 import {Button, ButtonType} from "../button/button.tsx";
 import {Vector3} from "three";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 4});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset});
 const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
-const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: 5});
-const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: 4});
+const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay5Offset});
+const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset});
 
-const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +6.5, z: 4});
-const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +5.8, z: 5});
+const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
+const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +5.8, z: TetrisConstants.z.overlay5Offset});
 
-const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +6.5, z: 4});
-const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.8, z: 5});
+const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
+const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.8, z: TetrisConstants.z.overlay5Offset});
 
-const SCORING_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +6.5, z: 4});
-const SCORING_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +5.8, z: 5});
+const SCORING_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
+const SCORING_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +5.8, z: TetrisConstants.z.overlay5Offset});
 
-const CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: 4});
+const CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: TetrisConstants.z.overlay4Offset});
 
-const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: 4});
+const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
 
 const HOW_TO_PLAY_TEXT = [
   'Arrange falling blocks to complete',

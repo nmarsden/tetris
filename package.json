@@ -13,6 +13,7 @@
     "@react-spring/three": "^9.7.3",
     "@react-three/drei": "^9.97.6",
     "@react-three/fiber": "^8.15.16",
+    "@react-three/uikit": "^0.1.19",
     "@use-gesture/react": "^10.3.0",
     "howler": "^2.2.4",
     "react": "^18.2.0",

@@ -60,5 +60,14 @@ export const TetrisConstants = {
   pauseRow: INFO_ROW - 14,
   center: { col: GAME_WIDTH_CELLS * 0.5, row: GAME_HEIGHT_CELLS * 0.5 },
   gameWidth: GAME_WIDTH_CELLS * CELL_SIZE,
-  gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE
+  gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE,
+  z: { /* Note: all z values (main + offset) are less than 0, as uikit components have z equal to 0 */
+    main: -60,
+    backgroundOffset: -10,
+    overlay1Offset: 10,
+    overlay2Offset: 20,
+    overlay3Offset: 30,
+    overlay4Offset: 40,
+    overlay5Offset: 50
+  }
 };

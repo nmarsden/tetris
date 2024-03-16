@@ -2,7 +2,7 @@ import {Plane} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 
-const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: -2});
+const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.backgroundOffset});
 
 const Background = () => {
   return (

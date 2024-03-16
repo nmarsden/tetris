@@ -14,7 +14,7 @@ class GridUtils {
     return new THREE.Vector3(
       TetrisConstants.gridOrigin.x + (gridPos.col * TetrisConstants.cellSize),
       TetrisConstants.gridOrigin.y + (gridPos.row * TetrisConstants.cellSize),
-      0
+      TetrisConstants.z.main
     );
   }
 }

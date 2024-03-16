@@ -86,8 +86,11 @@ let timeoutId: number;
 // TODO options
 //  - sound volume
 //  - music volume
+//  - save options to local storage
 
 // TODO fix bug - pausing when piece is locking continues to play locking sound
+
+// TODO fix bug - can click hidden buttons when the Options and Help are shown
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...

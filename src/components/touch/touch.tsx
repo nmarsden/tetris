@@ -7,7 +7,7 @@ import {animated} from "@react-spring/three";
 import {useDrag} from "@use-gesture/react";
 import { useThree } from "@react-three/fiber";
 
-const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
+const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay2Offset});
 
 const DRAG_THRESHOLD = 1;
 const REPEAT_DELAY_MSECS = 100;

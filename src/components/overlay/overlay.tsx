@@ -4,10 +4,10 @@ import {GridUtils} from "../playfield/playfield.tsx";
 import {animated, useSpring} from "@react-spring/three";
 import {useEffect} from "react";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 2});
-const IMAGE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 2, z: 3});
-const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 1.7, z: 3});
-const SUB_HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 - 0.6, z: 3});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay2Offset});
+const IMAGE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 2, z: TetrisConstants.z.overlay3Offset});
+const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 1.7, z: TetrisConstants.z.overlay3Offset});
+const SUB_HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 - 0.6, z: TetrisConstants.z.overlay3Offset});
 
 const SubHeading = ({ text }: { text: string }) => {
   if (text === '') return null;

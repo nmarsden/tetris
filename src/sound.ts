@@ -1,4 +1,4 @@
-import { Howl } from 'howler';
+import { Howl, Howler } from 'howler';
 
 type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO' | 'BUTTON';
 
@@ -38,6 +38,14 @@ class Sound {
 
   play(audio: Audio): void {
     (this.sounds.get(audio) as Howl).play();
+  }
+
+  setVolume(volume: number): void {
+    Howler.volume(volume);
+  }
+
+  volume(): number {
+    return Howler.volume();
   }
 }
 
