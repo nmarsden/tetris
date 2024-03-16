@@ -28,7 +28,7 @@ const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).
 
 const HOW_TO_PLAY_TEXT = [
   'Arrange falling blocks to complete',
-  'lines and scores points.',
+  'lines and score points.',
   '',
   'Every 10 lines cleared will level up',
   'and increase the game speed.',
@@ -40,16 +40,16 @@ const HOW_TO_PLAY_TEXT = [
 ];
 
 const SCORING_TEXT = [
-  ['ACTION',    'POINTS'],
-  ['Single',    '100 *'],
-  ['Double',    '300 *'],
-  ['Triple',    '500 *'],
-  ['Tetris',    '800 *'],
-  ['Combo',     '(50 × combo count) *'],
+  ['ACTION',        'POINTS'],
+  ['Single',        '100 *'],
+  ['Double',        '300 *'],
+  ['Triple',        '500 *'],
+  ['Tetris',        '800 *'],
+  ['Combo',         '(50 × combo count) *'],
   ['Perfect Clear', '(400 + (cleared × 400)) *'],
-  ['Soft drop', '1 per cell'],
-  ['Hard drop', '2 per cell'],
-  ['',          'Note: * multiplied by level']
+  ['Soft drop',     '1 per cell'],
+  ['Hard drop',     '2 per cell'],
+  ['',              'Note: * multiplied by level']
 ];
 
 const CONTROLS_TEXT: [string, string, string][] = [
@@ -193,7 +193,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <>
-      <Plane position={OVERLAY_POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>
+      <Plane position={OVERLAY_POSITION} args={[BORDER_WIDTH, BORDER_HEIGHT]}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}

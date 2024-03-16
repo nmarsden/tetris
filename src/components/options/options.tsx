@@ -99,7 +99,7 @@ const Options = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <>
-      <Plane position={OVERLAY_POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>
+      <Plane position={OVERLAY_POSITION} args={[BORDER_WIDTH, BORDER_HEIGHT]}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
