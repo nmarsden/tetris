@@ -9,7 +9,7 @@ const OPTIONS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center
 const HELP_BUTTON_POSITION    = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
 const RETRY_BUTTON_POSITION  = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1,      y: -1 -5,   z: TetrisConstants.z.overlay3Offset});
 
-const GameOver = ({ onRetry, onOptions, onHelp }: { onRetry: () => void, onOptions: () => void, onHelp: () => void }) => {
+const GameOver = ({ onRetry, onOptions, onHelp, enableButtons }: { onRetry: () => void, onOptions: () => void, onHelp: () => void, enableButtons: boolean }) => {
   useEffect(() => {
     Sound.getInstance().play('GAME OVER');
   }, []);
@@ -17,9 +17,9 @@ const GameOver = ({ onRetry, onOptions, onHelp }: { onRetry: () => void, onOptio
   return (
     <>
       <Overlay subHeading={'GAME OVER'} />
-      <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} />
-      <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} />
-      <Button position={RETRY_BUTTON_POSITION} label={'RETRY'} onButtonClick={onRetry} enableSound={false} />
+      <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} enabled={enableButtons} />
+      <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} enabled={enableButtons} />
+      <Button position={RETRY_BUTTON_POSITION} label={'RETRY'} onButtonClick={onRetry} enableSound={false} enabled={enableButtons} />
     </>
   )
 }

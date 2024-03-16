@@ -24,15 +24,16 @@ const BUTTON_INFO: Map<ButtonType, ButtonInfo> = new Map([
   [ 'TAB_UNSELECTED', { scale: 0.5,  width: 8.5, fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.grey,  textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
 ]);
 
-const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void, enableSound?:boolean }) => {
+const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true, enabled=true }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void, enableSound?:boolean, enabled?:boolean }) => {
   const { scale, width, fontSize, outlineWidth, outlineColor, textColor, bgColor } = useMemo(() => {
     return BUTTON_INFO.get(type) as ButtonInfo;
   }, [type]);
 
   const onPointerDown = useCallback(() => {
+    if (!enabled) return;
     if (enableSound) Sound.getInstance().play('BUTTON');
     onButtonClick();
-  }, [onButtonClick]);
+  }, [enabled, onButtonClick]);
 
   return <group scale={scale} position={position}>
     <RoundedBox

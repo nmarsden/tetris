@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Bounds, Environment, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
@@ -90,8 +90,6 @@ let timeoutId: number;
 
 // TODO fix bug - pausing when piece is locking continues to play locking sound
 
-// TODO fix bug - can click hidden buttons when the Options and Help are shown
-
 // TODO fix bug - toasts overlapping
 
 // TODO fix intelliJ CPU performance problem
@@ -111,6 +109,10 @@ const App = () => {
   const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [action, setActionField] = useKeyboardControls();
+
+  const isShowOptionsOrHelp = useMemo(() => {
+    return showOptions || showHelp;
+  }, [showOptions, showHelp]);
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
     const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
@@ -225,9 +227,9 @@ const App = () => {
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
         {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
         {/* Overlays */}
-        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} /> : null}
-        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} /> : null}
-        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} /> : null}
+        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
         {showOptions ? <Options onClose={() => setShowOptions(false)}/> : null}
