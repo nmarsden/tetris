@@ -34,7 +34,8 @@ const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
 
   useEffect(() => {
     api.start(animation)
-    Sound.getInstance().play('COUNT');
+    Sound.getInstance().stopMusic();
+    Sound.getInstance().playSoundFX('COUNT');
   }, [count]);
 
   return <>

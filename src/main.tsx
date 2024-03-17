@@ -76,8 +76,6 @@ let timeoutId: number;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO music
-
 // TODO high score
 //  - show high score underneath current score with a trophy icon
 //  - save/retrieve high score to/from local storage
@@ -119,7 +117,7 @@ const App = () => {
     setGameState({...gameState});
 
     if (gameState.pieceAction === 'LOCK') {
-      Sound.getInstance().play(gameState.pieceAction);
+      Sound.getInstance().playSoundFX(gameState.pieceAction);
     }
 
     // check for game over
@@ -150,12 +148,14 @@ const App = () => {
   const onCountdownDoneStart = useCallback(() => {
     setShowCountdown(false);
     // start game
+    Sound.getInstance().playMusic();
     step('START');
   }, [step]);
 
   const onCountdownDoneResume = useCallback(() => {
     setShowCountdown(false);
     // resume game
+    Sound.getInstance().playMusic();
     step('RESUME');
   }, [step]);
 
@@ -174,7 +174,7 @@ const App = () => {
     setGameState({...gameState});
 
     if (gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
-      Sound.getInstance().play(gameState.pieceAction);
+      Sound.getInstance().playSoundFX(gameState.pieceAction);
     }
     if (gameState.pieceAction === 'HARD DROP') {
       // give time to render blurred piece before next step
@@ -186,12 +186,19 @@ const App = () => {
       return;
     }
     if (!gameState.previousIsLockMode && gameState.isLockMode) {
-      Sound.getInstance().play('LOCK');
+      Sound.getInstance().playSoundFX('LOCK');
       // when lock mode is triggered due to an action, ensure it ends in 500ms
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => { step(); }, 500);
     }
   }, [action, step]);
+
+  useEffect(() => {
+    // Set music rate
+    Sound.getInstance().stopMusic();
+    Sound.getInstance().setMusicRate(0.5 + (gameState.level * 0.1));
+    Sound.getInstance().playMusic();
+  }, [gameState.level]);
 
   return (
     <Canvas>

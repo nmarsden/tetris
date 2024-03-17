@@ -31,7 +31,7 @@ const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true
 
   const onPointerDown = useCallback(() => {
     if (!enabled) return;
-    if (enableSound) Sound.getInstance().play('BUTTON');
+    if (enableSound) Sound.getInstance().playSoundFX('BUTTON');
     onButtonClick();
   }, [enabled, onButtonClick]);
 

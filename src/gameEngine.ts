@@ -134,7 +134,7 @@ type GameState = {
 };
 
 class GameEngine {
-  timePerRowInMSecs = 1;
+  timePerRowInMSecs = 1000;
   droppingBlockPositions: GridPos[] = [];
   pieceBag: RandomPieceBag = new RandomPieceBag();
   comboCounter = -1;
@@ -473,7 +473,7 @@ class GameEngine {
   }
 
   private calcTimePerRow(level: number): number {
-    return Math.pow((0.8-((level-1)*0.007)), (this.gameState.level-1)) * 1000;
+    return Math.pow((0.8-((level-1)*0.007)), (level-1)) * 1000;
   }
 
   private isGameOver(piece: Piece): boolean {

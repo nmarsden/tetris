@@ -11,7 +11,8 @@ const RETRY_BUTTON_POSITION  = GridUtils.gridPosToScreen(TetrisConstants.center)
 
 const GameOver = ({ onRetry, onOptions, onHelp, enableButtons }: { onRetry: () => void, onOptions: () => void, onHelp: () => void, enableButtons: boolean }) => {
   useEffect(() => {
-    Sound.getInstance().play('GAME OVER');
+    Sound.getInstance().stopMusic();
+    Sound.getInstance().playSoundFX('GAME OVER');
   }, []);
 
   return (

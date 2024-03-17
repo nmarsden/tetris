@@ -2,12 +2,19 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {Overlay} from "../overlay/overlay.tsx";
 import {Button} from "../button/button.tsx";
+import {useEffect} from "react";
+import {Sound} from "../../sound.ts";
 
 const OPTIONS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
 const HELP_BUTTON_POSITION    = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
 const START_BUTTON_POSITION   = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1,      y: -1 -5,   z: TetrisConstants.z.overlay3Offset});
 
 const Home = ({ onStart, onOptions, onHelp, enableButtons }: { onStart: () => void, onOptions: () => void, onHelp: () => void, enableButtons: boolean }) => {
+
+  useEffect(() => {
+    Sound.getInstance().playMusic();
+  }, []);
+
   return (
     <>
       <Overlay />

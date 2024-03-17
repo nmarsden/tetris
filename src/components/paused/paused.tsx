@@ -11,7 +11,8 @@ const RESUME_BUTTON_POSITION  = GridUtils.gridPosToScreen(TetrisConstants.center
 
 const Paused = ({ onResume, onOptions, onHelp, enableButtons }: { onResume: () => void, onOptions: () => void, onHelp: () => void, enableButtons: boolean }) => {
   useEffect(() => {
-    Sound.getInstance().play('PAUSE');
+    Sound.getInstance().stopMusic();
+    Sound.getInstance().playSoundFX('PAUSE');
   }, []);
 
   return (

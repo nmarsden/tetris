@@ -16,7 +16,8 @@ const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
 const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay5Offset});
 const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset});
 
-const VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.5, z: TetrisConstants.z.overlay4Offset});
+const MUSIC_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.5, z: TetrisConstants.z.overlay4Offset});
+const SFX_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +0.5, z: TetrisConstants.z.overlay4Offset});
 
 const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
 
@@ -51,7 +52,7 @@ const LabelValue = ({ position, opacity, label, value }: { position: Vector3, op
   );
 };
 
-const VolumeSlider = ({ initialValue, onVolumeChange }: { initialValue: number, onVolumeChange: (value: number) => void }) => {
+const VolumeSlider = ({ translateY, initialValue, onVolumeChange }: { translateY: number, initialValue: number, onVolumeChange: (value: number) => void }) => {
   return (
     <Root backgroundColor="red"
           backgroundOpacity={0}
@@ -61,7 +62,7 @@ const VolumeSlider = ({ initialValue, onVolumeChange }: { initialValue: number, 
           alignItems={"center"}
           justifyContent={"center"}
           transformTranslateX={1200}
-          transformTranslateY={-1800}
+          transformTranslateY={translateY}
     >
       <Slider
         defaultValue={initialValue}
@@ -77,7 +78,8 @@ const VolumeSlider = ({ initialValue, onVolumeChange }: { initialValue: number, 
 };
 
 const Options = ({ onClose }: { onClose: () => void }) => {
-  const [volume, setVolume] = useState(Sound.getInstance().volume() * 10);
+  const [musicVolume, setMusicVolume] = useState(Sound.getInstance().musicVolume() * 10);
+  const [sfxVolume, setSfxVolume] = useState(Sound.getInstance().soundFXVolume() * 10);
   const [{ opacity }, api] = useSpring(() => ({
     from: { opacity: 0 },
     config: {
@@ -85,13 +87,20 @@ const Options = ({ onClose }: { onClose: () => void }) => {
     }
   }));
 
-  const onVolumeChange = useCallback((value: number): void => {
-    if (value !== volume) {
-      setVolume(value);
-      Sound.getInstance().setVolume(value * 0.1);
-      Sound.getInstance().play('COUNT');
+  const onMusicVolumeChange = useCallback((value: number): void => {
+    if (value !== musicVolume) {
+      setMusicVolume(value);
+      Sound.getInstance().setMusicVolume(value * 0.1);
     }
-  }, [volume]);
+  }, [sfxVolume]);
+
+  const onSfxVolumeChange = useCallback((value: number): void => {
+    if (value !== sfxVolume) {
+      setSfxVolume(value);
+      Sound.getInstance().setSoundFXVolume(value * 0.1);
+      Sound.getInstance().playSoundFX('COUNT');
+    }
+  }, [sfxVolume]);
 
   useEffect(() => {
     api.start({ to: { opacity: 1 } });
@@ -112,8 +121,11 @@ const Options = ({ onClose }: { onClose: () => void }) => {
 
       <Heading position={HEADING_POSITION} opacity={opacity} text={'OPTIONS'} />
 
-      <LabelValue position={VOLUME_LABEL_POSITION} opacity={opacity} label={'Volume'} value={volume}/>
-      <VolumeSlider initialValue={volume} onVolumeChange={onVolumeChange} />
+      <LabelValue position={MUSIC_VOLUME_LABEL_POSITION} opacity={opacity} label={'Music Volume'} value={musicVolume}/>
+      <VolumeSlider translateY={-1800} initialValue={musicVolume} onVolumeChange={onMusicVolumeChange} />
+
+      <LabelValue position={SFX_VOLUME_LABEL_POSITION} opacity={opacity} label={'SFX Volume'} value={sfxVolume}/>
+      <VolumeSlider translateY={+700} initialValue={sfxVolume} onVolumeChange={onSfxVolumeChange} />
 
       <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} onButtonClick={onClose} />
     </>

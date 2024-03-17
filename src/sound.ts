@@ -1,11 +1,12 @@
-import { Howl, Howler } from 'howler';
+import { Howl } from 'howler';
 
-type Audio = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO' | 'BUTTON';
+type SoundFX = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'PAUSE' | 'COUNT' | 'MOVE' | 'SOFT DROP' | 'HARD DROP' | 'ROTATE' | 'LOCK' | 'BLOCKED' | 'LEVEL UP' | 'GAME OVER' | 'PERFECT CLEAR' | 'COMBO' | 'BUTTON';
 
 class Sound {
   static instance: Sound;
 
-  sounds: Map<Audio, Howl>;
+  music: Howl;
+  soundFXs: Map<SoundFX, Howl>;
 
   static getInstance(): Sound {
     if (typeof Sound.instance === 'undefined') {
@@ -15,7 +16,8 @@ class Sound {
   }
 
   private constructor() {
-    this.sounds = new Map([
+    this.music = new Howl({ src: ['/tetris/audio/music.wav'], loop: true })
+    this.soundFXs = new Map([
       ['SINGLE',         new Howl({ src: ['/tetris/audio/se_game_single.wav']})],
       ['DOUBLE',         new Howl({ src: ['/tetris/audio/se_game_double.wav']})],
       ['TRIPLE',         new Howl({ src: ['/tetris/audio/se_game_triple.wav']})],
@@ -27,7 +29,7 @@ class Sound {
       ['HARD DROP',      new Howl({ src: ['/tetris/audio/se_game_harddrop.wav']})],
       ['ROTATE',         new Howl({ src: ['/tetris/audio/se_game_rotate.wav']})],
       ['LOCK',           new Howl({ src: ['/tetris/audio/se_game_landing.wav']})],
-      ['BLOCKED',        new Howl({ src: ['/tetris/audio/se_game_landing.wav'], volume: 0.3, rate: 0.2 })],
+      ['BLOCKED',        new Howl({ src: ['/tetris/audio/blocked.wav'], rate: 0.2 })],
       ['LEVEL UP',       new Howl({ src: ['/tetris/audio/me_game_plvup.wav'] })],
       ['GAME OVER',      new Howl({ src: ['/tetris/audio/ses_sys_save.wav'] })],
       ['PERFECT CLEAR',  new Howl({ src: ['/tetris/audio/se_game_perfect.wav'] })],
@@ -36,16 +38,37 @@ class Sound {
     ])
   }
 
-  play(audio: Audio): void {
-    (this.sounds.get(audio) as Howl).play();
+  playMusic(): void {
+    this.music.play();
   }
 
-  setVolume(volume: number): void {
-    Howler.volume(volume);
+  stopMusic(): void {
+    this.music.stop();
   }
 
-  volume(): number {
-    return Howler.volume();
+  setMusicRate(rate: number): void {
+    this.music.rate(rate);
+  }
+  setMusicVolume(volume: number): void {
+    this.music.volume(volume);
+  }
+
+  musicVolume(): number {
+    return this.music.volume();
+  }
+
+  playSoundFX(audio: SoundFX): void {
+    (this.soundFXs.get(audio) as Howl).play();
+  }
+
+  setSoundFXVolume(volume: number): void {
+    this.soundFXs.forEach(soundFx => {
+      soundFx.volume(volume);
+    });
+  }
+
+  soundFXVolume(): number {
+    return (this.soundFXs.get('COUNT') as Howl).volume();
   }
 }
 

@@ -33,7 +33,7 @@ const Toast = ({ details }: { details: ToastDetails }) => {
 
   useEffect(() => {
     api.start(animation)
-    Sound.getInstance().play(details.achievement);
+    Sound.getInstance().playSoundFX(details.achievement);
   }, []);
 
   return (
