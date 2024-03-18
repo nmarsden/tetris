@@ -88,8 +88,6 @@ let timeoutId: number;
 
 // TODO fix bug - pausing when piece is locking continues to play locking sound
 
-// TODO fix bug - toasts overlapping
-
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
 //     - Command + Shift + A

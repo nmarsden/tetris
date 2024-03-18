@@ -12,6 +12,10 @@
 - [Game Boy Tetris](https://upload.wikimedia.org/wikipedia/en/4/4a/GB_Tetris.png)
 - [Retro (Unknown)](docs%2Freference.png)
 
+## Music
+- [Korobeeiniki](https://en.wikipedia.org/wiki/Korobeiniki)
+- [Custom music using Song maker](https://musiclab.chromeexperiments.com/Song-Maker/song/6348087999201280)
+ 
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

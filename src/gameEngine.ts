@@ -111,6 +111,7 @@ type Piece = {
 type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR' | 'COMBO';
 
 export type ToastDetails = {
+  id: number;
   row: number;
   achievement: Achievement;
   points: number;
@@ -233,11 +234,11 @@ class GameEngine {
 
         if (this.gameState.completedRows.length > 0) {
           // update gameState: toasts
-          this.gameState.toasts = [...this.gameState.toasts, {
-            row: this.gameState.completedRows[0],
-            achievement: this.calcCompletedRowsAchievement(this.gameState.completedRows.length),
-            points: this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level)
-          }];
+          this.addToast(
+            this.gameState.completedRows[0],
+            this.calcCompletedRowsAchievement(this.gameState.completedRows.length),
+            this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level)
+          );
           // increase comboCounter
           this.comboCounter++;
         } else {
@@ -281,11 +282,7 @@ class GameEngine {
         // update gameState: level & toasts
         this.gameState.level++;
         this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
-        this.gameState.toasts = [...this.gameState.toasts, {
-          row: this.gameState.completedRows[0],
-          achievement: 'LEVEL UP',
-          points: 0
-        }];
+        this.addToast(this.gameState.completedRows[0], 'LEVEL UP', 0);
       }
 
       // update gameState: lockedColors
@@ -296,22 +293,14 @@ class GameEngine {
         // update gameState: score & toasts
         const comboPoints = this.comboCounter * 50 * this.gameState.level;
         this.gameState.score = this.gameState.score + comboPoints;
-        this.gameState.toasts = [...this.gameState.toasts, {
-          row: this.gameState.completedRows[0],
-          achievement: 'COMBO',
-          points: comboPoints
-        }];
+        this.addToast(this.gameState.completedRows[0], 'COMBO', comboPoints);
       }
 
       if (this.isPerfectClear(this.gameState.lockedColors)) {
         // update gameState: score & toasts
         const perfectClearPoints = this.calcPerfectClearPoints(this.gameState.completedRows.length, this.gameState.level);
         this.gameState.score = this.gameState.score + perfectClearPoints;
-        this.gameState.toasts = [...this.gameState.toasts, {
-          row: this.gameState.completedRows[0],
-          achievement: 'PERFECT CLEAR',
-          points: perfectClearPoints
-        }];
+        this.addToast(this.gameState.completedRows[0], 'PERFECT CLEAR', perfectClearPoints);
       }
 
       // update gameState: completedRows
@@ -595,6 +584,10 @@ class GameEngine {
   private setIsLockMode(isLockMode: boolean): void {
     this.gameState.previousIsLockMode = this.gameState.isLockMode;
     this.gameState.isLockMode = isLockMode;
+  }
+
+  private addToast(row: number, achievement: Achievement, points: number): void {
+    this.gameState.toasts = [...this.gameState.toasts, { id: this.gameState.toasts.length, row, achievement, points }];
   }
 
   private calcCompletedRowsPoints(completedRows: number, level: number): number {

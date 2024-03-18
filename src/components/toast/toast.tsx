@@ -9,12 +9,7 @@ import {Sound} from "../../sound.ts";
 
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
-type DisplayedToast = {
-  key: number;
-  toast: ToastDetails;
-};
-
-const Toast = ({ details }: { details: ToastDetails }) => {
+const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () => void }) => {
   const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 1.5, z: TetrisConstants.z.overlay3Offset});
   const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 3.5, z: TetrisConstants.z.overlay3Offset});
 
@@ -34,6 +29,7 @@ const Toast = ({ details }: { details: ToastDetails }) => {
   useEffect(() => {
     api.start(animation)
     Sound.getInstance().playSoundFX(details.achievement);
+    setTimeout(() => onExpired(), DELAY_BETWEEN_TOASTS_MSECS);
   }, []);
 
   return (
@@ -67,40 +63,49 @@ const Toast = ({ details }: { details: ToastDetails }) => {
   );
 }
 
+const queuedToasts: ToastDetails[] = [];
+let lastProcessedTime: number = new Date().getTime();
+
 const Toasts = ({ toasts }: { toasts: ToastDetails[] }) => {
-  const [displayedToasts, setDisplayedToasts] = useState<DisplayedToast[]>([]);
+  const [displayedToasts, setDisplayedToasts] = useState<ToastDetails[]>([]);
   const [toastCount, setToastCount] = useState(0);
+
+  const removeDisplayedToast = useCallback((toastId: number) => {
+    setDisplayedToasts(prevDisplayToasts => prevDisplayToasts.filter(dt => dt.id !== toastId));
+  }, []);
+
+  const addDisplayedToast = useCallback((toast: ToastDetails) => {
+    setDisplayedToasts((prevDisplayToasts) => [...prevDisplayToasts, toast]);
+  }, []);
+
+  const processQueue = useCallback(() => {
+    if (queuedToasts.length === 0) return;
+    const msecsSinceLastProcessed = new Date().getTime() - lastProcessedTime;
+    if (msecsSinceLastProcessed >= DELAY_BETWEEN_TOASTS_MSECS) {
+      lastProcessedTime = new Date().getTime();
+      addDisplayedToast(queuedToasts.shift() as ToastDetails);
+    }
+    if (queuedToasts.length > 0) {
+      setTimeout(processQueue, DELAY_BETWEEN_TOASTS_MSECS);
+    }
+  }, [addDisplayedToast]);
 
   useEffect(() => {
     if (toasts.length === toastCount) return;
 
     setToastCount(toasts.length);
 
-    // Note: no delay for the first toast when no toasts are currently displayed
-    let delay = displayedToasts.length * DELAY_BETWEEN_TOASTS_MSECS;
-
-    // display each toast after delay
+    // add to queued toasts
     for (let i=toastCount; i<toasts.length; i++) {
-      setTimeout(() => {
-        setDisplayedToasts((prevDisplayToasts) => {
-          const newDisplayToasts = [...prevDisplayToasts, { key: i, toast: toasts[i] }];
-          // remove displayToast after 2 seconds
-          setTimeout(() => {
-            setDisplayedToasts((prevDisplayToasts) => {
-              return prevDisplayToasts.filter(dt => dt.key !== i)
-            })
-          }, 2000);
-
-          return newDisplayToasts;
-        });
-      }, delay);
-      delay = delay + DELAY_BETWEEN_TOASTS_MSECS;
+      queuedToasts.push(toasts[i]);
     }
-  }, [toasts, toastCount]);
+    processQueue();
+
+  }, [toasts, toastCount, processQueue]);
 
   return (
     <>
-      {displayedToasts.map((displayedToast: DisplayedToast) => <Toast key={displayedToast.key} details={displayedToast.toast} />)}
+      {displayedToasts.map((displayedToast: ToastDetails) => <Toast key={displayedToast.id} details={displayedToast} onExpired={() => removeDisplayedToast(displayedToast.id)}/>)}
     </>
   )
 }
