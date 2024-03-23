@@ -129,6 +129,7 @@ type GameState = {
   previousIsLockMode: boolean;
   isLockMode: boolean;
   score: number;
+  bestScore: number;
   level: number;
   lines: number;
   toasts: ToastDetails[];
@@ -151,6 +152,7 @@ class GameEngine {
     previousIsLockMode: false,
     isLockMode: false,
     score: 0,
+    bestScore: 0,
     level: 1,
     lines: 0,
     toasts: []
@@ -275,7 +277,7 @@ class GameEngine {
     // check if there are completed rows to be removed
     if (this.gameState.completedRows.length > 0) {
       // update gameState: score & lines
-      this.gameState.score = this.gameState.score + this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level);
+      this.addToScore(this.calcCompletedRowsPoints(this.gameState.completedRows.length, this.gameState.level));
       this.gameState.lines = this.gameState.lines + this.gameState.completedRows.length;
 
       if (this.isLevelUp(this.gameState.level, this.gameState.lines)) {
@@ -292,14 +294,14 @@ class GameEngine {
       if (this.comboCounter > 0) {
         // update gameState: score & toasts
         const comboPoints = this.comboCounter * 50 * this.gameState.level;
-        this.gameState.score = this.gameState.score + comboPoints;
+        this.addToScore(comboPoints);
         this.addToast(this.gameState.completedRows[0], 'COMBO', comboPoints);
       }
 
       if (this.isPerfectClear(this.gameState.lockedColors)) {
         // update gameState: score & toasts
         const perfectClearPoints = this.calcPerfectClearPoints(this.gameState.completedRows.length, this.gameState.level);
-        this.gameState.score = this.gameState.score + perfectClearPoints;
+        this.addToScore(perfectClearPoints);
         this.addToast(this.gameState.completedRows[0], 'PERFECT CLEAR', perfectClearPoints);
       }
 
@@ -405,7 +407,7 @@ class GameEngine {
         this.droppingBlockPositions = this.getBlockPositions(this.gameState.piece);
 
         // update score
-        this.gameState.score = this.gameState.score + 1;
+        this.addToScore(1);
 
         if (!this.canMoveDown()) {
           // LOCK DETECTED!!!
@@ -440,7 +442,7 @@ class GameEngine {
     if (action.hardDrop && this.canMoveDown()) {
       const numRowsDropped = (this.gameState.piece.pos.row - this.gameState.ghostPiece.pos.row);
       // update score
-      this.gameState.score = this.gameState.score + (2 * numRowsDropped);
+      this.addToScore((2 * numRowsDropped));
       // update piece
       this.gameState.piece = this.gameState.ghostPiece;
       this.gameState.pieceAction = 'HARD DROP';
@@ -584,6 +586,13 @@ class GameEngine {
   private setIsLockMode(isLockMode: boolean): void {
     this.gameState.previousIsLockMode = this.gameState.isLockMode;
     this.gameState.isLockMode = isLockMode;
+  }
+
+  private addToScore(points: number): void {
+    this.gameState.score = this.gameState.score + points;
+    if (this.gameState.score > this.gameState.bestScore) {
+      this.gameState.bestScore = this.gameState.score;
+    }
   }
 
   private addToast(row: number, achievement: Achievement, points: number): void {

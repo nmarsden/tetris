@@ -77,7 +77,6 @@ let timeoutId: number;
 //   T-Spin Triple	 Yes
 
 // TODO high score
-//  - show high score underneath current score with a trophy icon
 //  - save/retrieve high score to/from local storage
 //  - on game over, show new high score
 
@@ -229,7 +228,7 @@ const App = () => {
         {/* Toasts */}
         <Toasts toasts={gameState.toasts} />
         {/* Info */}
-        <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score}/>
+        <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score} bestValue={gameState.bestScore}/>
         <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
         <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
         {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
