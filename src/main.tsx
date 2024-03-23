@@ -86,7 +86,9 @@ let timeoutId: number;
 //  - music volume
 //  - save/retrieve options to/from local storage
 
-// TODO fix bug - pausing when piece is locking continues to play locking sound
+// TODO fix bug - toast appears on top of overlay (eg. paused)
+// TODO fix bug - toast hard to read when appearing on top of blocks
+
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
@@ -98,6 +100,10 @@ let timeoutId: number;
 //   - see: https://blog.jetbrains.com/webstorm/2023/12/try-the-future-typescript-engine-with-the-webstorm-next-program/#update
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
+
+// TODO save/retrieve settings to local storage
+// Sound.getInstance().setMusicVolume(0.1);
+// Sound.getInstance().setSoundFXVolume(0.1);
 
 const App = () => {
   const [gameState, setGameState] = useState(initialGameState);
@@ -114,14 +120,15 @@ const App = () => {
     const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
     setGameState({...gameState});
 
+    // check for game over
+    if (gameState.mode === 'GAME OVER' || gameState.mode === 'PAUSED') {
+      return;
+    }
+
     if (gameState.pieceAction === 'LOCK') {
       Sound.getInstance().playSoundFX(gameState.pieceAction);
     }
 
-    // check for game over
-    if (gameState.mode === 'GAME OVER') {
-      return;
-    }
     // when lock mode is triggered, ensure it ends in 500ms
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
