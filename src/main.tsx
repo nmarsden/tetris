@@ -76,8 +76,11 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO high score
-//  - on game over, show new high score
+// TODO show tetris favicon
+
+// TODO fix text alignment & size in help
+
+// TODO fix toast animation - should fade out
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
@@ -249,7 +252,7 @@ const App = () => {
         {/* Overlays */}
         {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
         {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver newBestScore={gameState.isNewBestScore ? gameState.bestScore : undefined} onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
         {showOptions ? <Options onClose={onOptionsClose}/> : null}

@@ -108,7 +108,7 @@ type Piece = {
   type: PieceType;
 };
 
-type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR' | 'COMBO';
+type Achievement = 'SINGLE' | 'DOUBLE' | 'TRIPLE' | 'TETRIS' | 'LEVEL UP' | 'PERFECT CLEAR' | 'COMBO' | 'NEW BEST SCORE';
 
 export type ToastDetails = {
   id: number;
@@ -130,6 +130,7 @@ type GameState = {
   isLockMode: boolean;
   score: number;
   bestScore: number;
+  isNewBestScore: boolean;
   level: number;
   lines: number;
   toasts: ToastDetails[];
@@ -153,6 +154,7 @@ class GameEngine {
     isLockMode: false,
     score: 0,
     bestScore: 0,
+    isNewBestScore: false,
     level: 1,
     lines: 0,
     toasts: []
@@ -166,6 +168,7 @@ class GameEngine {
   start(): GameState {
     this.gameState.mode = 'PLAYING';
     this.gameState.score = 0;
+    this.gameState.isNewBestScore = false;
     this.gameState.level = 1;
     this.gameState.lines = 0;
     this.gameState.toasts = [];
@@ -593,6 +596,10 @@ class GameEngine {
     this.gameState.score = this.gameState.score + points;
     if (this.gameState.score > this.gameState.bestScore) {
       this.gameState.bestScore = this.gameState.score;
+      if (!this.gameState.isNewBestScore) {
+        this.addToast(10, 'NEW BEST SCORE', 0);
+      }
+      this.gameState.isNewBestScore = true;
     }
   }
 
