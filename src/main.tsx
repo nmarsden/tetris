@@ -86,10 +86,6 @@ let timeoutId: number;
 //  - music volume
 //  - save/retrieve options to/from local storage
 
-// TODO fix bug - toast appears on top of overlay (eg. paused)
-// TODO fix bug - toast hard to read when appearing on top of blocks
-
-
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
 //     - Command + Shift + A

@@ -10,8 +10,8 @@ import {Sound} from "../../sound.ts";
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
 const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () => void }) => {
-  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 1.5, z: TetrisConstants.z.overlay3Offset});
-  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 3.5, z: TetrisConstants.z.overlay3Offset});
+  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 1.5, z: TetrisConstants.z.overlay1Offset});
+  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 3.5, z: TetrisConstants.z.overlay1Offset});
 
   const animation = useCallback(() => ({
     from: { positionX: startPos.x, positionY: startPos.y, positionZ: startPos.z, scale: 0, opacity: 0 },
@@ -39,21 +39,21 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
       position-z={positionZ}
       scale={scale}
     >
-      <Text fontSize={1} letterSpacing={0.1} outlineWidth={0.05} outlineColor={0xFFFFFF}>
+      <Text fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
-          color={0xFFFFFF}
+          color={0x000000}
           opacity={opacity}
           transparent={true}
         />
         {details.achievement}
       </Text>
-      {details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.05} outlineColor={0xFFFFFF}>
+      {details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
-          color={0xFFFFFF}
+          color={0x000000}
           opacity={opacity}
           transparent={true}
         />
