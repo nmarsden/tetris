@@ -23,6 +23,7 @@ import {Sound} from "./sound.ts";
 import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 import {Help} from './components/help/help.tsx';
 import {Options} from "./components/options/options.tsx";
+import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -77,13 +78,9 @@ let timeoutId: number;
 //   T-Spin Triple	 Yes
 
 // TODO high score
-//  - save/retrieve high score to/from local storage
 //  - on game over, show new high score
 
-// TODO options
-//  - sound volume
-//  - music volume
-//  - save/retrieve options to/from local storage
+// TODO fix bug - blur animation not showing on hard drop
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
@@ -96,11 +93,15 @@ let timeoutId: number;
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 
-// TODO save/retrieve settings to local storage
-// Sound.getInstance().setMusicVolume(0.1);
-// Sound.getInstance().setSoundFXVolume(0.1);
+
+const INITIAL_STORE: Store = {
+  bestScore: 0,
+  musicVolume: 1,
+  soundFXVolume: 1
+};
 
 const App = () => {
+  const [store, setStore] = useLocalStorage('tetris', INITIAL_STORE);
   const [gameState, setGameState] = useState(initialGameState);
   const [showCountdown, setShowCountdown] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -131,6 +132,11 @@ const App = () => {
 
   const onOptions = useCallback(() => {
     setShowOptions(true);
+  }, []);
+
+  const onOptionsClose = useCallback(() => {
+    setShowOptions(false);
+    setStore({...store, musicVolume: Sound.getInstance().musicVolume(), soundFXVolume: Sound.getInstance().soundFXVolume()});
   }, []);
 
   const onHelp = useCallback(() => {
@@ -200,6 +206,17 @@ const App = () => {
     Sound.getInstance().playMusic();
   }, [gameState.level]);
 
+  useEffect(() => {
+    if (gameState.bestScore === 0) return;
+    setStore({...store, bestScore: gameState.bestScore});
+  }, [gameState.bestScore]);
+
+  useEffect(() => {
+    Sound.getInstance().setMusicVolume(store.musicVolume);
+    Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
+    setGameState({...gameState, bestScore: store.bestScore });
+  }, []);
+
   return (
     <Canvas>
       <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
@@ -239,7 +256,7 @@ const App = () => {
         {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
         {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
         {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
-        {showOptions ? <Options onClose={() => setShowOptions(false)}/> : null}
+        {showOptions ? <Options onClose={onOptionsClose}/> : null}
         {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
       </Bounds>
       {/* Touch */}
