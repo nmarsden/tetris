@@ -158,7 +158,8 @@ class GameEngine {
     toasts: []
   };
 
-  initialState(): GameState {
+  initialState(bestScore: number): GameState {
+    this.gameState.bestScore = bestScore;
     return this.gameState;
   }
 

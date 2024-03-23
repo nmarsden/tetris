@@ -21,6 +21,9 @@ const SFX_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.cent
 
 const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
 
+function roundToOneDecimalPlace(num: number) {
+  return +(num.toFixed(1));
+}
 
 const Heading = ({ position, opacity, text }: { position: Vector3, opacity: SpringValue<number>, text: string }) => {
   return (
@@ -90,14 +93,14 @@ const Options = ({ onClose }: { onClose: () => void }) => {
   const onMusicVolumeChange = useCallback((value: number): void => {
     if (value !== musicVolume) {
       setMusicVolume(value);
-      Sound.getInstance().setMusicVolume(value * 0.1);
+      Sound.getInstance().setMusicVolume(roundToOneDecimalPlace(value * 0.1));
     }
   }, [sfxVolume]);
 
   const onSfxVolumeChange = useCallback((value: number): void => {
     if (value !== sfxVolume) {
       setSfxVolume(value);
-      Sound.getInstance().setSoundFXVolume(value * 0.1);
+      Sound.getInstance().setSoundFXVolume(roundToOneDecimalPlace(value * 0.1));
       Sound.getInstance().playSoundFX('COUNT');
     }
   }, [sfxVolume]);

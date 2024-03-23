@@ -23,6 +23,7 @@
   "devDependencies": {
     "@pmndrs/assets": "^1.6.0",
     "@types/howler": "^2.2.11",
+    "@types/node": "^20.11.30",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@types/three": "^0.161.2",

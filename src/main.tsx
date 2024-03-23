@@ -28,7 +28,6 @@ import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
 const gameEngine = new GameEngine();
-const initialGameState = gameEngine.initialState();
 
 // Load audio
 Sound.getInstance();
@@ -54,7 +53,7 @@ const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
   return completedRows.length === 0 && mode !== 'HOME';
 };
 
-let timeoutId: number;
+let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO reward Perfect Clear Bonus: completely clearing the playfield
 //  Action	                            Points
@@ -100,7 +99,7 @@ const INITIAL_STORE: Store = {
 
 const App = () => {
   const [store, setStore] = useLocalStorage('tetris', INITIAL_STORE);
-  const [gameState, setGameState] = useState(initialGameState);
+  const [gameState, setGameState] = useState(gameEngine.initialState(store.bestScore));
   const [showCountdown, setShowCountdown] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -212,7 +211,6 @@ const App = () => {
   useEffect(() => {
     Sound.getInstance().setMusicVolume(store.musicVolume);
     Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
-    setGameState({...gameState, bestScore: store.bestScore });
   }, []);
 
   return (

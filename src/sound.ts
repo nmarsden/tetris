@@ -49,6 +49,7 @@ class Sound {
   setMusicRate(rate: number): void {
     this.music.rate(rate);
   }
+
   setMusicVolume(volume: number): void {
     this.music.volume(volume);
   }
