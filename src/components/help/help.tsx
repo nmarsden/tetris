@@ -129,7 +129,7 @@ const HowToPlay = ({ opacity }: { opacity: SpringValue<number> }) => {
       {HOW_TO_PLAY_TEXT.map((text, index) => {
           const pos1 = CONTENT_POSITION.clone().add({x: 0, y: -index, z: 0});
           return (
-              <Content key={`${index}`} position={pos1} opacity={opacity} text={text} />
+              <Content key={`${index}`} position={pos1} opacity={opacity} text={text} fontSize={0.7} />
           )
       })}
     </>
@@ -141,8 +141,8 @@ const Scoring = ({ opacity }: { opacity: SpringValue<number> }) => {
     <>
       {SCORING_TEXT.map((text, index) => {
         const isBold = (index === 0);
-        const pos0 = CONTENT_POSITION.clone().add({x: -3, y: -index, z: 0});
-        const pos1 = CONTENT_POSITION.clone().add({x: +3, y: -index, z: 0});
+        const pos0 = CONTENT_POSITION.clone().add({x: -4.5, y: -index, z: 0});
+        const pos1 = CONTENT_POSITION.clone().add({x: +2.5, y: -index, z: 0});
         return (
           <group key={`${index}`}>
             <Content position={pos0} opacity={opacity} text={text[0]} isBold={isBold} />

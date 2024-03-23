@@ -78,8 +78,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO show tetris favicon
 
-// TODO fix text alignment & size in help
-
 // TODO fix toast animation - should fade out
 
 // TODO fix intelliJ CPU performance problem
