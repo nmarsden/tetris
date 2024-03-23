@@ -80,8 +80,6 @@ let timeoutId: number;
 // TODO high score
 //  - on game over, show new high score
 
-// TODO fix bug - blur animation not showing on hard drop
-
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
 //     - Command + Shift + A
