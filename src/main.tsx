@@ -2,9 +2,9 @@
 import './index.css'
 import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
-import {Bounds, Environment, OrbitControls, OrthographicCamera} from "@react-three/drei";
+import {Bounds, Environment, Loader, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {Suspense, useCallback, useEffect, useMemo, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
@@ -77,6 +77,8 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Triple	 Yes
 
 // TODO camera animation - perfect clear, hard drop & blocked
+
+// TODO initial Loading state
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
@@ -213,64 +215,69 @@ const App = () => {
   }, []);
 
   return (
-    <Canvas>
-      <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
-      <Bounds fit clip observe margin={1} maxDuration={0.1}>
-        <Background />
-        <Playfield enableGrid={false}/>
-        {gameState.pieceAction === 'HARD DROP' ?
-        <>
-          {/* Active Piece */}
-          <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} rowsDropped={gameState.pieceRowsDropped}/>
-        </>
-        :
-        <>
-          {/* Active Piece */}
-          {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
-          {/* Ghost Piece */}
-          {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
-        </>}
-        {/* Stack */}
-        {gameState.lockedColors.map((lockedColor, index) => {
-          const gridPos = LockedColorUtils.indexToGridPos(index);
-          const blockMode = rowBlockMode(gridPos.row, gameState.completedRows);
-          return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor} mode={blockMode}/>
-        })
-        }
-        {/* Toasts */}
-        <Toasts toasts={gameState.toasts} />
-        {/* Info */}
-        <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score} bestValue={gameState.bestScore}/>
-        <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
-        <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
-        {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
-        {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
-        {/* Overlays */}
-        {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-        {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-        {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver newBestScore={gameState.isNewBestScore ? gameState.bestScore : undefined} onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-        {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
-        {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
-        {showOptions ? <Options onClose={onOptionsClose}/> : null}
-        {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
-      </Bounds>
-      {/* Touch */}
-      {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
-      { /* @ts-ignore */ }
-      <Environment files={suspend(warehouse)}/>
-      <OrbitControls
-        enabled={false}
-        makeDefault={true}
-        minAzimuthAngle={0}
-        maxAzimuthAngle={0}
-        minPolarAngle={Math.PI * 0.4}
-        maxPolarAngle={Math.PI * 0.6}
-        autoRotate={false}
-        enableZoom={false}
-        enablePan={false}
-        enableRotate={true}
-      />
-    </Canvas>
+    <>
+      <Canvas>
+        <Suspense>
+          <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
+          <Bounds fit clip observe margin={1} maxDuration={0.1}>
+            <Background />
+            <Playfield enableGrid={false}/>
+            {gameState.pieceAction === 'HARD DROP' ?
+            <>
+              {/* Active Piece */}
+              <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} rowsDropped={gameState.pieceRowsDropped}/>
+            </>
+            :
+            <>
+              {/* Active Piece */}
+              {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
+              {/* Ghost Piece */}
+              {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+            </>}
+            {/* Stack */}
+            {gameState.lockedColors.map((lockedColor, index) => {
+              const gridPos = LockedColorUtils.indexToGridPos(index);
+              const blockMode = rowBlockMode(gridPos.row, gameState.completedRows);
+              return lockedColor === null ? null : <Block key={`${index}`} position={LockedColorUtils.indexToScreen(index)} color={lockedColor} mode={blockMode}/>
+            })
+            }
+            {/* Toasts */}
+            <Toasts toasts={gameState.toasts} />
+            {/* Info */}
+            <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score} bestValue={gameState.bestScore}/>
+            <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
+            <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
+            {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
+            {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
+            {/* Overlays */}
+            {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+            {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+            {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver newBestScore={gameState.isNewBestScore ? gameState.bestScore : undefined} onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+            {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
+            {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
+            {showOptions ? <Options onClose={onOptionsClose}/> : null}
+            {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
+          </Bounds>
+          {/* Touch */}
+          {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
+          { /* @ts-ignore */ }
+          <Environment files={suspend(warehouse)}/>
+          <OrbitControls
+            enabled={false}
+            makeDefault={true}
+            minAzimuthAngle={0}
+            maxAzimuthAngle={0}
+            minPolarAngle={Math.PI * 0.4}
+            maxPolarAngle={Math.PI * 0.6}
+            autoRotate={false}
+            enableZoom={false}
+            enablePan={false}
+            enableRotate={true}
+          />
+        </Suspense>
+      </Canvas>
+      <Loader containerStyles={{ background: '#000000' }}/>
+    </>
   )
 }
 
