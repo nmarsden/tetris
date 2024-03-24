@@ -78,7 +78,7 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO show tetris favicon
 
-// TODO fix toast animation - should fade out
+// TODO camera animation - perfect clear, hard drop & blocked
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...

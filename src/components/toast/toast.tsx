@@ -29,7 +29,7 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
   useEffect(() => {
     api.start(animation)
     Sound.getInstance().playSoundFX(details.achievement);
-    setTimeout(() => onExpired(), DELAY_BETWEEN_TOASTS_MSECS);
+    setTimeout(() => onExpired(), 1500);
   }, []);
 
   return (

@@ -288,7 +288,7 @@ class GameEngine {
         // update gameState: level & toasts
         this.gameState.level++;
         this.timePerRowInMSecs = this.calcTimePerRow(this.gameState.level);
-        this.addToast(this.gameState.completedRows[0], 'LEVEL UP', 0);
+        this.addToast(8, 'LEVEL UP', 0);
       }
 
       // update gameState: lockedColors
@@ -306,7 +306,7 @@ class GameEngine {
         // update gameState: score & toasts
         const perfectClearPoints = this.calcPerfectClearPoints(this.gameState.completedRows.length, this.gameState.level);
         this.addToScore(perfectClearPoints);
-        this.addToast(this.gameState.completedRows[0], 'PERFECT CLEAR', perfectClearPoints);
+        this.addToast(8, 'PERFECT CLEAR', perfectClearPoints);
       }
 
       // update gameState: completedRows
@@ -597,7 +597,7 @@ class GameEngine {
     if (this.gameState.score > this.gameState.bestScore) {
       this.gameState.bestScore = this.gameState.score;
       if (!this.gameState.isNewBestScore) {
-        this.addToast(10, 'NEW BEST SCORE', 0);
+        this.addToast(8, 'NEW BEST SCORE', 0);
       }
       this.gameState.isNewBestScore = true;
     }
