@@ -76,8 +76,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO show tetris favicon
-
 // TODO camera animation - perfect clear, hard drop & blocked
 
 // TODO fix intelliJ CPU performance problem
