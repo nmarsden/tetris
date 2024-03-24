@@ -78,8 +78,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO camera animation - perfect clear, hard drop & blocked
 
-// TODO initial Loading state
-
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
 //     - Command + Shift + A
