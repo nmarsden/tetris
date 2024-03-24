@@ -155,7 +155,7 @@ class GameEngine {
     score: 0,
     bestScore: 0,
     isNewBestScore: false,
-    level: 1,
+    level: 0,
     lines: 0,
     toasts: []
   };

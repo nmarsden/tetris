@@ -126,6 +126,11 @@ const App = () => {
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
   }, []);
 
+  const onEnter = useCallback(() => {
+    Sound.getInstance().setMusicVolume(store.musicVolume);
+    Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
+  }, []);
+
   const onOptions = useCallback(() => {
     setShowOptions(true);
   }, []);
@@ -196,6 +201,7 @@ const App = () => {
   }, [action, step]);
 
   useEffect(() => {
+    if (gameState.level === 0) return;
     // Set music rate
     Sound.getInstance().stopMusic();
     Sound.getInstance().setMusicRate(0.5 + (gameState.level * 0.1));
@@ -206,11 +212,6 @@ const App = () => {
     if (gameState.bestScore === 0) return;
     setStore({...store, bestScore: gameState.bestScore});
   }, [gameState.bestScore]);
-
-  useEffect(() => {
-    Sound.getInstance().setMusicVolume(store.musicVolume);
-    Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
-  }, []);
 
   return (
     <>
@@ -248,7 +249,7 @@ const App = () => {
             {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
             {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
             {/* Overlays */}
-            {gameState.mode === 'HOME' && !showCountdown ? <Home onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+            {gameState.mode === 'HOME' && !showCountdown ? <Home onEnter={onEnter} onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
             {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
             {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver newBestScore={gameState.isNewBestScore ? gameState.bestScore : undefined} onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
             {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}

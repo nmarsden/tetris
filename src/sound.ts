@@ -16,6 +16,8 @@ class Sound {
   }
 
   private constructor() {
+    Howler.autoUnlock = false;
+
     this.music = new Howl({ src: ['/tetris/audio/music.webm', '/tetris/audio/music.mp3'], format: ['webm', 'mp3'], loop: true })
     this.soundFXs = new Map([
     ['SINGLE',         new Howl({ src: ['/tetris/audio/se_game_single.webm', '/tetris/audio/se_game_single.mp3'], format: ['webm', 'mp3']})],
