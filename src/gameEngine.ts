@@ -9,7 +9,7 @@ const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 
 type PieceTypeTuple = typeof PIECE_TYPES;
 export type PieceType = PieceTypeTuple[number];
 
-type PieceAction = 'MOVE' | 'ROTATE' | 'SOFT DROP' | 'HARD DROP' | 'LOCK' | 'BLOCKED' | null;
+type PieceAction = 'MOVE' | 'ROTATE' | 'SOFT DROP' | 'HARD DROP' | 'LOCK' | 'BLOCKED LEFT' | 'BLOCKED RIGHT' | 'BLOCKED DOWN' | null;
 
 class RandomPieceBag {
   pieces: PieceType[] = ['I0', 'O', 'T0', 'S0', 'Z0', 'J0', 'L0'];
@@ -359,7 +359,7 @@ class GameEngine {
 
     if (action.moveLeft) {
       if (!this.canMoveLeft()) {
-        this.gameState.pieceAction = 'BLOCKED';
+        this.gameState.pieceAction = 'BLOCKED LEFT';
       } else {
         // update gameState: piece & ghostPiece moved left
         this.gameState.piece = this.movePiece(this.gameState.piece, {col: -1, row: 0});
@@ -376,10 +376,13 @@ class GameEngine {
         }
         return this.gameState;
       }
+    } else if (this.gameState.pieceAction === 'BLOCKED LEFT') {
+      this.gameState.pieceAction = null;
     }
+
     if (action.moveRight) {
       if (!this.canMoveRight()) {
-        this.gameState.pieceAction = 'BLOCKED';
+        this.gameState.pieceAction = 'BLOCKED RIGHT';
       } else {
         // update gameState: piece & ghostPiece moved left
         this.gameState.piece = this.movePiece(this.gameState.piece, {col: 1, row: 0});
@@ -396,11 +399,14 @@ class GameEngine {
         }
         return this.gameState;
       }
+    } else if (this.gameState.pieceAction === 'BLOCKED RIGHT') {
+      this.gameState.pieceAction = null;
     }
+
     if (action.moveDown) {
       if (!this.canMoveDown()) {
         if (!this.gameState.isLockMode) {
-          this.gameState.pieceAction = 'BLOCKED';
+          this.gameState.pieceAction = 'BLOCKED DOWN';
         }
       } else {
         // update gameState: piece moved down
@@ -421,11 +427,11 @@ class GameEngine {
         return this.gameState;
       }
     }
+
     if (action.rotateClockwise) {
       const rotatedPiece = this.getValidPieceRotatedClockwise(this.gameState.piece);
       if (rotatedPiece === null) {
-        this.gameState.pieceAction = 'BLOCKED';
-        // return this.gameState;
+        this.gameState.pieceAction = 'BLOCKED RIGHT';
       } else {
         // update gameState: rotate piece & ghost clockwise
         this.gameState.piece = rotatedPiece;
@@ -456,6 +462,8 @@ class GameEngine {
       // update lockMode
       this.setIsLockMode(true);
       return this.gameState;
+    } else if (this.gameState.pieceAction === 'HARD DROP') {
+      this.gameState.pieceAction = null;
     }
 
     if (this.gameState.isLockMode) {

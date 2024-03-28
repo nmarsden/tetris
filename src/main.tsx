@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Bounds, Environment, Loader, OrbitControls, OrthographicCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Suspense, useCallback, useEffect, useMemo, useState} from "react";
+import {Suspense, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
@@ -23,6 +23,7 @@ import {Sound} from "./sound.ts";
 import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 import {Help} from './components/help/help.tsx';
 import {Options} from "./components/options/options.tsx";
+import {CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
 import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
@@ -76,7 +77,12 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO camera animation - perfect clear, hard drop & blocked
+// TODO fix bug: pieceAction is not being reset after key up, resulting in action being triggered twice when a key is pressed and released
+
+// TODO add juiciness...
+//      - camera animation - line clear, perfect clear, hard drop & blocked
+//      - particle effect - hard drop, blocked, etc...
+//      - background effect (eg. flashing color) - perfect clear, line cleared, level up, combo
 
 // TODO fix intelliJ CPU performance problem
 //   - Try enabling the new TypeScript Engine...
@@ -103,6 +109,7 @@ const App = () => {
   const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [action, setActionField] = useKeyboardControls();
+  const cameraAnimation = useRef<CameraAnimationRef>(null);
 
   const isShowOptionsOrHelp = useMemo(() => {
     return showOptions || showHelp;
@@ -180,6 +187,16 @@ const App = () => {
     const gameState = gameEngine.handleAction(action);
     setGameState({...gameState});
 
+    if (gameState.pieceAction === 'BLOCKED LEFT') {
+      cameraAnimation.current?.animate('BUMP_RIGHT');
+    }
+    if (gameState.pieceAction === 'BLOCKED RIGHT') {
+      cameraAnimation.current?.animate('BUMP_LEFT');
+    }
+    if (gameState.pieceAction === 'HARD DROP') {
+      cameraAnimation.current?.animate('BUMP_UP');
+    }
+
     if (gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
       Sound.getInstance().playSoundFX(gameState.pieceAction);
     }
@@ -218,6 +235,7 @@ const App = () => {
       <Canvas>
         <Suspense>
           <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
+          <CameraAnimation ref={cameraAnimation}/>
           <Bounds fit clip observe margin={1} maxDuration={0.1}>
             <Background />
             <Playfield enableGrid={false}/>

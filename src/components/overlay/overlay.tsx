@@ -16,7 +16,7 @@ const MODAL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x:
 const MODAL_BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -(MODAL_BORDER_WIDTH*0.5), y: -1 +(MODAL_BORDER_HEIGHT*0.5), z: TetrisConstants.z.overlay3Offset});
 
 const IMAGE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 3.5, z: TetrisConstants.z.overlay3Offset});
-const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 3.2, z: TetrisConstants.z.overlay3Offset});
+const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 3.2, z: TetrisConstants.z.overlay3Offset + 5});
 const SUB_HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 + 0.9, z: TetrisConstants.z.overlay3Offset});
 
 const SubHeading = ({ text }: { text: string }) => {
