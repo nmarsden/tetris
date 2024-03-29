@@ -77,8 +77,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO fix bug: pieceAction is not being reset after key up, resulting in action being triggered twice when a key is pressed and released
-
 // TODO add juiciness...
 //      - camera animation - line clear, perfect clear, hard drop & blocked
 //      - particle effect - hard drop, blocked, etc...
@@ -193,11 +191,11 @@ const App = () => {
     if (gameState.pieceAction === 'BLOCKED RIGHT') {
       cameraAnimation.current?.animate('BUMP_LEFT');
     }
-    if (gameState.pieceAction === 'HARD DROP') {
+    if (gameState.pieceAction === 'HARD DROP' || gameState.pieceAction === 'BLOCKED DOWN') {
       cameraAnimation.current?.animate('BUMP_UP');
     }
 
-    if (gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
+    if (gameState.mode === 'PLAYING' && gameState.pieceAction !== null && gameState.pieceAction !== 'LOCK') {
       Sound.getInstance().playSoundFX(gameState.pieceAction);
     }
     if (gameState.pieceAction === 'HARD DROP') {

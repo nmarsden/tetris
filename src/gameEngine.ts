@@ -165,6 +165,18 @@ class GameEngine {
     return this.gameState;
   }
 
+  // logPlayfield(): void {
+  //   for (let row=19; row>=0; row--) {
+  //     let output = '';
+  //     for (let col=0; col<10; col++) {
+  //       const index = (row * 10) + col;
+  //       const isDroppedBlock = this.droppingBlockPositions.some(pos => pos.row === row && pos.col === col);
+  //       output = output + (this.gameState.lockedColors[index] ? '*' : isDroppedBlock ? 'O' : '_');
+  //     }
+  //     console.log(`${row}: ${output}`);
+  //   }
+  // }
+
   start(): GameState {
     this.gameState.mode = 'PLAYING';
     this.gameState.score = 0;
@@ -355,7 +367,12 @@ class GameEngine {
       this.gameState.mode = 'PAUSED';
       return this.gameState;
     }
-    if (this.gameState.mode === 'PAUSED') return this.gameState;
+    if (this.gameState.mode !== 'PLAYING') return this.gameState;
+
+    // do not allow movement when completed rows
+    if (this.gameState.completedRows.length !== 0) {
+      return this.gameState;
+    }
 
     if (action.moveLeft) {
       if (!this.canMoveLeft()) {
@@ -405,9 +422,7 @@ class GameEngine {
 
     if (action.moveDown) {
       if (!this.canMoveDown()) {
-        if (!this.gameState.isLockMode) {
-          this.gameState.pieceAction = 'BLOCKED DOWN';
-        }
+        this.gameState.pieceAction = 'BLOCKED DOWN';
       } else {
         // update gameState: piece moved down
         this.gameState.piece = this.movePiece(this.gameState.piece, {col: 0, row: -1});

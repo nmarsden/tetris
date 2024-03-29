@@ -7,13 +7,8 @@ const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y
 const Background = () => {
   return (
     <>
-      <Plane position={POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>
-        <meshStandardMaterial
-          metalness={1}
-          roughness={1}
-          color={TetrisConstants.color.black}
-        />
-      </Plane>
+      {/* Note: this is not visible, but it determines the bounds of the game */}
+      <Plane position={POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]} visible={false} />
     </>
   )
 }
