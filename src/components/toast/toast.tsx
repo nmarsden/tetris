@@ -6,6 +6,7 @@ import {ToastDetails} from "../../gameEngine.ts";
 import {useCallback, useEffect, useState} from "react";
 import {animated, useSpring} from "@react-spring/three";
 import {Sound} from "../../sound.ts";
+import {Confetti} from "../confetti/confetti.tsx";
 
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
@@ -59,6 +60,7 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
         />
         {`+${details.points}`}
       </Text> : null}
+      <Confetti />
     </animated.group>
   );
 }
