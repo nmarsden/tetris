@@ -3,6 +3,7 @@ import {RoundedBox, Text} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useCallback, useMemo} from "react";
 import {Sound} from "../../sound.ts";
+import {ThreeEvent} from "@react-three/fiber/dist/declarations/src/core/events.js";
 
 export type ButtonType = 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -29,7 +30,9 @@ const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true
     return BUTTON_INFO.get(type) as ButtonInfo;
   }, [type]);
 
-  const onPointerDown = useCallback(() => {
+  const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+
     if (!enabled) return;
     if (enableSound) Sound.getInstance().playSoundFX('BUTTON');
     onButtonClick();
@@ -37,7 +40,7 @@ const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true
 
   return <group scale={scale} position={position}>
     <RoundedBox
-      args={[width, TetrisConstants.cellSize * 2, TetrisConstants.cellSize]} // Width, height, depth. Default is [1, 1, 1]
+      args={[width, TetrisConstants.cellSize * 2, TetrisConstants.cellSize * 0.5]} // Width, height, depth. Default is [1, 1, 1]
       radius={0.2} // Radius of the rounded corners. Default is 0.05
       smoothness={4} // The number of curve segments. Default is 4
       bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
@@ -49,7 +52,7 @@ const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true
         roughness={0.75}
         color={bgColor}
       />
-      <Text key={type} position={[0,0,1]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth} outlineColor={outlineColor}>
+      <Text key={type} position={[0,0,0.51]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth} outlineColor={outlineColor}>
         <meshStandardMaterial
           metalness={1}
           roughness={1}

@@ -11,8 +11,8 @@ import {Confetti} from "../confetti/confetti.tsx";
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
 const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () => void }) => {
-  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 1.5, z: TetrisConstants.z.overlay1Offset});
-  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 3.5, z: TetrisConstants.z.overlay1Offset});
+  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 2.5, z: TetrisConstants.z.overlay1Offset});
+  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 4.5, z: TetrisConstants.z.overlay1Offset});
 
   const animation = useCallback(() => ({
     from: { positionX: startPos.x, positionY: startPos.y, positionZ: startPos.z, scale: 0, opacity: 0 },

@@ -10,14 +10,14 @@ import {Sound} from "../../sound.ts";
 import {Slider} from "../uikit/slider.tsx";
 import {Root} from "@react-three/uikit";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset - 0.05});
 const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
-const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay5Offset});
-const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset});
+const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay4Offset});
+const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset + 0.01});
 
-const MUSIC_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.5, z: TetrisConstants.z.overlay4Offset});
-const SFX_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +0.5, z: TetrisConstants.z.overlay4Offset});
+const MUSIC_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.5, z: TetrisConstants.z.overlay4Offset + 0.01});
+const SFX_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +0.5, z: TetrisConstants.z.overlay4Offset + 0.01});
 
 const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
 

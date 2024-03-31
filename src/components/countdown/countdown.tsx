@@ -6,8 +6,8 @@ import {useSpring, animated, config, AnimationResult} from '@react-spring/three'
 import {useCallback, useEffect, useState} from "react";
 import {Sound} from "../../sound.ts";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay2Offset});
-const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay2Offset});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset});
+const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset + 0.01});
 
 const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
   const [count, setCount] = useState(3);

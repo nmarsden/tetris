@@ -10,7 +10,7 @@ const WELCOME_MESSAGE = [
   'WELCOME TO THE BLOCK PARTY.',
   "THE PLACE FOR GEOMETRIC CHAOS."
 ];
-const WELCOME_MESSAGE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -1, z: TetrisConstants.z.overlay3Offset});
+const WELCOME_MESSAGE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -1, z: TetrisConstants.z.overlay3Offset + 0.01});
 
 const OPTIONS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
 const HELP_BUTTON_POSITION    = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +2.4, y: -1 -2.5, z: TetrisConstants.z.overlay3Offset});
@@ -37,7 +37,7 @@ const Home = ({ onEnter, onStart, onOptions, onHelp, enableButtons }: { onEnter:
   const onEnterClicked = useCallback(() => {
     setShowEnter(false);
     onEnter();
-  }, []);
+  }, [onEnter]);
 
   return (
     <>

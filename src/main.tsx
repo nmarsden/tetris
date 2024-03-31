@@ -2,7 +2,7 @@
 import './index.css'
 import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
-import {Bounds, Environment, Loader, OrbitControls, OrthographicCamera} from "@react-three/drei";
+import {Environment, Loader, OrbitControls, PerspectiveCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
 import {Suspense, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
@@ -14,7 +14,6 @@ import {TetrisConstants} from "./tetrisConstants.ts";
 import {Info} from "./components/info/info.tsx";
 import {GameOver} from "./components/gameOver/gameOver.tsx";
 import {Home} from "./components/home/home.tsx";
-import {Background} from "./components/background/background.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
 import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
@@ -23,7 +22,7 @@ import {Sound} from "./sound.ts";
 import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 import {Help} from './components/help/help.tsx';
 import {Options} from "./components/options/options.tsx";
-import {CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
+import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
 import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
@@ -76,6 +75,10 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Single	 Yes
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
+
+// TODO options - camera FOV (eg. set to 10 to remove perspective)
+
+// TODO ghost piece - can the look be improved?  transparency/opacity gives inconsistent results when rendered
 
 // TODO add juiciness...
 //      - camera animation - line clear, perfect clear, hard drop & blocked
@@ -232,10 +235,8 @@ const App = () => {
     <>
       <Canvas>
         <Suspense>
-          <OrthographicCamera makeDefault={true} position={[0, 0, 800]} />
-          <CameraAnimation ref={cameraAnimation}/>
-          <Bounds fit clip observe margin={1} maxDuration={0.1}>
-            <Background />
+            <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} />
+            <CameraAnimation ref={cameraAnimation}/>
             <Playfield enableGrid={false}/>
             {gameState.pieceAction === 'HARD DROP' ?
             <>
@@ -272,7 +273,6 @@ const App = () => {
             {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
             {showOptions ? <Options onClose={onOptionsClose}/> : null}
             {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
-          </Bounds>
           {/* Touch */}
           {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
           { /* @ts-ignore */ }
