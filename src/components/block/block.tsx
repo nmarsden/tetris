@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {animated, config, useSpring} from "@react-spring/three";
 import {Color} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useEffect} from "react";
-import {RoundedBox} from "@react-three/drei";
+import {Outlines, RoundedBox} from "@react-three/drei";
 
 export type BlockMode = 'STANDARD' | 'GHOST' | 'LOCK' | 'CLEAR' | 'SHIFT_ONE' | 'SHIFT_TWO' | 'SHIFT_THREE' | 'SHIFT_FOUR';
 
@@ -13,7 +14,7 @@ const DURATION = 500;
 
 const Block = ({ position, color, mode='STANDARD' } : { position: [number, number, number], color: Color, mode?: BlockMode }) => {
   const [{ opacity, rotationZ, positionY, scale}, api] = useSpring(() => ({
-    from: { opacity: mode === 'GHOST' ? 0.3 : 1, rotationZ: 0, positionY: 0, scale: 1 },
+    from: { opacity: mode === 'GHOST' ? 0.2 : 1, rotationZ: 0, positionY: 0, scale: 1 },
     config: config.stiff
   }));
   const blockColor = mode === 'CLEAR' ? TetrisConstants.color.white : color;
@@ -43,6 +44,7 @@ const Block = ({ position, color, mode='STANDARD' } : { position: [number, numbe
           smoothness={4} // The number of curve segments. Default is 4
           bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
           creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
+          scale={mode === 'GHOST' ? 0.9 : 1}
         >
           <animated.meshStandardMaterial
             metalness={0.45}
@@ -51,10 +53,11 @@ const Block = ({ position, color, mode='STANDARD' } : { position: [number, numbe
             opacity={opacity}
             transparent={true}
           />
+          {mode === 'GHOST' ? <Outlines thickness={0.05} color="white" transparent={true} opacity={1}/> : null}
         </RoundedBox>
       </animated.mesh>
     </animated.group>
   )
 }
 
-export { Block }
+export {Block}

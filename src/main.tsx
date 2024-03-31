@@ -78,7 +78,7 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
-// TODO ghost piece - can the look be improved?  transparency/opacity gives inconsistent results when rendered
+// TODO confetti - perhaps it should explode more in the z direction towards the camera?
 
 // TODO add juiciness...
 //      - camera animation - line clear, perfect clear, hard drop & blocked
