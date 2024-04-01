@@ -11,14 +11,14 @@ import {Confetti} from "../confetti/confetti.tsx";
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
 const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () => void }) => {
-  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 2.5, z: TetrisConstants.z.overlay1Offset});
-  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 4.5, z: TetrisConstants.z.overlay1Offset});
+  const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 4.5, z: TetrisConstants.z.overlay1Offset});
+  const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 6.5, z: TetrisConstants.z.overlay1Offset});
 
   const animation = useCallback(() => ({
     from: { positionX: startPos.x, positionY: startPos.y, positionZ: startPos.z, scale: 0, opacity: 0 },
     // @ts-ignore
     to: async (next)=> {
-      await next({ positionX: endPos.x, positionY: endPos.y, positionZ: endPos.z, scale: 1, opacity: 0.8 })
+      await next({ positionX: endPos.x, positionY: endPos.y, positionZ: endPos.z, scale: 1.4, opacity: 0.8 })
       await next({ opacity: 1 })
       await next({ opacity: 0 })
     },

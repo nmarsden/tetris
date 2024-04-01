@@ -214,6 +214,15 @@ class GameEngine {
     // this.gameState.lockedColors[18] = null;
     // this.gameState.lockedColors[19] = null;
 
+    // -- multiple rows
+    // for (let row=0; row<16; row++) {
+    //   for (let col=0; col<10; col++) {
+    //     const index = (row * 10) + col;
+    //     const color = (row === 15 && col === 5) ? null : TetrisConstants.color.yellow;
+    //     this.gameState.lockedColors[index] = color;
+    //   }
+    // }
+
     const newPiece = { pos: {...START_POS}, type: this.pieceBag.pick() };
     this.gameState.piece = newPiece
     this.gameState.ghostPiece = this.ghostPiece(newPiece);

@@ -11,7 +11,6 @@ type ConfettiProps = {
 };
 
 type Particle = {
-  life: number;
   destination: Vector3;
   rotateSpeedX: number;
   rotateSpeedY: number;
@@ -19,7 +18,6 @@ type Particle = {
 };
 
 type Boom = {
-  life: number;
   object3D: Object3D;
   particles: Particle[];
 };
@@ -36,7 +34,6 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
     groupRef.current.add(boomObject);
 
     const boom: Boom = {
-      life: Math.random() * 5 + 5,
       object3D: boomObject,
       particles: []
     };
@@ -59,15 +56,14 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
       boomObject.add(particleMesh);
 
       const particle: Particle = {
-        life: 1,
         destination: new Vector3(
           (Math.random() - 0.5) * (radius * 2) * Math.random(),
           (Math.random() - 0.5) * (radius * 2) * Math.random(),
-          (Math.random() - 0.5) * (radius * 2) * Math.random()
+          (radius) * Math.random()
         ),
-        rotateSpeedX: Math.random() * 0.8 - 0.4,
-        rotateSpeedY: Math.random() * 0.8 - 0.4,
-        rotateSpeedZ: Math.random() * 0.8 - 0.4
+        rotateSpeedX: 0,
+        rotateSpeedY: 0,
+        rotateSpeedZ: 0.2
       };
 
       boom.particles.push(particle);
@@ -85,7 +81,6 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
         const particle = boom.particles[k];
 
         particle.destination.y -= MathUtils.randFloat(0.1, 0.3);
-        particle.life -= MathUtils.randFloat(0.005, 0.01);
 
         const speedX = (particle.destination.x - particleMesh.position.x) / 200;
         const speedY = (particle.destination.y - particleMesh.position.y) / 200;
