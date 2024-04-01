@@ -54,7 +54,7 @@ const Overlay = ({ subHeading=''}: { subHeading?: string }) => {
           map={texture}
         />
       </Plane>
-      <Text position={TEXT_POSITION} fontSize={3.75} letterSpacing={0.1} outlineWidth={0.2} outlineColor={0x000000}>
+      <Text position={TEXT_POSITION} fontSize={3.65} letterSpacing={0.1} outlineWidth={0.2} outlineColor={0x000000}>
         <meshStandardMaterial
           metalness={1}
           roughness={1}

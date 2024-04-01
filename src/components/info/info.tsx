@@ -1,6 +1,6 @@
 import {Vector3} from "three";
 import {Plane, Text, useTexture} from "@react-three/drei";
-import {GridPos, GridUtils} from "../playfield/playfield.tsx";
+import {GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {PieceType} from "../../gameEngine.ts";
 import {Border} from "../border/border.tsx";
@@ -32,14 +32,12 @@ const CustomText = ({ position, size, text, color, outlineColor } : { position: 
   )
 }
 
-const Label = ({ gridPos, label } : { gridPos: GridPos, label: string }) => {
-  const position = GridUtils.gridPosToScreen({ col: gridPos.col, row: gridPos.row });
+const Label = ({ position, label } : { position: Vector3, label: string }) => {
   return <CustomText position={position} size={1} text={label} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
 };
 
-const Value = ({ gridPos, value, bestValue } : { gridPos: GridPos, value: number | PieceType, bestValue?: number }) => {
+const Value = ({ position, value, bestValue } : { position: Vector3, value: number | PieceType, bestValue?: number }) => {
   const isPieceValue = !Number.isInteger(value);
-  const position = GridUtils.gridPosToScreen({ col: gridPos.col, row: gridPos.row });
   const valueBoxWidth = TetrisConstants.infoWidth;
   const valueBoxHeight = TetrisConstants.cellSize * (isPieceValue ? 2.7 : 1.4);
   const borderPosition = position.clone().add({ x: -valueBoxWidth * 0.5, y: TetrisConstants.cellSize * 0.3, z: 0})
@@ -52,8 +50,10 @@ const Value = ({ gridPos, value, bestValue } : { gridPos: GridPos, value: number
   const bestBorderPosition = position.clone().add({ x: -bestValueBoxWidth * 0.5, y: -TetrisConstants.cellSize * 1.1, z: 0})
   const bestTextPosition = position.clone().add({ x: 0, y: -TetrisConstants.cellSize * 1.6, z: 0})
 
+  const gridPos = GridUtils.screenToGridPos(position);
   const pieceCol = isPieceValue ? (['O', 'I0'].includes(value as PieceType) ? (gridPos.col - 1) : gridPos.col - 0.5) : 0;
   const pieceGridPos = { col: pieceCol, row: gridPos.row - 2 };
+
   return (
     <>
       <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
@@ -73,12 +73,12 @@ const Value = ({ gridPos, value, bestValue } : { gridPos: GridPos, value: number
   )
 };
 
-const Info = ({ gridPos, label, value, bestValue } : { gridPos: GridPos, label: string, value: number | PieceType, bestValue?: number }) => {
-  const valuePos = { col: gridPos.col, row: gridPos.row - 0.8 };
+const Info = ({ position, label, value, bestValue } : { position: Vector3, label: string, value: number | PieceType, bestValue?: number }) => {
+  const valuePosition = position.clone().add({ x: 0, y: -0.8, z: 0 });
   return (
     <>
-      <Label gridPos={gridPos} label={label} />
-      <Value gridPos={valuePos} value={value} bestValue={bestValue} />
+      <Label position={position} label={label} />
+      <Value position={valuePosition} value={value} bestValue={bestValue} />
     </>
   )
 }

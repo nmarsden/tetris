@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as THREE from 'three'
 import {useMemo} from "react";
 import {Line} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
+import {Vector3} from "three";
 
 export type GridPos = {
   col: number;
@@ -10,18 +10,25 @@ export type GridPos = {
 };
 
 class GridUtils {
-  static gridPosToScreen(gridPos: GridPos): THREE.Vector3  {
-    return new THREE.Vector3(
+  static gridPosToScreen(gridPos: GridPos): Vector3  {
+    return new Vector3(
       TetrisConstants.gridOrigin.x + (gridPos.col * TetrisConstants.cellSize),
       TetrisConstants.gridOrigin.y + (gridPos.row * TetrisConstants.cellSize),
       TetrisConstants.z.main
     );
   }
+
+  static screenToGridPos(position: Vector3): GridPos {
+    return {
+      row: (position.y - TetrisConstants.gridOrigin.y) / TetrisConstants.cellSize,
+      col: (position.x - TetrisConstants.gridOrigin.x) / TetrisConstants.cellSize,
+    };
+  }
 }
 
 const Grid = () => {
-  const positions: THREE.Vector3[] = useMemo(() => {
-    const positions: THREE.Vector3[] = [];
+  const positions: Vector3[] = useMemo(() => {
+    const positions: Vector3[] = [];
     for (let row=0; row<TetrisConstants.numRows; row++) {
       for (let col=0; col<TetrisConstants.numCols; col++) {
         positions.push(GridUtils.gridPosToScreen({ col, row }));

@@ -8,14 +8,14 @@ const GRID_WIDTH = NUM_COLS * CELL_SIZE;
 const GRID_HEIGHT = NUM_ROWS * CELL_SIZE;
 const GRID_ORIGIN: THREE.Vector3 = new THREE.Vector3(GRID_WIDTH * -0.5, GRID_HEIGHT * -0.5, 0);
 
-const INFO_LEFT_PADDING_CELLS = 0.5;
-const INFO_WIDTH_CELLS = 4.5
+const INFO_LEFT_PADDING_CELLS = 0;
+const INFO_WIDTH_CELLS = 4.5;
 
-const GAME_WIDTH_CELLS = NUM_COLS + INFO_LEFT_PADDING_CELLS + INFO_WIDTH_CELLS + 2;
+const GAME_WIDTH_CELLS = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS) + 2;
 const GAME_HEIGHT_CELLS = NUM_ROWS + 2;
 
-const INFO_COL = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS * 0.5);
-const INFO_ROW = NUM_ROWS - 0.5;
+const SIDEBAR_COL = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS * 0.5 * 0.5);
+const INFO_ROW = NUM_ROWS - 2.2;
 
 const CYAN = new Color(0x00B7B4);
 const YELLOW = new Color(0xF8F200);
@@ -48,15 +48,11 @@ export const TetrisConstants = {
     grey: GREY
   },
   infoWidth: INFO_WIDTH_CELLS * CELL_SIZE,
-  scoreCol: INFO_COL,
+  sideBarCol: SIDEBAR_COL,
   scoreRow: INFO_ROW,
-  levelCol: INFO_COL,
   levelRow: INFO_ROW - 3.75,
-  linesCol: INFO_COL,
   linesRow: INFO_ROW - 6.75,
-  nextCol: INFO_COL,
   nextRow: INFO_ROW - 9.75,
-  pauseCol: INFO_COL,
   pauseRow: INFO_ROW - 14.75,
   center: { col: GAME_WIDTH_CELLS * 0.5, row: GAME_HEIGHT_CELLS * 0.5 },
   gameWidth: GAME_WIDTH_CELLS * CELL_SIZE,

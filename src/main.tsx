@@ -10,8 +10,6 @@ import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {ActionField, useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 import {Playfield} from "./components/playfield/playfield.tsx";
-import {TetrisConstants} from "./tetrisConstants.ts";
-import {Info} from "./components/info/info.tsx";
 import {GameOver} from "./components/gameOver/gameOver.tsx";
 import {Home} from "./components/home/home.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
@@ -19,11 +17,11 @@ import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
-import {PauseButton} from "./components/pauseButton/pauseButton.tsx";
 import {Help} from './components/help/help.tsx';
 import {Options} from "./components/options/options.tsx";
 import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
 import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
+import { Sidebar } from './components/sidebar/sidebar.tsx';
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -77,8 +75,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Triple	 Yes
 
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
-
-// TODO confetti - perhaps it should explode more in the z direction towards the camera?
 
 // TODO add juiciness...
 //      - camera animation - line clear, perfect clear, hard drop & blocked
@@ -259,12 +255,17 @@ const App = () => {
             }
             {/* Toasts */}
             <Toasts toasts={gameState.toasts} />
-            {/* Info */}
-            <Info gridPos={{col: TetrisConstants.scoreCol, row: TetrisConstants.scoreRow}} label={'SCORE'} value={gameState.score} bestValue={gameState.bestScore}/>
-            <Info gridPos={{col: TetrisConstants.levelCol, row: TetrisConstants.levelRow}} label={'LEVEL'} value={gameState.level}/>
-            <Info gridPos={{col: TetrisConstants.linesCol, row: TetrisConstants.linesRow}} label={'LINES'} value={gameState.lines}/>
-            {isShowPiece(gameState.completedRows, gameState.mode) ? <Info gridPos={{col: TetrisConstants.nextCol,  row: TetrisConstants.nextRow }} label={'NEXT'}  value={gameState.nextPieceType}/> : null}
-            {gameState.mode === 'PLAYING' ? <PauseButton gridPos={{col: TetrisConstants.pauseCol, row: TetrisConstants.pauseRow}} onPause={onPause}/> : null}
+            {/* Sidebar */}
+            <Sidebar
+              score={gameState.score}
+              bestScore={gameState.bestScore}
+              level={gameState.level}
+              lines={gameState.lines}
+              isNextPieceShown={gameState.mode === 'PLAYING'}
+              nextPieceType={gameState.nextPieceType}
+              isPauseButtonShown={gameState.mode === 'PLAYING'}
+              onPause={onPause}
+            />
             {/* Overlays */}
             {gameState.mode === 'HOME' && !showCountdown ? <Home onEnter={onEnter} onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
             {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
