@@ -1,25 +1,25 @@
-import {Plane, Text} from "@react-three/drei";
+import {Text, Wireframe} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
-import {animated, SpringValue, useSpring} from "@react-spring/three";
+import {animated, config, SpringValue, useSpring} from "@react-spring/three";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {useCallback, useEffect, useState} from "react";
-import {Border} from "../border/border.tsx";
 import {Button} from "../button/button.tsx";
 import {Vector3} from "three";
 import {Sound} from "../../sound.ts";
 import {Slider} from "../uikit/slider.tsx";
 import {Root} from "@react-three/uikit";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset - 0.05});
 const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
-const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay4Offset});
-const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset + 0.01});
 
-const MUSIC_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.5, z: TetrisConstants.z.overlay4Offset + 0.01});
-const SFX_VOLUME_LABEL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +0.5, z: TetrisConstants.z.overlay4Offset + 0.01});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset - 0.05});
 
-const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
+const HEADING_POSITION = new Vector3(0, 8.5, 0.01);
+
+const MUSIC_VOLUME_LABEL_POSITION = new Vector3(0, 5.5, 0.01);
+const SFX_VOLUME_LABEL_POSITION = new Vector3(0, 0.5, 0.01);
+
+const CLOSE_BUTTON_POSITION = new Vector3(0, -8, 0);
 
 function roundToOneDecimalPlace(num: number) {
   return +(num.toFixed(1));
@@ -64,7 +64,7 @@ const VolumeSlider = ({ translateY, initialValue, onVolumeChange }: { translateY
           display={"flex"}
           alignItems={"center"}
           justifyContent={"center"}
-          transformTranslateX={1200}
+          transformTranslateX={0}
           transformTranslateY={translateY}
     >
       <Slider
@@ -80,14 +80,20 @@ const VolumeSlider = ({ translateY, initialValue, onVolumeChange }: { translateY
   );
 };
 
+const CLOSED = {
+  opacity: 0,
+  positionY: OVERLAY_POSITION.y + 20
+};
+const OPEN = {
+  opacity: 1,
+  positionY: OVERLAY_POSITION.y
+};
+
 const Options = ({ onClose }: { onClose: () => void }) => {
   const [musicVolume, setMusicVolume] = useState(Sound.getInstance().musicVolume() * 10);
   const [sfxVolume, setSfxVolume] = useState(Sound.getInstance().soundFXVolume() * 10);
-  const [{ opacity }, api] = useSpring(() => ({
-    from: { opacity: 0 },
-    config: {
-      duration: 300
-    }
+  const [{ opacity, positionY }, api] = useSpring(() => ({
+    from: CLOSED
   }));
 
   const onMusicVolumeChange = useCallback((value: number): void => {
@@ -105,32 +111,48 @@ const Options = ({ onClose }: { onClose: () => void }) => {
     }
   }, [sfxVolume]);
 
+  const onButtonClick = useCallback(() => {
+    api.start({
+      to: CLOSED,
+      config: config.stiff,
+      onRest: () => onClose()
+    });
+  }, [api, onClose]);
+
   useEffect(() => {
-    api.start({ to: { opacity: 1 } });
+    api.start({
+      to: OPEN,
+      config: config.gentle
+    });
   }, [api]);
 
   return (
     <>
-      <Plane position={OVERLAY_POSITION} args={[BORDER_WIDTH, BORDER_HEIGHT]}>
+      <animated.mesh
+        position-x={OVERLAY_POSITION.x}
+        position-y={positionY}
+        position-z={OVERLAY_POSITION.z}
+      >
+        <planeGeometry args={[BORDER_WIDTH, BORDER_HEIGHT]} />
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
           transparent={true}
-          color={TetrisConstants.color.black}
+          color={'#000F2e'}
           opacity={opacity}
         />
-      </Plane>
-      <Border position={BORDER_POSITION} width={BORDER_WIDTH} height={BORDER_HEIGHT} />
+        <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01}/>
 
-      <Heading position={HEADING_POSITION} opacity={opacity} text={'OPTIONS'} />
+        <Heading position={HEADING_POSITION} opacity={opacity} text={'OPTIONS'} />
 
-      <LabelValue position={MUSIC_VOLUME_LABEL_POSITION} opacity={opacity} label={'Music Volume'} value={musicVolume}/>
-      <VolumeSlider translateY={-1800} initialValue={musicVolume} onVolumeChange={onMusicVolumeChange} />
+        <LabelValue position={MUSIC_VOLUME_LABEL_POSITION} opacity={opacity} label={'Music Volume'} value={musicVolume}/>
+        <VolumeSlider translateY={-1800} initialValue={musicVolume} onVolumeChange={onMusicVolumeChange} />
 
-      <LabelValue position={SFX_VOLUME_LABEL_POSITION} opacity={opacity} label={'SFX Volume'} value={sfxVolume}/>
-      <VolumeSlider translateY={+700} initialValue={sfxVolume} onVolumeChange={onSfxVolumeChange} />
+        <LabelValue position={SFX_VOLUME_LABEL_POSITION} opacity={opacity} label={'SFX Volume'} value={sfxVolume}/>
+        <VolumeSlider translateY={+700} initialValue={sfxVolume} onVolumeChange={onSfxVolumeChange} />
 
-      <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} onButtonClick={onClose} />
+        <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} opacity={opacity} onButtonClick={onButtonClick} />
+      </animated.mesh>
     </>
   )
 }

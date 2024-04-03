@@ -4,6 +4,7 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useCallback, useMemo} from "react";
 import {Sound} from "../../sound.ts";
 import {ThreeEvent} from "@react-three/fiber/dist/declarations/src/core/events.js";
+import {SpringValue, animated, useSpringValue} from "@react-spring/three";
 
 export type ButtonType = 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -25,7 +26,19 @@ const BUTTON_INFO: Map<ButtonType, ButtonInfo> = new Map([
   [ 'TAB_UNSELECTED', { scale: 0.5,  width: 8.5, fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.grey,  textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
 ]);
 
-const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true, enabled=true }: { position: Vector3, label: string, type?: ButtonType, onButtonClick: () => void, enableSound?:boolean, enabled?:boolean }) => {
+type ButtonProps = {
+  position: Vector3,
+  label: string,
+  opacity?: SpringValue<number>,
+  type?: ButtonType,
+  onButtonClick: () => void,
+  enableSound?:boolean,
+  enabled?:boolean
+};
+
+const Button = ({ position, label, type='LARGE', opacity, onButtonClick, enableSound=true, enabled=true }: ButtonProps) => {
+  const defaultOpacity = useSpringValue(1);
+  const buttonOpacity = opacity === null ? defaultOpacity : opacity;
   const { scale, width, fontSize, outlineWidth, outlineColor, textColor, bgColor } = useMemo(() => {
     return BUTTON_INFO.get(type) as ButtonInfo;
   }, [type]);
@@ -47,16 +60,20 @@ const Button = ({ position, label, type='LARGE', onButtonClick, enableSound=true
       creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
       onPointerDown={onPointerDown}
     >
-      <meshStandardMaterial
+      <animated.meshStandardMaterial
         metalness={0.45}
         roughness={0.75}
         color={bgColor}
+        transparent={true}
+        opacity={buttonOpacity}
       />
       <Text key={type} position={[0,0,0.51]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth} outlineColor={outlineColor}>
-        <meshStandardMaterial
+        <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
           color={textColor}
+          transparent={true}
+          opacity={buttonOpacity}
         />
         {label}
       </Text>

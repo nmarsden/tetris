@@ -1,30 +1,30 @@
-import {Line, Plane, Text} from "@react-three/drei";
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import {Line, Text, Wireframe} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
-import {animated, SpringValue, useSpring} from "@react-spring/three";
+import {animated, config, SpringValue, useSpring} from "@react-spring/three";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {Border} from "../border/border.tsx";
 import {Button, ButtonType} from "../button/button.tsx";
 import {Vector3} from "three";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset - 0.05});
 const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
-const BORDER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 - (BORDER_WIDTH * 0.5), y: -1 + (BORDER_HEIGHT * 0.5), z: TetrisConstants.z.overlay4Offset});
-const HEADING_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +8.5, z: TetrisConstants.z.overlay4Offset + 0.01});
 
-const HOW_TO_PLAY_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
-const HOW_TO_PLAY_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -4.5, y: -1 +5.8, z: TetrisConstants.z.overlay4Offset + 0.01});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset});
 
-const CONTROLS_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
-const CONTROLS_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +5.8, z: TetrisConstants.z.overlay4Offset + 0.01});
+const HEADING_POSITION = new Vector3(0, 8.5, 0.01);
+const HOW_TO_PLAY_BUTTON_POSITION = new Vector3(-4.5, 6.5, 0);
+const HOW_TO_PLAY_LINE_POSITION = new Vector3(-4.5, 5.8, 0.01);
 
-const SCORING_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +6.5, z: TetrisConstants.z.overlay4Offset});
-const SCORING_LINE_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 +4.5, y: -1 +5.8, z: TetrisConstants.z.overlay4Offset + 0.01});
+const CONTROLS_BUTTON_POSITION = new Vector3(0, 6.5, 0);
+const CONTROLS_LINE_POSITION = new Vector3(0, 5.8, 0.01);
 
-const CONTENT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 +4, z: TetrisConstants.z.overlay4Offset + 0.05});
+const SCORING_BUTTON_POSITION = new Vector3(4.5, 6.5, 0);
+const SCORING_LINE_POSITION = new Vector3(4.5, 5.8, 0.01);
 
-const CLOSE_BUTTON_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1 -8, z: TetrisConstants.z.overlay4Offset});
+const CONTENT_POSITION = new Vector3(0, 4, 0.05);
+
+const CLOSE_BUTTON_POSITION = new Vector3(0, -8, 0);
 
 const HOW_TO_PLAY_TEXT = [
   'Arrange falling blocks to complete',
@@ -174,45 +174,69 @@ const Controls = ({ opacity }: { opacity: SpringValue<number> }) => {
   )
 };
 
+const CLOSED = {
+  opacity: 0,
+  positionY: OVERLAY_POSITION.y + 20
+};
+const OPEN = {
+  opacity: 1,
+  positionY: OVERLAY_POSITION.y
+};
+
 const Help = ({ onClose }: { onClose: () => void }) => {
   const [selectedTab, setSelectedTab] = useState<Tab>('HOW_TO_PLAY');
-  const [{ opacity }, api] = useSpring(() => ({
-    from: { opacity: 0 },
-    config: {
-      duration: 300
-    }
+  const [{ opacity, positionY }, api] = useSpring(() => ({
+    from: CLOSED
   }));
 
   const onTabChanged = useCallback((tab: Tab) => {
     setSelectedTab(tab);
   }, []);
 
+  const onButtonClick = useCallback(() => {
+    api.start({
+      to: CLOSED,
+      config: config.stiff,
+      onRest: () => onClose()
+    });
+  }, [api, onClose]);
+
   useEffect(() => {
-    api.start({ to: { opacity: 1 } });
+    api.start({
+      to: OPEN,
+      config: config.gentle
+    });
   }, [api]);
 
   return (
     <>
-      <Plane position={OVERLAY_POSITION} args={[BORDER_WIDTH, BORDER_HEIGHT]}>
+      <animated.mesh
+        position-x={OVERLAY_POSITION.x}
+        position-y={positionY}
+        position-z={OVERLAY_POSITION.z}
+      >
+        <planeGeometry args={[BORDER_WIDTH, BORDER_HEIGHT]} />
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
           transparent={true}
-          color={TetrisConstants.color.black}
+          color={'#000F2e'}
           opacity={opacity}
         />
-      </Plane>
-      <Border position={BORDER_POSITION} width={BORDER_WIDTH} height={BORDER_HEIGHT} />
+        <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01}/>
 
-      <Heading position={HEADING_POSITION} opacity={opacity} text={'HELP'} />
+        <Heading position={HEADING_POSITION} opacity={opacity} text={'HELP'} />
 
-      <Tabs onTabChanged={onTabChanged} />
+        <Tabs onTabChanged={onTabChanged} />
 
-      {selectedTab === 'HOW_TO_PLAY' ? <HowToPlay opacity={opacity} />  : null}
-      {selectedTab === 'SCORING' ? <Scoring opacity={opacity} /> : null}
-      {selectedTab === 'CONTROLS' ? <Controls opacity={opacity} /> : null}
+        {selectedTab === 'HOW_TO_PLAY' ? <HowToPlay opacity={opacity} />  : null}
+        {selectedTab === 'SCORING' ? <Scoring opacity={opacity} /> : null}
+        {selectedTab === 'CONTROLS' ? <Controls opacity={opacity} /> : null}
 
-      <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} onButtonClick={onClose} />
+        <Button position={CLOSE_BUTTON_POSITION} label={'CLOSE'} opacity={opacity} onButtonClick={onButtonClick} />
+
+      </animated.mesh>
+
     </>
   )
 }

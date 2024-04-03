@@ -6,7 +6,13 @@ export type Store = {
   soundFXVolume: number;
 };
 
-export default function useLocalStorage(key:string, initialValue: Store) {
+const INITIAL_STORE: Store = {
+  bestScore: 0,
+  musicVolume: 1,
+  soundFXVolume: 1
+};
+
+export default function useLocalStorage(key:string) {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
   const [storedValue, setStoredValue] = useState(() => {
@@ -14,11 +20,11 @@ export default function useLocalStorage(key:string, initialValue: Store) {
       // Get from local storage by key
       const item = window.localStorage.getItem(key);
       // Parse stored json or if none return initialValue
-      return item ? JSON.parse(item) : initialValue;
+      return item ? JSON.parse(item) : INITIAL_STORE;
     } catch (error) {
       // If error also return initialValue
       console.log(error);
-      return initialValue;
+      return INITIAL_STORE;
     }
   });
 

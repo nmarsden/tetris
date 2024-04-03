@@ -4,24 +4,20 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, Loader, OrbitControls, PerspectiveCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Suspense, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {Suspense, useCallback, useEffect, useRef, useState} from "react";
 import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {ActionField, useKeyboardControls} from "./hooks/useKeyboardControls.ts";
 import {Playfield} from "./components/playfield/playfield.tsx";
-import {GameOver} from "./components/gameOver/gameOver.tsx";
-import {Home} from "./components/home/home.tsx";
 import {Countdown} from "./components/countdown/countdown.tsx";
-import {Paused} from "./components/paused/paused.tsx";
 import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
-import {Help} from './components/help/help.tsx';
-import {Options} from "./components/options/options.tsx";
 import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
-import useLocalStorage, { Store } from "./hooks/useLocalStorage.ts";
+import useLocalStorage from "./hooks/useLocalStorage.ts";
 import { Sidebar } from './components/sidebar/sidebar.tsx';
+import {Overlay, OverlayMode} from "./components/overlay/overlay.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -74,6 +70,12 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
+// TODO main menu UI ideas
+//      - block rotates into view
+//      - whole game rotates to reveal the menu
+
+// TODO animate buttons when clicked
+
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
 // TODO add juiciness...
@@ -93,24 +95,13 @@ let timeoutId: ReturnType<typeof setTimeout>;
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 
 
-const INITIAL_STORE: Store = {
-  bestScore: 0,
-  musicVolume: 1,
-  soundFXVolume: 1
-};
-
 const App = () => {
-  const [store, setStore] = useLocalStorage('tetris', INITIAL_STORE);
+  const [store, setStore] = useLocalStorage('tetris');
   const [gameState, setGameState] = useState(gameEngine.initialState(store.bestScore));
   const [showCountdown, setShowCountdown] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [action, setActionField] = useKeyboardControls();
   const cameraAnimation = useRef<CameraAnimationRef>(null);
-
-  const isShowOptionsOrHelp = useMemo(() => {
-    return showOptions || showHelp;
-  }, [showOptions, showHelp]);
+  const [overlayMode, setOverlayMode] = useState<OverlayMode>('HOME');
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
     const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
@@ -130,29 +121,21 @@ const App = () => {
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
   }, []);
 
-  const onEnter = useCallback(() => {
+  const onOverlayEnter = useCallback(() => {
     Sound.getInstance().setMusicVolume(store.musicVolume);
     Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
-  }, []);
+  }, [store]);
 
-  const onOptions = useCallback(() => {
-    setShowOptions(true);
-  }, []);
+  const onOverlayOptionsUpdated = useCallback(() => {
+    setStore({
+      ...store,
+      musicVolume: Sound.getInstance().musicVolume(),
+      soundFXVolume: Sound.getInstance().soundFXVolume()
+    });
+  }, [setStore, store]);
 
-  const onOptionsClose = useCallback(() => {
-    setShowOptions(false);
-    setStore({...store, musicVolume: Sound.getInstance().musicVolume(), soundFXVolume: Sound.getInstance().soundFXVolume()});
-  }, []);
-
-  const onHelp = useCallback(() => {
-    setShowHelp(true);
-  }, []);
-
-  const onStartOrRetry = useCallback(() => {
-    setShowCountdown(true);
-  }, []);
-
-  const onResume = useCallback(() => {
+  const onOverlayClosed = useCallback(() => {
+    setOverlayMode('CLOSED');
     setShowCountdown(true);
   }, []);
 
@@ -227,6 +210,13 @@ const App = () => {
     setStore({...store, bestScore: gameState.bestScore});
   }, [gameState.bestScore]);
 
+  useEffect(() => {
+    switch (gameState.mode) {
+      case 'PAUSED': setOverlayMode('PAUSED'); break;
+      case 'GAME OVER': setOverlayMode('GAME_OVER'); break;
+    }
+  }, [gameState.mode]);
+
   return (
     <>
       <Canvas>
@@ -266,14 +256,17 @@ const App = () => {
               isPauseButtonShown={gameState.mode === 'PLAYING'}
               onPause={onPause}
             />
-            {/* Overlays */}
-            {gameState.mode === 'HOME' && !showCountdown ? <Home onEnter={onEnter} onStart={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-            {gameState.mode === 'PAUSED' && !showCountdown ? <Paused onResume={onResume} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
-            {gameState.mode === 'GAME OVER' && !showCountdown ? <GameOver newBestScore={gameState.isNewBestScore ? gameState.bestScore : undefined} onRetry={onStartOrRetry} onOptions={onOptions} onHelp={onHelp} enableButtons={!isShowOptionsOrHelp} /> : null}
+            {/* Overlay */}
+            <Overlay
+              mode={overlayMode}
+              onEnter={onOverlayEnter}
+              onOptionsUpdated={onOverlayOptionsUpdated}
+              onClose={onOverlayClosed}
+              bestScore={gameState.bestScore}
+            />
+            {/* Countdown */}
             {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
             {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
-            {showOptions ? <Options onClose={onOptionsClose}/> : null}
-            {showHelp ? <Help onClose={() => setShowHelp(false)}/> : null}
           {/* Touch */}
           {gameState.mode === 'PLAYING' ? <Touch onActionField={onTouchActionField}/> : null}
           { /* @ts-ignore */ }
@@ -281,12 +274,12 @@ const App = () => {
           <OrbitControls
             enabled={false}
             makeDefault={true}
-            minAzimuthAngle={0}
-            maxAzimuthAngle={0}
-            minPolarAngle={Math.PI * 0.4}
-            maxPolarAngle={Math.PI * 0.6}
+            // minAzimuthAngle={0}
+            // maxAzimuthAngle={0}
+            // minPolarAngle={Math.PI * 0.4}
+            // maxPolarAngle={Math.PI * 0.6}
             autoRotate={false}
-            enableZoom={false}
+            enableZoom={true}
             enablePan={false}
             enableRotate={true}
           />
