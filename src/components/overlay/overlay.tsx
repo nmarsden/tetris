@@ -1,12 +1,12 @@
 import {Plane, Text, useTexture, Wireframe} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
-import {animated, config, useSpring} from "@react-spring/three";
+import {animated, config, SpringValue, useSpring} from "@react-spring/three";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {Button} from "../button/button.tsx";
 import { Options } from "../options/options.tsx";
 import {Help} from "../help/help.tsx";
-import {Vector3} from "three";
+import {Color, Vector3} from "three";
 import {Sound} from "../../sound.ts";
 
 const WELCOME_MESSAGE = [
@@ -32,42 +32,31 @@ const OPTIONS_BUTTON_POSITION = new Vector3(-2.4, -2.5, 0);
 const HELP_BUTTON_POSITION = new Vector3(2.4, -2.5, 0);
 const CLOSE_BUTTON_POSITION  = new Vector3(0, -5, 0);
 
-const SubHeading = ({ text }: { text: string }) => {
-  if (text === '') return null;
-  return (
-    <Text position={SUB_HEADING_POSITION} fontSize={1.5} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0x222222}>
-      <meshStandardMaterial
-        metalness={1}
-        roughness={1}
-        color={0xFFFFFF}
-      />
-      {text}
-    </Text>
-  );
-}
+type CustomTextType = 'SUB_HEADING' | 'MESSAGE' | 'BEST_SCORE';
 
-const Content = ({ position, text }: { position: Vector3, text: string }) => {
-  return (
-    <Text position={position} fontSize={0.7} letterSpacing={0.1} outlineWidth={0.04} outlineColor={0xFFFFFF}>
-      <meshStandardMaterial
-        metalness={1}
-        roughness={1}
-        color={0xFFFFFF}
-        opacity={1}
-        transparent={true}
-      />
-      {text}
-    </Text>
-  );
+type CustomTextSettings = {
+  fontSize: number,
+  outlineWidth: number,
+  outlineColor: Color
 };
 
-const BestScore = ({ position, text }: { position: Vector3, text: string }) => {
+const CUSTOM_TEXT_SETTINGS = new Map<CustomTextType, CustomTextSettings>([
+  ['SUB_HEADING', { fontSize: 1.5, outlineWidth: 0.1, outlineColor: new Color(0x222222) }],
+  ['MESSAGE', { fontSize: 0.7, outlineWidth: 0.04, outlineColor: new Color(0xFFFFFF) }],
+  ['BEST_SCORE', { fontSize: 1.5, outlineWidth: 0.1, outlineColor: new Color(0xFFFFFF) }]
+]);
+
+const CustomText = ({ type, position, text, opacity }: { type: CustomTextType, position: Vector3, text: string, opacity: SpringValue<number> }) => {
+  if (text === '') return null;
+  const settings = CUSTOM_TEXT_SETTINGS.get(type) as CustomTextSettings;
   return (
-    <Text position={position} fontSize={1.5} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
-      <meshStandardMaterial
+    <Text position={position} fontSize={settings.fontSize} letterSpacing={0.1} outlineWidth={settings.outlineWidth} outlineColor={settings.outlineColor}>
+      <animated.meshStandardMaterial
         metalness={1}
         roughness={1}
         color={0xFFFFFF}
+        opacity={opacity}
+        transparent={true}
       />
       {text}
     </Text>
@@ -76,7 +65,7 @@ const BestScore = ({ position, text }: { position: Vector3, text: string }) => {
 
 const CLOSED = {
   opacity: 0,
-  positionY: MODAL_POSITION.y + 20
+  positionY: MODAL_POSITION.y + 22
 };
 const OPEN = {
   opacity: 1,
@@ -195,21 +184,25 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
               color={'#000F2e'}
               opacity={opacity}
             />
-            <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01}/>
+            <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01} />
 
             {/*Logo*/}
             <Plane position={IMAGE_POSITION} args={[TetrisConstants.gameWidth - 2, TetrisConstants.gameHeight - 17]}>
-              <meshStandardMaterial
+              <animated.meshStandardMaterial
                 metalness={1}
                 roughness={1}
                 map={texture}
+                transparent={true}
+                opacity={opacity}
               />
             </Plane>
             <Text position={TEXT_POSITION} fontSize={3.65} letterSpacing={0.1} outlineWidth={0.2} outlineColor={0x000000}>
-              <meshStandardMaterial
+              <animated.meshStandardMaterial
                 metalness={1}
                 roughness={1}
                 color={0x000000}
+                transparent={true}
+                opacity={opacity}
               />
               {'TETRIS'}
             </Text>
@@ -218,19 +211,19 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
               <>
                 {WELCOME_MESSAGE.map((text, index) => {
                   const position = WELCOME_MESSAGE_POSITION.clone().add({ x: 0, y: -index * 1.2, z: 0 });
-                  return <Content key= {`${index}`} position={position} text={text} />;
+                  return <CustomText type='MESSAGE' key= {`${index}`} position={position} text={text} opacity={opacity} />;
                 })}
-                <Button position={CLOSE_BUTTON_POSITION} label={'ENTER'} onButtonClick={onEnterButtonClick} enableSound={false} enabled={true} />
+                <Button position={CLOSE_BUTTON_POSITION} label={'ENTER'} onButtonClick={onEnterButtonClick} enableSound={false} opacity={opacity} enabled={true} />
               </>
             ) : (
               <>
-                <SubHeading text={subHeading} />
+                <CustomText type={'SUB_HEADING'} position={SUB_HEADING_POSITION} text={subHeading} opacity={opacity} />
 
-                {showNewBestScore ? <BestScore position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} /> : null}
+                {showNewBestScore ? <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} opacity={opacity} /> : null}
 
-                <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} enabled={enableButtons} />
-                <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} enabled={enableButtons} />
-                <Button position={CLOSE_BUTTON_POSITION} label={closeLabel} onButtonClick={onCloseButtonClick} enableSound={false} enabled={enableButtons} />
+                <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} opacity={opacity} enabled={enableButtons} />
+                <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} opacity={opacity} enabled={enableButtons} />
+                <Button position={CLOSE_BUTTON_POSITION} label={closeLabel} onButtonClick={onCloseButtonClick} opacity={opacity} enableSound={false} enabled={enableButtons} />
               </>
             )}
           </animated.mesh>

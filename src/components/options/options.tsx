@@ -82,7 +82,7 @@ const VolumeSlider = ({ translateY, initialValue, onVolumeChange }: { translateY
 
 const CLOSED = {
   opacity: 0,
-  positionY: OVERLAY_POSITION.y + 20
+  positionY: OVERLAY_POSITION.y + 22
 };
 const OPEN = {
   opacity: 1,
