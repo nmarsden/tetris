@@ -14,7 +14,7 @@ const INFO_WIDTH_CELLS = 4.5;
 const GAME_WIDTH_CELLS = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS) + 2;
 const GAME_HEIGHT_CELLS = NUM_ROWS + 2;
 
-const SIDEBAR_COL = NUM_COLS + INFO_LEFT_PADDING_CELLS + (INFO_WIDTH_CELLS * 0.5 * 0.5);
+const SIDEBAR_COL = NUM_COLS - 0.5;
 const INFO_ROW = NUM_ROWS - 2.2;
 
 const CYAN = new Color(0x00B7B4);
@@ -58,11 +58,11 @@ export const TetrisConstants = {
   gameWidth: GAME_WIDTH_CELLS * CELL_SIZE,
   gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE,
   z: { /* Note: all z values (main + offset) are less than 0, as uikit components have z equal to 0 */
-    main: -2,
+    main: -4.5,
     backgroundOffset: -1,
     overlay1Offset: 1.1, // countdown & toast
     overlay2Offset: 1.3, // overlay & touch
     overlay3Offset: 1.4, // gameOver, home, & paused
-    overlay4Offset: 2    // help & options
+    overlay4Offset: 4.5  // help & options
   }
 };

@@ -5,13 +5,17 @@ import {Block, BlockMode} from "../block/block.tsx";
 import {PIECE_DATA, PieceData, PieceType} from "../../gameEngine.ts";
 import {GradientTexture, Plane} from "@react-three/drei";
 import {Vector3} from "three";
+import {SpringValue, useSpringValue} from "@react-spring/three";
 
 type Blur = {
   position: Vector3;
   numRows: number;
 };
 
-const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false } : { gridPos: GridPos, type: PieceType, rowsDropped?: number, isGhost?: boolean, isLock?: boolean }) => {
+const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false, opacity } : { gridPos: GridPos, type: PieceType, rowsDropped?: number, isGhost?: boolean, isLock?: boolean, opacity?: SpringValue<number> }) => {
+  const defaultOpacity = useSpringValue(1);
+  const pieceOpacity = opacity === null ? defaultOpacity : opacity;
+
   const position = useMemo(() => {
     return GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5);
   }, [gridPos]);
@@ -41,7 +45,7 @@ const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false
       )}
       {/* Piece */}
       {pieceData.positions.map((position, index) =>
-        <Block key={`${index}`} position={position} color={pieceData.color} mode={blockMode}/>
+        <Block key={`${index}`} position={position} color={pieceData.color} mode={blockMode} outlineOpacity={pieceOpacity} />
       )}
     </group>
   )

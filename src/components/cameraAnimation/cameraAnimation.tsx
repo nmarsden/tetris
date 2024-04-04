@@ -8,8 +8,8 @@ import {GridUtils} from "../playfield/playfield.tsx";
 
 export type CamAnimation = 'NONE' | 'BUMP_RIGHT' | 'BUMP_LEFT' | 'BUMP_UP';
 
-const BOUNDS_WIDTH = TetrisConstants.gameWidth + 1.5;
-const BOUNDS_HEIGHT = TetrisConstants.gameHeight + 1.5;
+const BOUNDS_WIDTH = TetrisConstants.gameWidth + 2;
+const BOUNDS_HEIGHT = TetrisConstants.gameHeight + 3;
 const BOUNDS_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1 -(BOUNDS_WIDTH*0.5), y: -1 +(BOUNDS_HEIGHT*0.5), z: 0});
 
 const CENTER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 0});
@@ -49,7 +49,7 @@ const CameraAnimation = forwardRef<CameraAnimationRef, CameraAnimationProps>(({}
     previousFov = fov;
 
     // Calculate camera Z required to fit BOUNDS in the view
-    const fitOffset = 0.91;
+    const fitOffset = 0.8;
     const fitHeightDistance = BOUNDS_HEIGHT / (2 * Math.tan(fov * Math.PI / 360));
     const fitWidthDistance = (BOUNDS_WIDTH / (2 * Math.tan(fov * Math.PI / 360))) / currentAspect;
     const cameraZ = fitOffset * Math.max(fitHeightDistance, fitWidthDistance);

@@ -1,4 +1,4 @@
-import {Plane, Text, useTexture, Wireframe} from "@react-three/drei";
+import {Float, Text, Text3D, Wireframe} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {animated, config, SpringValue, useSpring} from "@react-spring/three";
@@ -19,8 +19,7 @@ const MODAL_HEIGHT = TetrisConstants.gameHeight-8;
 
 const MODAL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset - 0.05});
 
-const IMAGE_POSITION = new Vector3(0, 3.5, 0.05);
-const TEXT_POSITION = new Vector3(0, 3.2, 0.1);
+const TEXT_POSITION = new Vector3(-7.6, 2.2, 1);
 
 const WELCOME_MESSAGE_POSITION = new Vector3(0, -1, 0.01);
 
@@ -88,7 +87,6 @@ const SETTINGS = new Map<OverlayMode, OverlaySettings>([
 
 const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mode: OverlayMode, onEnter: () => void, onOptionsUpdated: () => void, onClose: () => void, bestScore: number }) => {
   const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
-  const texture = useTexture('/tetris/image/tetris_blocks.png');
   const [showWelcome, setShowWelcome] = useState(true);
   const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -184,46 +182,57 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
               color={'#000F2e'}
               opacity={opacity}
             />
-            <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01} />
+            <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01}/>
 
-            {/*Logo*/}
-            <Plane position={IMAGE_POSITION} args={[TetrisConstants.gameWidth - 2, TetrisConstants.gameHeight - 17]}>
-              <animated.meshStandardMaterial
-                metalness={1}
-                roughness={1}
-                map={texture}
-                transparent={true}
-                opacity={opacity}
-              />
-            </Plane>
-            <Text position={TEXT_POSITION} fontSize={3.65} letterSpacing={0.1} outlineWidth={0.2} outlineColor={0x000000}>
-              <animated.meshStandardMaterial
-                metalness={1}
-                roughness={1}
-                color={0x000000}
-                transparent={true}
-                opacity={opacity}
-              />
-              {'TETRIS'}
-            </Text>
+            <Float speed={2}>
+              <Text3D
+                position={TEXT_POSITION}
+                castShadow={false}
+                curveSegments={8}
+                bevelEnabled
+                bevelSize={0.25}
+                bevelThickness={0.5}
+                height={0.2}
+                lineHeight={0.6}
+                letterSpacing={0.01}
+                size={3.1}
+                font="/tetris/Inter_Bold.json"
+              >
+                {'TETRIS'}
+                <animated.meshStandardMaterial
+                  metalness={0.25}
+                  roughness={0.75}
+                  color={TetrisConstants.color.orange}
+                  transparent={true}
+                  opacity={opacity}
+                />
+              </Text3D>
+            </Float>
 
             {showWelcome ? (
               <>
                 {WELCOME_MESSAGE.map((text, index) => {
-                  const position = WELCOME_MESSAGE_POSITION.clone().add({ x: 0, y: -index * 1.2, z: 0 });
-                  return <CustomText type='MESSAGE' key= {`${index}`} position={position} text={text} opacity={opacity} />;
+                  const position = WELCOME_MESSAGE_POSITION.clone().add({x: 0, y: -index * 1.2, z: 0});
+                  return <CustomText type='MESSAGE' key={`${index}`} position={position} text={text}
+                                     opacity={opacity}/>;
                 })}
-                <Button position={CLOSE_BUTTON_POSITION} label={'ENTER'} onButtonClick={onEnterButtonClick} enableSound={false} opacity={opacity} enabled={true} />
+                <Button position={CLOSE_BUTTON_POSITION} label={'ENTER'} onButtonClick={onEnterButtonClick}
+                        enableSound={false} opacity={opacity} enabled={true}/>
               </>
             ) : (
               <>
-                <CustomText type={'SUB_HEADING'} position={SUB_HEADING_POSITION} text={subHeading} opacity={opacity} />
+                <CustomText type={'SUB_HEADING'} position={SUB_HEADING_POSITION} text={subHeading} opacity={opacity}/>
 
-                {showNewBestScore ? <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} opacity={opacity} /> : null}
+                {mode === 'GAME_OVER' && showNewBestScore ?
+                  <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`}
+                              opacity={opacity}/> : null}
 
-                <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions} opacity={opacity} enabled={enableButtons} />
-                <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp} opacity={opacity} enabled={enableButtons} />
-                <Button position={CLOSE_BUTTON_POSITION} label={closeLabel} onButtonClick={onCloseButtonClick} opacity={opacity} enableSound={false} enabled={enableButtons} />
+                <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions}
+                        opacity={opacity} enabled={enableButtons}/>
+                <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp}
+                        opacity={opacity} enabled={enableButtons}/>
+                <Button position={CLOSE_BUTTON_POSITION} label={closeLabel} onButtonClick={onCloseButtonClick}
+                        opacity={opacity} enableSound={false} enabled={enableButtons}/>
               </>
             )}
           </animated.mesh>
@@ -235,4 +244,4 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
   );
 }
 
-export { Overlay }
+export {Overlay}

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {animated, config, useSpring} from "@react-spring/three";
+import {animated, config, SpringValue, useSpring, useSpringValue} from "@react-spring/three";
 import {Color} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useEffect} from "react";
@@ -12,7 +12,12 @@ const DURATION = 500;
 // const DURATION = Math.pow((0.8-((level-1)*0.007)), (level-1)) * 1000;
 // const DURATION = 1000;
 
-const Block = ({ position, color, mode='STANDARD' } : { position: [number, number, number], color: Color, mode?: BlockMode }) => {
+const AnimatedOutlines = animated(Outlines)
+
+const Block = ({ position, color, mode='STANDARD', outlineOpacity } : { position: [number, number, number], color: Color, mode?: BlockMode, outlineOpacity?: SpringValue<number> }) => {
+  const defaultOutlineOpacity = useSpringValue(1);
+  const ghostOutlineOpacity = outlineOpacity === null ? defaultOutlineOpacity : outlineOpacity;
+
   const [{ opacity, rotationZ, positionY, scale}, api] = useSpring(() => ({
     from: { opacity: mode === 'GHOST' ? 0.2 : 1, rotationZ: 0, positionY: 0, scale: 1 },
     config: config.stiff
@@ -53,7 +58,7 @@ const Block = ({ position, color, mode='STANDARD' } : { position: [number, numbe
             opacity={opacity}
             transparent={true}
           />
-          {mode === 'GHOST' ? <Outlines thickness={0.05} color="white" transparent={true} opacity={1}/> : null}
+          {mode === 'GHOST' ? <AnimatedOutlines thickness={0.05} color="white" transparent={true} opacity={ghostOutlineOpacity}/> : null}
         </RoundedBox>
       </animated.mesh>
     </animated.group>

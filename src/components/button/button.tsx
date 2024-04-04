@@ -20,7 +20,7 @@ type ButtonInfo = {
 
 const BUTTON_INFO: Map<ButtonType, ButtonInfo> = new Map([
   [ 'LARGE',          { scale: 1,    width: 5,   fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
-  [ 'MEDIUM',         { scale: 0.8,  width: 5,   fontSize: 0.8, outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.blue } ],
+  [ 'MEDIUM',         { scale: 0.8,  width: 5,   fontSize: 0.8, outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.grey } ],
   [ 'INFO',           { scale: 0.9,  width: 5,   fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.black, textColor: TetrisConstants.color.black, bgColor: TetrisConstants.color.orange } ],
   [ 'TAB',            { scale: 0.55, width: 8.5, fontSize: 1,   outlineWidth: 0.07, outlineColor: TetrisConstants.color.white, textColor: TetrisConstants.color.white, bgColor: TetrisConstants.color.black } ],
   [ 'TAB_UNSELECTED', { scale: 0.5,  width: 8.5, fontSize: 1,   outlineWidth: 0.05, outlineColor: TetrisConstants.color.grey,  textColor: TetrisConstants.color.grey,  bgColor: TetrisConstants.color.black } ]
