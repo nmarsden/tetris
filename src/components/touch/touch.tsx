@@ -74,7 +74,7 @@ const Touch = ({ onActionField }: { onActionField: (actionField: ActionField) =>
           metalness={1}
           roughness={1}
           color={TetrisConstants.color.red}
-          opacity={0.5}
+          opacity={0}
           transparent={true}
         />
       </animated.mesh>
