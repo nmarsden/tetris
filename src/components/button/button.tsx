@@ -46,7 +46,7 @@ const Button = ({ position, label, type='LARGE', opacity, onButtonClick, enableS
   }, [type]);
   const [{ positionZ }, api] = useSpring(() => ({
     from: { positionZ: 0 },
-    config: { duration: 200 }
+    config: { duration: 100 }
   }))
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
