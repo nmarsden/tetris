@@ -87,6 +87,7 @@ const SETTINGS = new Map<OverlayMode, OverlaySettings>([
 
 const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mode: OverlayMode, onEnter: () => void, onOptionsUpdated: () => void, onClose: () => void, bestScore: number }) => {
   const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
+  const [showModal, setShowModal] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [showOptions, setShowOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -112,11 +113,12 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
   }, [onEnter]);
 
   const onCloseButtonClick = useCallback(() => {
+    onClose()
     api.start({
       to: CLOSED,
       config: config.stiff,
       onRest: () => {
-        onClose()
+        setShowModal(false);
         setShowNewBestScore(false);
       }
     });
@@ -140,6 +142,9 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
   }, [open]);
 
   useEffect(() => {
+    if (mode !== 'CLOSED') {
+      setShowModal(true);
+    }
     if (mode === 'PAUSED') {
       open();
       Sound.getInstance().stopMusic();
@@ -166,7 +171,7 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
 
   return (
     <>
-      {mode !== 'CLOSED' ? (
+      {showModal ? (
         <>
           {/*Modal*/}
           <animated.mesh

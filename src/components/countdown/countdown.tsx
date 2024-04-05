@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {Plane, Text} from "@react-three/drei";
+import {Circle, Text} from "@react-three/drei";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useSpring, animated, config, AnimationResult} from '@react-spring/three'
 import {useCallback, useEffect, useState} from "react";
 import {Sound} from "../../sound.ts";
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset});
 const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset + 0.01});
 
 const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
@@ -39,21 +38,21 @@ const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
   }, [count]);
 
   return <>
-    <Plane position={OVERLAY_POSITION} args={[TetrisConstants.gameWidth, TetrisConstants.gameHeight]}>
-      <meshStandardMaterial
-        metalness={1}
-        roughness={1}
-        color={TetrisConstants.color.black}
-        opacity={0.5}
-        transparent={true}
-      />
-    </Plane>
     <animated.group position={TEXT_POSITION} scale={scale} >
-      <Text fontSize={1.5} letterSpacing={0.1} outlineWidth={0.075} outlineColor={0xFFFFFF}>
+      <Circle args={[2, 64]} position-y={0.2}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
-          color={0xFFFFFF}
+          color={TetrisConstants.color.white}
+          opacity={opacity}
+          transparent={true}
+        />
+      </Circle>
+      <Text fontSize={1.8} letterSpacing={0.1} outlineWidth={0.075} outlineColor={0x000000}>
+        <animated.meshStandardMaterial
+          metalness={1}
+          roughness={1}
+          color={0x000000}
           opacity={opacity}
           transparent={true}
         />
