@@ -70,27 +70,16 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO main menu UI ideas
-//      - block rotates into view
-//      - whole game rotates to reveal the menu
+// TODO show confetti and reward sound when game over and there's a new best score
 
-// TODO animate buttons when clicked
+// TODO when starting a new game, clear the previous state before the countdown starts
+
+// TODO continue to show the next piece when the overlay is shown
+
+// TODO fix bug: clicking the pause button also triggers rotation
 
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
-// TODO add juiciness...
-//      - camera animation - line clear, perfect clear, hard drop & blocked
-//      - particle effect - hard drop, blocked, etc...
-//      - background effect (eg. flashing color) - perfect clear, line cleared, level up, combo
-
-// TODO fix intelliJ CPU performance problem
-//   - Try enabling the new TypeScript Engine...
-//     - Command + Shift + A
-//     - search for "Registry"
-//     - type "typescript.compiler.evaluation"
-//     - check to enable
-//   - see: https://youtrack.jetbrains.com/issue/WEB-57701/High-CPU-usage-on-TS-conditional-types
-//   - see: https://blog.jetbrains.com/webstorm/2023/12/try-the-future-typescript-engine-with-the-webstorm-next-program/#update
 
 type StepMode = 'START' | 'NEXT' | 'RESUME';
 

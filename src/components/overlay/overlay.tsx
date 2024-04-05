@@ -232,7 +232,7 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
                 <Button position={HELP_BUTTON_POSITION} label={'HELP'} type={'MEDIUM'} onButtonClick={onHelp}
                         opacity={opacity} enabled={enableButtons}/>
                 <Button position={CLOSE_BUTTON_POSITION} label={closeLabel} onButtonClick={onCloseButtonClick}
-                        opacity={opacity} enableSound={false} enabled={enableButtons}/>
+                        opacity={opacity} enabled={enableButtons}/>
               </>
             )}
           </animated.mesh>

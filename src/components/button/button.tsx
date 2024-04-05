@@ -4,7 +4,7 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {useCallback, useMemo} from "react";
 import {Sound} from "../../sound.ts";
 import {ThreeEvent} from "@react-three/fiber/dist/declarations/src/core/events.js";
-import {SpringValue, animated, useSpringValue} from "@react-spring/three";
+import {SpringValue, animated, useSpringValue, useSpring} from "@react-spring/three";
 
 export type ButtonType = 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -36,23 +36,37 @@ type ButtonProps = {
   enabled?:boolean
 };
 
+const AnimatedRoundedBox = animated(RoundedBox);
+
 const Button = ({ position, label, type='LARGE', opacity, onButtonClick, enableSound=true, enabled=true }: ButtonProps) => {
   const defaultOpacity = useSpringValue(1);
   const buttonOpacity = opacity === null ? defaultOpacity : opacity;
   const { scale, width, fontSize, outlineWidth, outlineColor, textColor, bgColor } = useMemo(() => {
     return BUTTON_INFO.get(type) as ButtonInfo;
   }, [type]);
+  const [{ positionZ }, api] = useSpring(() => ({
+    from: { positionZ: 0 },
+    config: { duration: 200 }
+  }))
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
 
     if (!enabled) return;
     if (enableSound) Sound.getInstance().playSoundFX('BUTTON');
-    onButtonClick();
-  }, [enabled, onButtonClick]);
+
+    api.start({
+      to: { positionZ: -0.125 },
+      onRest: () => {
+        api.start({ to: { positionZ: 0 }});
+        onButtonClick()
+      }
+    });
+  }, [api, enableSound, enabled, onButtonClick]);
 
   return <group scale={scale} position={position}>
-    <RoundedBox
+    <AnimatedRoundedBox
+      position-z={positionZ}
       args={[width, TetrisConstants.cellSize * 2, TetrisConstants.cellSize * 0.5]} // Width, height, depth. Default is [1, 1, 1]
       radius={0.2} // Radius of the rounded corners. Default is 0.05
       smoothness={4} // The number of curve segments. Default is 4
@@ -77,7 +91,7 @@ const Button = ({ position, label, type='LARGE', opacity, onButtonClick, enableS
         />
         {label}
       </Text>
-    </RoundedBox>
+    </AnimatedRoundedBox>
   </group>
 }
 
