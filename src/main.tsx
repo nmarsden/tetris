@@ -76,8 +76,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO continue to show the next piece when the overlay is shown
 
-// TODO fix bug: clicking the pause button also triggers rotation
-
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
 

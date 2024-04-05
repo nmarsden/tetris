@@ -59,10 +59,9 @@ export const TetrisConstants = {
   gameHeight: GAME_HEIGHT_CELLS * CELL_SIZE,
   z: { /* Note: all z values (main + offset) are less than 0, as uikit components have z equal to 0 */
     main: -4.5,
-    backgroundOffset: -1,
-    overlay1Offset: 1.1, // countdown & toast
-    overlay2Offset: 1.3, // overlay & touch
-    overlay3Offset: 1.4, // gameOver, home, & paused
-    overlay4Offset: 4.5  // help & options
+    touchLayerOffset: -6, // touch
+    overlay1Offset: 1.1,  // toast
+    overlay3Offset: 1.4,  // countdown & overlay (gameOver, home, & paused)
+    overlay4Offset: 4.5   // help & options
   }
 };

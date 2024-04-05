@@ -7,7 +7,7 @@ import {animated} from "@react-spring/three";
 import {useDrag} from "@use-gesture/react";
 import { useThree } from "@react-three/fiber";
 
-const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay2Offset});
+const POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.touchLayerOffset});
 
 const DRAG_THRESHOLD = 1;
 const REPEAT_DELAY_MSECS = 100;
@@ -74,7 +74,7 @@ const Touch = ({ onActionField }: { onActionField: (actionField: ActionField) =>
           metalness={1}
           roughness={1}
           color={TetrisConstants.color.red}
-          opacity={0}
+          opacity={0.5}
           transparent={true}
         />
       </animated.mesh>
