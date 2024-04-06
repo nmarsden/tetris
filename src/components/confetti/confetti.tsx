@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Object3D, PlaneGeometry, MeshBasicMaterial, DoubleSide, Mesh, Vector3, MathUtils} from 'three';
 
 type ConfettiProps = {
-  amount?: number;          // The amount of particles
-  radius?: number;          // The radius of each explosion.
-  colors?: number[];        // Array of Hex color codes for particles. Example: [0x0000ff, 0xff0000, 0xffff00]
-  enableShadows?: boolean;  // Enable particle shadows. Set false for better performance.
+  depth?: number;    // Depth of explosion. Default: 50
+  loop?: boolean;    // Continuous explosions. Default: false
 };
 
 type Particle = {
@@ -22,12 +20,19 @@ type Boom = {
   particles: Particle[];
 };
 
-const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xffff00], enableShadows = false } : ConfettiProps) => {
-  const groupRef = useRef<Mesh>(null);
-  const [booms, setBooms] = useState<Boom[]>([]);
-  const geometry = new PlaneGeometry(0.03, 0.03, 1, 1);
+const NUM_PARTICLES = 100;
+const EXPLOSION_RADIUS = 100;
+const PARTICLE_COLORS = [0x0000ff, 0xff0000, 0xffff00];
 
-  const explode = () => {
+const EXPLOSION_DURATION_SECS = 1.5;
+let booms: Boom[] = [];
+let startTime = 0;
+
+const Confetti = ({ depth = EXPLOSION_RADIUS, loop = false } : ConfettiProps) => {
+  const groupRef = useRef<Mesh>(null);
+
+  const explode = useCallback(() => {
+    const geometry = new PlaneGeometry(0.03, 0.03, 1, 1);
     const boomObject = new Object3D();
     boomObject.position.y = 2;
     // @ts-ignore
@@ -38,15 +43,14 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
       particles: []
     };
 
-    for (let i = 0; i < amount; i++) {
+    for (let i = 0; i < NUM_PARTICLES; i++) {
       const material = new MeshBasicMaterial({
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
         transparent: true,
         side: DoubleSide
       })
 
       const particleMesh = new Mesh(geometry, material);
-      particleMesh.castShadow = enableShadows;
       particleMesh.rotation.x = Math.random() * 360;
       particleMesh.rotation.y = Math.random() * 360;
       particleMesh.rotation.z = Math.random() * 360;
@@ -57,9 +61,9 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
 
       const particle: Particle = {
         destination: new Vector3(
-          (Math.random() - 0.5) * (radius * 2) * Math.random(),
-          (Math.random() - 0.5) * (radius * 2) * Math.random(),
-          (radius) * Math.random()
+          (Math.random() - 0.5) * EXPLOSION_RADIUS * Math.random(),
+          (Math.random() - 0.5) * EXPLOSION_RADIUS * Math.random(),
+          depth * Math.random()
         ),
         rotateSpeedX: 0,
         rotateSpeedY: 0,
@@ -70,9 +74,23 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
     }
 
     booms.push(boom);
-  };
+  }, [depth]);
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
+
+    if (startTime === 0) {
+      startTime = clock.elapsedTime;
+      explode();
+      return;
+    }
+
+    const animationTime = clock.elapsedTime - startTime;
+    if (loop && animationTime > EXPLOSION_DURATION_SECS) {
+      startTime = clock.elapsedTime;
+      explode();
+      return;
+    }
+
     for (let i = 0; i < booms.length; i++) {
       const boom = booms[i];
 
@@ -106,15 +124,15 @@ const Confetti = ({ amount = 100, radius = 50, colors = [0x0000ff, 0xff0000, 0xf
       if (boom.object3D.children.length <= 0) {
         // @ts-ignore
         groupRef.current.remove(boom.object3D);
-        // cleanup(boom.object3D);
-        setBooms(booms.filter((b) => b !== boom))
+        booms = booms.filter((b) => b !== boom)
       }
     }
   })
 
   useEffect(() => {
-    explode();
-  }, []);
+    // Trigger explosion
+    startTime = 0;
+  }, [depth]);
 
   return <mesh ref={groupRef} />
 }

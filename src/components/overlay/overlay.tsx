@@ -8,6 +8,7 @@ import { Options } from "../options/options.tsx";
 import {Help} from "../help/help.tsx";
 import {Color, Vector3} from "three";
 import {Sound} from "../../sound.ts";
+import {Confetti} from "../confetti/confetti.tsx";
 
 const WELCOME_MESSAGE = [
   'WELCOME TO THE BLOCK PARTY.',
@@ -228,9 +229,14 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
               <>
                 <CustomText type={'SUB_HEADING'} position={SUB_HEADING_POSITION} text={subHeading} opacity={opacity}/>
 
-                {mode === 'GAME_OVER' && showNewBestScore ?
-                  <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`}
-                              opacity={opacity}/> : null}
+                {mode === 'GAME_OVER' && showNewBestScore ? (
+                  <>
+                    <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} opacity={opacity}/>
+                    <group position-y={-2.2}>
+                      <Confetti depth={3} loop={true}/>
+                    </group>
+                  </>
+                  ) : null}
 
                 <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions}
                         opacity={opacity} enabled={enableButtons}/>

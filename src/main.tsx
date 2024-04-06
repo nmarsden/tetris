@@ -70,8 +70,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO show confetti and reward sound when game over and there's a new best score
-
 // TODO when starting a new game, clear the previous state before the countdown starts
 
 // TODO continue to show the next piece when the overlay is shown
