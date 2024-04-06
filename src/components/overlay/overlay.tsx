@@ -9,6 +9,7 @@ import {Help} from "../help/help.tsx";
 import {Color, Vector3} from "three";
 import {Sound} from "../../sound.ts";
 import {Confetti} from "../confetti/confetti.tsx";
+import {SpinningStars} from "../spinningStars/spinningStars.tsx";
 
 const WELCOME_MESSAGE = [
   'WELCOME TO THE BLOCK PARTY.',
@@ -26,7 +27,8 @@ const WELCOME_MESSAGE_POSITION = new Vector3(0, -1, 0.01);
 
 const SUB_HEADING_POSITION = new Vector3(0, 0.9, 0.1);
 
-const NEW_BEST_VALUE_POSITION = new Vector3(0, -0.75, 0.01);
+const NEW_BEST_STAR_POSITION = new Vector3(0, -0.65, 0.01);
+const NEW_BEST_VALUE_POSITION = new Vector3(0, -0.75, 0.02);
 
 const OPTIONS_BUTTON_POSITION = new Vector3(-2.4, -2.5, 0);
 const HELP_BUTTON_POSITION = new Vector3(2.4, -2.5, 0);
@@ -37,13 +39,14 @@ type CustomTextType = 'SUB_HEADING' | 'MESSAGE' | 'BEST_SCORE';
 type CustomTextSettings = {
   fontSize: number,
   outlineWidth: number,
+  color: Color,
   outlineColor: Color
 };
 
 const CUSTOM_TEXT_SETTINGS = new Map<CustomTextType, CustomTextSettings>([
-  ['SUB_HEADING', { fontSize: 1.5, outlineWidth: 0.1, outlineColor: new Color(0x222222) }],
-  ['MESSAGE', { fontSize: 0.7, outlineWidth: 0.04, outlineColor: new Color(0xFFFFFF) }],
-  ['BEST_SCORE', { fontSize: 1.5, outlineWidth: 0.1, outlineColor: new Color(0xFFFFFF) }]
+  ['SUB_HEADING', { fontSize: 1.5, outlineWidth: 0.1, color: new Color(0xFFFFFF), outlineColor: new Color(0x555555) }],
+  ['MESSAGE', { fontSize: 0.7, outlineWidth: 0.04, color: new Color(0xFFFFFF), outlineColor: new Color(0xFFFFFF) }],
+  ['BEST_SCORE', { fontSize: 1.5, outlineWidth: 0.1, color: new Color(0x000000), outlineColor: new Color(0x000000) }]
 ]);
 
 const CustomText = ({ type, position, text, opacity }: { type: CustomTextType, position: Vector3, text: string, opacity: SpringValue<number> }) => {
@@ -54,7 +57,7 @@ const CustomText = ({ type, position, text, opacity }: { type: CustomTextType, p
       <animated.meshStandardMaterial
         metalness={1}
         roughness={1}
-        color={0xFFFFFF}
+        color={settings.color}
         opacity={opacity}
         transparent={true}
       />
@@ -231,6 +234,7 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
 
                 {mode === 'GAME_OVER' && showNewBestScore ? (
                   <>
+                    <SpinningStars position={NEW_BEST_STAR_POSITION} opacity={opacity}/>
                     <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} opacity={opacity}/>
                     <group position-y={-2.2}>
                       <Confetti depth={3} loop={true}/>
