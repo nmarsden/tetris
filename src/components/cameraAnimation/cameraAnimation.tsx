@@ -21,7 +21,7 @@ const CAM_BOUNDS = new Map<CamBounds, Bounds>([
 ]);
 
 const CENTER_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: 0});
-export const CAMERA_POSITION = CENTER_POSITION.clone().add({x: 0, y: 0, z: 1}); // Note: z will be auto-adjusted to fit the bounds in view
+export const CAMERA_POSITION = CENTER_POSITION.clone().add({x: 0, y: 0, z: 22}); // Note: z will be auto-adjusted to fit the bounds in view
 
 const BOUNDS_LINE_WIDTH = 2;
 
