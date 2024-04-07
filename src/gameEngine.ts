@@ -125,7 +125,7 @@ type GameState = {
   pieceAction: PieceAction;
   pieceRowsDropped: number;
   ghostPiece: Piece;
-  nextPieceType: PieceType;
+  nextPieceType: PieceType | null;
   lockedColors: Color[];
   completedRows: number[];
   previousIsLockMode: boolean;
@@ -149,7 +149,7 @@ class GameEngine {
     pieceAction: null,
     pieceRowsDropped: 0,
     ghostPiece: { pos: {...START_POS}, type: 'I0' },
-    nextPieceType: 'I0',
+    nextPieceType: null,
     lockedColors: [],
     completedRows: [],
     previousIsLockMode: false,
@@ -238,6 +238,13 @@ class GameEngine {
 
   start(): GameState {
     this.gameState.mode = 'PLAYING';
+
+    // update gameState: piece, ghostPiece, & nextPiece
+    const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType as PieceType };
+    this.gameState.piece = newPiece;
+    this.gameState.ghostPiece = this.ghostPiece(newPiece);
+    this.gameState.nextPieceType = this.pieceBag.pick();
+
     return this.gameState;
   }
 
@@ -274,7 +281,7 @@ class GameEngine {
           this.comboCounter++;
         } else {
           // update gameState: piece & ghostPiece
-          const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
+          const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType as PieceType };
 
           // reset comboCounter
           this.comboCounter = -1;
@@ -338,7 +345,7 @@ class GameEngine {
       this.gameState.completedRows = [];
 
       // update gameState: piece & ghostPiece
-      const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType };
+      const newPiece = { pos: {...START_POS}, type: this.gameState.nextPieceType as PieceType };
 
       // check if game over
       if (this.isGameOver(newPiece)) {

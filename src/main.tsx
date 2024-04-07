@@ -72,8 +72,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO fix rendering issue with ghost piece after a hard drop
 
-// TODO continue to show the next piece when the overlay is shown
-
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
 
@@ -248,7 +246,6 @@ const App = () => {
               bestScore={gameState.bestScore}
               level={gameState.level}
               lines={gameState.lines}
-              isNextPieceShown={gameState.mode === 'PLAYING'}
               nextPieceType={gameState.nextPieceType}
               isPauseButtonShown={gameState.mode === 'PLAYING'}
               onPause={onPause}

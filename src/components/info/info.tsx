@@ -35,7 +35,7 @@ const Label = ({ position, label } : { position: Vector3, label: string }) => {
   return <CustomText position={position} size={1} text={label} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
 };
 
-const Value = ({ position, value, bestValue } : { position: Vector3, value: number | PieceType, bestValue?: number }) => {
+const Value = ({ position, value, bestValue } : { position: Vector3, value: number | PieceType | null, bestValue?: number }) => {
   const isPieceValue = !Number.isInteger(value);
   const valueBoxWidth = TetrisConstants.infoWidth;
   const valueBoxHeight = TetrisConstants.cellSize * (isPieceValue ? 2.7 : 1.4);
@@ -54,8 +54,8 @@ const Value = ({ position, value, bestValue } : { position: Vector3, value: numb
     <>
       <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
       { isPieceValue ?
-        <Piece position={piecePosition} type={value as PieceType} /> :
-        <CustomText position={textPosition} size={1} text={value.toString(10)} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
+        (value === null) ? null : <Piece position={piecePosition} type={value as PieceType} /> :
+        <CustomText position={textPosition} size={1} text={(value as number).toString(10)} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
       }
       { typeof bestValue !== 'undefined' ?
         <>
@@ -69,7 +69,7 @@ const Value = ({ position, value, bestValue } : { position: Vector3, value: numb
   )
 };
 
-const Info = ({ position, label, value, bestValue } : { position: Vector3, label: string, value: number | PieceType, bestValue?: number }) => {
+const Info = ({ position, label, value, bestValue } : { position: Vector3, label: string, value: number | PieceType | null, bestValue?: number }) => {
   const valuePosition = position.clone().add({ x: 0, y: -0.8, z: 0 });
   return (
     <>
