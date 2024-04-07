@@ -3,7 +3,7 @@ import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Action} from "./hooks/useKeyboardControls.ts";
 
-export type GameMode = 'HOME' | 'START' | 'PLAYING' | 'PAUSED' | 'GAME OVER';
+export type GameMode = 'HOME' | 'INIT' | 'PLAYING' | 'PAUSED' | 'GAME OVER';
 
 const PIECE_TYPES = ['I0', 'I1', 'I2', 'I3', 'O', 'T0', 'T1', 'T2', 'T3', 'S0', 'S1', 'S2', 'S3', 'Z0', 'Z1', 'Z2', 'Z3', 'J0', 'J1', 'J2', 'J3', 'L0', 'L1', 'L2', 'L3'] as const;
 type PieceTypeTuple = typeof PIECE_TYPES;
@@ -117,6 +117,8 @@ export type ToastDetails = {
   points: number;
 };
 
+export type GameEngineMethod = () => GameState;
+
 type GameState = {
   mode: GameMode;
   piece: Piece;
@@ -177,8 +179,8 @@ class GameEngine {
   //   }
   // }
 
-  start(): GameState {
-    this.gameState.mode = 'PLAYING';
+  init(): GameState {
+    this.gameState.mode = 'INIT';
     this.gameState.score = 0;
     this.gameState.isNewBestScore = false;
     this.gameState.level = 1;
@@ -234,15 +236,17 @@ class GameEngine {
     return this.gameState;
   }
 
+  start(): GameState {
+    this.gameState.mode = 'PLAYING';
+    return this.gameState;
+  }
+
   resume(): GameState {
     this.gameState.mode = 'PLAYING';
     return this.step();
   }
 
   step(): GameState {
-    if (this.gameState.mode === 'START') {
-      return this.start();
-    }
     if (this.gameState.mode !== 'PLAYING') return this.gameState;
 
     if (this.gameState.isLockMode) {

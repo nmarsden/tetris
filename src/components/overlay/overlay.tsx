@@ -27,8 +27,8 @@ const WELCOME_MESSAGE_POSITION = new Vector3(0, -1, 0.01);
 
 const SUB_HEADING_POSITION = new Vector3(0, 0.9, 0.1);
 
-const NEW_BEST_STAR_POSITION = new Vector3(0, -0.65, 0.01);
-const NEW_BEST_VALUE_POSITION = new Vector3(0, -0.75, 0.02);
+const NEW_BEST_STAR_POSITION = new Vector3(0, -0.65, 0.05);
+const NEW_BEST_VALUE_POSITION = new Vector3(0, -0.75, 0.1);
 
 const OPTIONS_BUTTON_POSITION = new Vector3(-2.4, -2.5, 0);
 const HELP_BUTTON_POSITION = new Vector3(2.4, -2.5, 0);

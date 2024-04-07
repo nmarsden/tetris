@@ -5,7 +5,7 @@ import {Canvas} from '@react-three/fiber'
 import {Environment, Loader, OrbitControls, PerspectiveCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
 import {Suspense, useCallback, useEffect, useRef, useState} from "react";
-import {GameEngine, GameMode, LockedColorUtils} from "./gameEngine.ts";
+import {GameEngine, GameEngineMethod, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
 import {ActionField, useKeyboardControls} from "./hooks/useKeyboardControls.ts";
@@ -44,7 +44,7 @@ const rowBlockMode = (row: number, completedRows: number[]): BlockMode => {
 };
 
 const isShowPiece = (completedRows: number[], mode: GameMode): boolean => {
-  return completedRows.length === 0 && mode !== 'HOME';
+  return completedRows.length === 0 && ['PLAYING', 'PAUSED', 'GAME OVER'].includes(mode);
 };
 
 let timeoutId: ReturnType<typeof setTimeout>;
@@ -70,15 +70,21 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO when starting a new game, clear the previous state before the countdown starts
+// TODO fix rendering issue with ghost piece after a hard drop
 
 // TODO continue to show the next piece when the overlay is shown
 
 // TODO options - camera FOV (eg. set to 10 to remove perspective)
 
 
-type StepMode = 'START' | 'NEXT' | 'RESUME';
+type StepMode = 'INIT' | 'START' | 'NEXT' | 'RESUME';
 
+const GAME_ENGINE_METHOD = new Map<StepMode, GameEngineMethod>([
+  ['INIT', () => gameEngine.init()],
+  ['START', () => gameEngine.start()],
+  ['NEXT', () => gameEngine.step()],
+  ['RESUME', () => gameEngine.resume()],
+]);
 
 const App = () => {
   const [store, setStore] = useLocalStorage('tetris');
@@ -89,7 +95,7 @@ const App = () => {
   const [overlayMode, setOverlayMode] = useState<OverlayMode>('HOME');
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
-    const gameState = (mode === 'START') ? gameEngine.start() : (mode === 'RESUME') ? gameEngine.resume() : gameEngine.step();
+    const gameState = (GAME_ENGINE_METHOD.get(mode) as GameEngineMethod)();
     setGameState({...gameState});
 
     // check for game over
@@ -121,6 +127,9 @@ const App = () => {
 
   const onOverlayClosed = useCallback(() => {
     setOverlayMode('CLOSED');
+    if (gameState.mode !== 'PAUSED') {
+      step('INIT');
+    }
     cameraAnimation.current?.setCamBounds('PLAYFIELD');
     setShowCountdown(true);
   }, []);
@@ -171,10 +180,6 @@ const App = () => {
       setTimeout(() => { step(); }, 50);
     }
 
-    if (gameState.mode === 'START') {
-      step();
-      return;
-    }
     if (!gameState.previousIsLockMode && gameState.isLockMode) {
       Sound.getInstance().playSoundFX('LOCK');
       // when lock mode is triggered due to an action, ensure it ends in 500ms

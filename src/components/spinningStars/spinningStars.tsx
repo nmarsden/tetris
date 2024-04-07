@@ -10,7 +10,7 @@ type SpinningStarProps = {
   opacity: SpringValue<number>;
 };
 
-const SpinningStar = ({ size, color, antiClockwise, opacity }: { size: number, color: Color, antiClockwise: boolean, opacity: SpringValue<number> }) => {
+const SpinningStar = ({ positionZ, size, color, antiClockwise, opacity }: { positionZ: number, size: number, color: Color, antiClockwise: boolean, opacity: SpringValue<number> }) => {
   const [{ rotationZ, scale }, api] = useSpring(() => (
     {
       from: { rotationZ: 0, scale: 0.8 }
@@ -29,7 +29,7 @@ const SpinningStar = ({ size, color, antiClockwise, opacity }: { size: number, c
   }, [api]);
 
   return (
-    <animated.group rotation-z={rotationZ} scale={scale}>
+    <animated.group position-z={positionZ} rotation-z={rotationZ} scale={scale}>
       <mesh>
         <planeGeometry args={[size, size]}/>
         <animated.meshStandardMaterial
@@ -57,9 +57,9 @@ const SpinningStar = ({ size, color, antiClockwise, opacity }: { size: number, c
 const SpinningStars = ({ position, opacity }: SpinningStarProps) => {
   return (
     <group position={position}>
-      <SpinningStar size={8.6} color={TetrisConstants.color.yellow} antiClockwise={true} opacity={opacity} />
-      <SpinningStar size={7.2} color={TetrisConstants.color.black} antiClockwise={false} opacity={opacity} />
-      <SpinningStar size={6.5} color={TetrisConstants.color.yellow} antiClockwise={false} opacity={opacity} />
+      <SpinningStar positionZ={0} size={8.6} color={TetrisConstants.color.yellow} antiClockwise={true} opacity={opacity} />
+      <SpinningStar positionZ={0.01} size={7.2} color={TetrisConstants.color.black} antiClockwise={false} opacity={opacity} />
+      <SpinningStar positionZ={0.02} size={6.5} color={TetrisConstants.color.yellow} antiClockwise={false} opacity={opacity} />
     </group>
   )
 }
