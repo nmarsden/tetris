@@ -121,6 +121,7 @@ const App = () => {
 
   const onOverlayClosed = useCallback(() => {
     setOverlayMode('CLOSED');
+    cameraAnimation.current?.setCamBounds('PLAYFIELD');
     setShowCountdown(true);
   }, []);
 
@@ -197,8 +198,14 @@ const App = () => {
 
   useEffect(() => {
     switch (gameState.mode) {
-      case 'PAUSED': setOverlayMode('PAUSED'); break;
-      case 'GAME OVER': setOverlayMode('GAME_OVER'); break;
+      case 'PAUSED':
+        cameraAnimation.current?.setCamBounds('OVERLAY');
+        setOverlayMode('PAUSED');
+        break;
+      case 'GAME OVER':
+        cameraAnimation.current?.setCamBounds('OVERLAY');
+        setOverlayMode('GAME_OVER');
+        break;
     }
   }, [gameState.mode]);
 
@@ -265,7 +272,7 @@ const App = () => {
             // maxPolarAngle={Math.PI * 0.6}
             autoRotate={false}
             enableZoom={true}
-            enablePan={false}
+            enablePan={true}
             enableRotate={true}
           />
         </Suspense>

@@ -3,6 +3,7 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {PieceType} from "../../gameEngine.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {Button} from "../button/button.tsx";
+import {Vector3} from "three";
 
 type SidebarProps = {
   score: number;
@@ -16,22 +17,22 @@ type SidebarProps = {
 };
 
 const Sidebar = ({ score, bestScore, level, lines, isNextPieceShown, nextPieceType, isPauseButtonShown, onPause }: SidebarProps) => {
-  const sideBarPosition = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight * 0.5}).add({ x:0, y:0, z:0 });
+  const sideBarPosition = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
 
-  const sidebarCol = TetrisConstants.gridWidth*0.5;
-  const scorePosition = GridUtils.gridPosToScreen({col: sidebarCol, row: TetrisConstants.scoreRow});
-  const levelPosition = GridUtils.gridPosToScreen({col: sidebarCol, row: TetrisConstants.levelRow});
-  const linesPosition = GridUtils.gridPosToScreen({col: sidebarCol, row: TetrisConstants.linesRow});
-  const nextPosition = GridUtils.gridPosToScreen({col: sidebarCol,  row: TetrisConstants.nextRow });
-  const pausePosition = GridUtils.gridPosToScreen({col: sidebarCol, row: TetrisConstants.pauseRow});
+  const sidebarX = 0;
+  const pausePosition =new Vector3(sidebarX, 0, 0);
+  const scorePosition = new Vector3(sidebarX, -3.2, 0);
+  const levelPosition = new Vector3(sidebarX, -7.2, 0);
+  const linesPosition = new Vector3(sidebarX, -10.2, 0);
+  const nextPosition = new Vector3(sidebarX, -13.2, 0);
 
   return (
-    <group position={sideBarPosition} rotation-y={Math.PI * -0.25} scale={1.2}>
+    <group position={sideBarPosition} rotation-y={Math.PI * -0.25} scale={1}>
+      {isPauseButtonShown ? <Button position={pausePosition} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} /> : null}
       <Info position={scorePosition} label={'SCORE'} value={score} bestValue={bestScore}/>
       <Info position={levelPosition}  label={'LEVEL'} value={level}/>
       <Info position={linesPosition} label={'LINES'} value={lines}/>
-      {isNextPieceShown ? <Info position={nextPosition} label={'NEXT'}  value={nextPieceType}/> : null}
-      {isPauseButtonShown ? <Button position={pausePosition} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} /> : null}
+      {isNextPieceShown ? <Info position={nextPosition} label={'NEXT'} value={nextPieceType}/> : null}
     </group>
   )
 };

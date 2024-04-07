@@ -6,7 +6,7 @@ import {useSpring, animated, config, AnimationResult} from '@react-spring/three'
 import {useCallback, useEffect, useState} from "react";
 import {Sound} from "../../sound.ts";
 
-const TEXT_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset + 0.01});
+const COUNTDOWN_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset});
 
 const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
   const [count, setCount] = useState(3);
@@ -38,8 +38,8 @@ const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
   }, [count]);
 
   return <>
-    <animated.group position={TEXT_POSITION} scale={scale} >
-      <Circle args={[2, 64]} position-y={0.2}>
+    <animated.group position={COUNTDOWN_POSITION} scale={scale} >
+      <Circle args={[2, 64]} position-y={0.1}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
@@ -48,7 +48,7 @@ const Countdown = ({ onCountdownDone }: { onCountdownDone: () => void}) => {
           transparent={true}
         />
       </Circle>
-      <Text fontSize={1.8} letterSpacing={0.1} outlineWidth={0.075} outlineColor={0x000000}>
+      <Text position-z={0.1} fontSize={1.8} letterSpacing={0.1} outlineWidth={0.075} outlineColor={0x000000}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}

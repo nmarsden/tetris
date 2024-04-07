@@ -1,6 +1,5 @@
 import {Vector3} from "three";
 import {Plane, Text, useTexture} from "@react-three/drei";
-import {GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {PieceType} from "../../gameEngine.ts";
 import {Border} from "../border/border.tsx";
@@ -49,16 +48,13 @@ const Value = ({ position, value, bestValue } : { position: Vector3, value: numb
   const bestValueBoxWidth = TetrisConstants.infoWidth - 1.6;
   const bestBorderPosition = position.clone().add({ x: -bestValueBoxWidth * 0.5, y: -TetrisConstants.cellSize * 1.1, z: 0})
   const bestTextPosition = position.clone().add({ x: 0, y: -TetrisConstants.cellSize * 1.6, z: 0})
-
-  const gridPos = GridUtils.screenToGridPos(position);
-  const pieceCol = isPieceValue ? (['O', 'I0'].includes(value as PieceType) ? (gridPos.col - 1) : gridPos.col - 0.5) : 0;
-  const pieceGridPos = { col: pieceCol, row: gridPos.row - 2 };
+  const piecePosition = isPieceValue ? (['O', 'I0'].includes(value as PieceType) ? position.clone().add({x:-0.5, y:-1.5, z:0}) : position.clone().add({x:0, y:-1.5, z:0})) : position;
 
   return (
     <>
       <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
       { isPieceValue ?
-        <Piece gridPos={pieceGridPos} type={value as PieceType} /> :
+        <Piece position={piecePosition} type={value as PieceType} /> :
         <CustomText position={textPosition} size={1} text={value.toString(10)} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
       }
       { typeof bestValue !== 'undefined' ?

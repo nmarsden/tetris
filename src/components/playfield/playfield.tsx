@@ -53,7 +53,7 @@ const Grid = () => {
         const key = `${index}`;
         return (
           // @ts-ignore
-          <Line key={key} position={position} points={points} color={"grey"} lineWidth={2} dashed={false} opacity={0.1} transparent={true} />
+          <Line key={key} position={position} points={points} color={"grey"} lineWidth={3} dashed={false} opacity={0.1} transparent={true} />
         )
       })}
     </>

@@ -12,13 +12,23 @@ type Blur = {
   numRows: number;
 };
 
-const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false, opacity } : { gridPos: GridPos, type: PieceType, rowsDropped?: number, isGhost?: boolean, isLock?: boolean, opacity?: SpringValue<number> }) => {
+type PieceProps = {
+  gridPos?: GridPos,
+  position?: Vector3,
+  type: PieceType,
+  rowsDropped?: number,
+  isGhost?: boolean,
+  isLock?: boolean,
+  opacity?: SpringValue<number>
+};
+
+const Piece = ({ gridPos, position, type, rowsDropped = 0, isGhost = false, isLock = false, opacity } : PieceProps) => {
   const defaultOpacity = useSpringValue(1);
   const pieceOpacity = opacity === null ? defaultOpacity : opacity;
 
-  const position = useMemo(() => {
-    return GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5);
-  }, [gridPos]);
+  const piecePosition = useMemo(() => {
+    return gridPos ? GridUtils.gridPosToScreen(gridPos).addScalar(TetrisConstants.cellSize * 0.5) : position;
+  }, [gridPos, position]);
 
   const { pieceData, blurData } = useMemo(() => {
     const pieceData = PIECE_DATA.get(type) as PieceData;
@@ -30,7 +40,7 @@ const Piece = ({ gridPos, type, rowsDropped = 0, isGhost = false, isLock = false
   const blockMode: BlockMode = isGhost ? 'GHOST' : (isLock ? 'LOCK' : 'STANDARD');
 
   return (
-    <group position={position}>
+    <group position={piecePosition}>
       {/* Blur effect */}
       {blurData.map((blur, index) =>
         <Plane key={`${index}`} position={blur.position} args={[TetrisConstants.cellSize, blur.numRows]}>

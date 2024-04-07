@@ -17,7 +17,7 @@ const WELCOME_MESSAGE = [
 ];
 
 const MODAL_WIDTH = TetrisConstants.gameWidth;
-const MODAL_HEIGHT = TetrisConstants.gameHeight-8;
+const MODAL_HEIGHT = TetrisConstants.gameHeight-7.5;
 
 const MODAL_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay3Offset - 0.05});
 

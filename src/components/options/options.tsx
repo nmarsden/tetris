@@ -12,7 +12,7 @@ import {Root} from "@react-three/uikit";
 const BORDER_WIDTH = TetrisConstants.gameWidth - 2;
 const BORDER_HEIGHT = TetrisConstants.gameHeight - 2;
 
-const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset - 0.05});
+const OVERLAY_POSITION = GridUtils.gridPosToScreen(TetrisConstants.center).add({x: -1, y: -1, z: TetrisConstants.z.overlay4Offset});
 
 const HEADING_POSITION = new Vector3(0, 8.5, 0.01);
 
@@ -66,6 +66,7 @@ const VolumeSlider = ({ translateY, initialValue, onVolumeChange }: { translateY
           justifyContent={"center"}
           transformTranslateX={0}
           transformTranslateY={translateY}
+          transformTranslateZ={100}
     >
       <Slider
         defaultValue={initialValue}
