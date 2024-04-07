@@ -211,7 +211,7 @@ const App = () => {
 
   return (
     <>
-      <Canvas>
+      <Canvas onContextMenu={(e)=> e.preventDefault()}>
         <Suspense>
             <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} />
             <CameraAnimation ref={cameraAnimation}/>
