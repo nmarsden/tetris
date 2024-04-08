@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {useCallback, useEffect, useRef} from 'react';
+import {useCallback, useContext, useEffect, useRef} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Object3D, PlaneGeometry, MeshBasicMaterial, DoubleSide, Mesh, Vector3, MathUtils} from 'three';
+import {AppContext} from "../context/AppContext.tsx";
 
 type ConfettiProps = {
   depth?: number;    // Depth of explosion. Default: 50
@@ -29,9 +30,12 @@ let booms: Boom[] = [];
 let startTime = 0;
 
 const Confetti = ({ depth = EXPLOSION_RADIUS, loop = false } : ConfettiProps) => {
+  const {appState} = useContext(AppContext)!;
   const groupRef = useRef<Mesh>(null);
 
   const explode = useCallback(() => {
+    if (!appState.confetti) return;
+
     const geometry = new PlaneGeometry(0.03, 0.03, 1, 1);
     const boomObject = new Object3D();
     boomObject.position.y = 2;
@@ -74,9 +78,10 @@ const Confetti = ({ depth = EXPLOSION_RADIUS, loop = false } : ConfettiProps) =>
     }
 
     booms.push(boom);
-  }, [depth]);
+  }, [appState.confetti, depth]);
 
   useFrame(({ clock }) => {
+    if (!appState.confetti) return;
 
     if (startTime === 0) {
       startTime = clock.elapsedTime;

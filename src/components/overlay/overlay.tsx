@@ -89,7 +89,7 @@ const SETTINGS = new Map<OverlayMode, OverlaySettings>([
   [ 'GAME_OVER', { subHeading: 'GAME OVER', closeLabel: 'RETRY' } ]
 ]);
 
-const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mode: OverlayMode, onEnter: () => void, onOptionsUpdated: () => void, onClose: () => void, bestScore: number }) => {
+const Overlay = ({ mode, onEnter, onClose, bestScore }: { mode: OverlayMode, onEnter: () => void, onClose: () => void, bestScore: number }) => {
   const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
   const [showModal, setShowModal] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -133,9 +133,8 @@ const Overlay = ({ mode, onEnter, onOptionsUpdated, onClose, bestScore,  }: { mo
   }, []);
 
   const onOptionsClose = useCallback(() => {
-    onOptionsUpdated();
     setShowOptions(false);
-  }, [onOptionsUpdated]);
+  }, []);
 
   const onHelp = useCallback(() => {
     setShowHelp(true);

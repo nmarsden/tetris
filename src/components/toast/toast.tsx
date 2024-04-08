@@ -3,14 +3,16 @@ import {Text} from "@react-three/drei";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {ToastDetails} from "../../gameEngine.ts";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import {animated, useSpring} from "@react-spring/three";
 import {Sound} from "../../sound.ts";
 import {Confetti} from "../confetti/confetti.tsx";
+import {AppContext} from "../context/AppContext.tsx";
 
 const DELAY_BETWEEN_TOASTS_MSECS = 1000;
 
 const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () => void }) => {
+  const {appState} = useContext(AppContext)!;
   const startPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 4.5, z: TetrisConstants.z.overlay1Offset});
   const endPos = GridUtils.gridPosToScreen({ col: TetrisConstants.numCols * 0.5, row: details.row }).add({x: 0, y: 6.5, z: TetrisConstants.z.overlay1Offset});
 
@@ -40,7 +42,7 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
       position-z={positionZ}
       scale={scale}
     >
-      <Text fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
+      {appState.popups ? <Text fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}
@@ -49,8 +51,8 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
           transparent={true}
         />
         {details.achievement}
-      </Text>
-      {details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
+      </Text> : null }
+      {appState.popups && details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
         <animated.meshStandardMaterial
           metalness={1}
           roughness={1}

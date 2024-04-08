@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, Loader, OrbitControls, PerspectiveCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Suspense, useCallback, useEffect, useRef, useState} from "react";
+import {Suspense, useCallback, useContext, useEffect, useRef, useState} from "react";
 import {GameEngine, GameEngineMethod, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
@@ -15,9 +15,9 @@ import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
-import useLocalStorage from "./hooks/useLocalStorage.ts";
 import { Sidebar } from './components/sidebar/sidebar.tsx';
 import {Overlay, OverlayMode} from "./components/overlay/overlay.tsx";
+import AppProvider, {AppContext} from "./components/context/AppContext.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -72,9 +72,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO fix rendering issue with ghost piece after a hard drop
 
-// TODO options - camera FOV (eg. set to 10 to remove perspective)
-
-
 type StepMode = 'INIT' | 'START' | 'NEXT' | 'RESUME';
 
 const GAME_ENGINE_METHOD = new Map<StepMode, GameEngineMethod>([
@@ -85,8 +82,8 @@ const GAME_ENGINE_METHOD = new Map<StepMode, GameEngineMethod>([
 ]);
 
 const App = () => {
-  const [store, setStore] = useLocalStorage('tetris');
-  const [gameState, setGameState] = useState(gameEngine.initialState(store.bestScore));
+  const {appState, setBestScore} = useContext(AppContext)!;
+  const [gameState, setGameState] = useState(gameEngine.initialState(appState.bestScore));
   const [showCountdown, setShowCountdown] = useState(false);
   const [action, setActionField] = useKeyboardControls();
   const cameraAnimation = useRef<CameraAnimationRef>(null);
@@ -111,17 +108,9 @@ const App = () => {
   }, []);
 
   const onOverlayEnter = useCallback(() => {
-    Sound.getInstance().setMusicVolume(store.musicVolume);
-    Sound.getInstance().setSoundFXVolume(store.soundFXVolume);
-  }, [store]);
-
-  const onOverlayOptionsUpdated = useCallback(() => {
-    setStore({
-      ...store,
-      musicVolume: Sound.getInstance().musicVolume(),
-      soundFXVolume: Sound.getInstance().soundFXVolume()
-    });
-  }, [setStore, store]);
+    Sound.getInstance().setMusicVolume(appState.musicVolume);
+    Sound.getInstance().setSoundFXVolume(appState.soundFXVolume);
+  }, [appState]);
 
   const onOverlayClosed = useCallback(() => {
     setOverlayMode('CLOSED');
@@ -196,8 +185,8 @@ const App = () => {
 
   useEffect(() => {
     if (gameState.bestScore === 0) return;
-    setStore({...store, bestScore: gameState.bestScore});
-  }, [gameState.bestScore]);
+    setBestScore(gameState.bestScore);
+  }, [gameState.bestScore, setBestScore]);
 
   useEffect(() => {
     switch (gameState.mode) {
@@ -254,7 +243,6 @@ const App = () => {
             <Overlay
               mode={overlayMode}
               onEnter={onOverlayEnter}
-              onOptionsUpdated={onOverlayOptionsUpdated}
               onClose={onOverlayClosed}
               bestScore={gameState.bestScore}
             />
@@ -284,4 +272,8 @@ const App = () => {
   )
 }
 
-createRoot(document.getElementById('root')!).render(<App />)
+createRoot(document.getElementById('root')!).render(
+  <AppProvider>
+    <App />
+  </AppProvider>
+)

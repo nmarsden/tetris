@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {useFrame, useThree} from "@react-three/fiber";
 import {PerspectiveCamera} from "three";
-import {forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState} from "react";
+import {forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState} from "react";
 import {Line} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
+import {AppContext} from "../context/AppContext.tsx";
 
 export type CamAnimation = 'NONE' | 'BUMP_RIGHT' | 'BUMP_LEFT' | 'BUMP_UP';
 
@@ -46,6 +47,7 @@ let previousBounds = { width: 0, height: 0 };
 
 // eslint-disable-next-line no-empty-pattern
 const CameraAnimation = forwardRef<CameraAnimationRef, CameraAnimationProps>(({}: CameraAnimationProps, ref) => {
+  const {appState} = useContext(AppContext)!;
   const [animation, setAnimation] = useState<CamAnimation>('NONE');
   const [startAnimation, setStartAnimation] = useState(false);
   const {camera} = useThree();
@@ -80,13 +82,14 @@ const CameraAnimation = forwardRef<CameraAnimationRef, CameraAnimationProps>(({}
 
   useImperativeHandle(ref, () => ({
     animate: (animation: CamAnimation) => {
+      if (!appState.cameraShake) return;
       setAnimation(animation);
       setStartAnimation(true);
     },
     setCamBounds: (camBounds: CamBounds) => {
       setBounds(CAM_BOUNDS.get(camBounds) as Bounds);
     }
-  }), [setAnimation]);
+  }), [appState.cameraShake]);
 
   useFrame(({ camera, clock }) => {
 

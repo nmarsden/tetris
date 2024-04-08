@@ -46,7 +46,7 @@ export const colors = basedOnPreferredColorScheme({
     destructive: hsl(0, 62.8, 30.6),
     destructiveForeground: hsl(210, 40, 98),
     border: hsl(217.2, 32.6, 17.5),
-    input: hsl(217.2, 32.6, 17.5),
+    input: hsl(40, 2, 61),
     ring: hsl(212.7, 26.8, 83.9),
   },
 })
