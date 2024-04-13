@@ -7,6 +7,7 @@ interface AppState {
   cameraShake: boolean;
   confetti: boolean;
   popups: boolean;
+  background: boolean;
   version: number;
 }
 
@@ -18,6 +19,7 @@ interface AppContextProps {
   setCameraShake: (cameraShake: boolean) => void;
   setConfetti: (confetti: boolean) => void;
   setPopups: (popups: boolean) => void;
+  setBackground: (background: boolean) => void;
 }
 
 export const AppContext = createContext<AppContextProps | null>(null);
@@ -33,7 +35,8 @@ const INITIAL_STATE: AppState = {
   cameraShake: true,
   confetti: true,
   popups: true,
-  version: 0.1
+  background: true,
+  version: 0.2
 };
 
 const getInitialAppState = () => {
@@ -49,6 +52,10 @@ const getInitialAppState = () => {
       appState.confetti = true;
       appState.popups = true;
       appState.version = 0.1;
+      storeAppState(appState);
+    } else if (appState.version === 0.1) {
+      appState.background = true;
+      appState.version = 0.2
       storeAppState(appState);
     }
     return appState;
@@ -94,6 +101,10 @@ const AppProvider = ({ children }: PropsWithChildren<AppProviderProps>) => {
     setAppState((prevState) => ({...prevState, popups}));
   }, []);
 
+  const setBackground = useCallback((background: boolean) => {
+    setAppState((prevState) => ({...prevState, background}));
+  }, []);
+
   return (
     <AppContext.Provider value={{
       appState,
@@ -102,7 +113,8 @@ const AppProvider = ({ children }: PropsWithChildren<AppProviderProps>) => {
       setSoundFXVolume,
       setCameraShake,
       setConfetti,
-      setPopups
+      setPopups,
+      setBackground
     }}>
       {children}
     </AppContext.Provider>

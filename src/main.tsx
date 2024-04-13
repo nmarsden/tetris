@@ -18,6 +18,7 @@ import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components
 import { Sidebar } from './components/sidebar/sidebar.tsx';
 import {Overlay, OverlayMode} from "./components/overlay/overlay.tsx";
 import AppProvider, {AppContext} from "./components/context/AppContext.tsx";
+import {Background} from "./components/background/background.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -71,6 +72,8 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Triple	 Yes
 
 // TODO fix rendering issue with ghost piece after a hard drop
+
+// TODO about
 
 type StepMode = 'INIT' | 'START' | 'NEXT' | 'RESUME';
 
@@ -205,7 +208,9 @@ const App = () => {
     <>
       <Canvas onContextMenu={(e)=> e.preventDefault()}>
         <Suspense>
-            <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} />
+            <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} >
+              {appState.background ? <Background /> : null}
+            </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
             <Playfield enableGrid={false}/>
             {gameState.pieceAction === 'HARD DROP' ?

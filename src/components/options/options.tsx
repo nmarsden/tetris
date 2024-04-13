@@ -31,13 +31,16 @@ const SFX_VOLUME_LABEL_POSITION = new Vector3(0, -1, 0.01);
 const SFX_VOLUME_SLIDER_TRANSLATE_Y = 1300;
 
 const CAMERA_SHAKE_SWITCH_TRANSLATE_Y = -1700;
-const CAMERA_SHAKE_LABEL_POSITION = new Vector3(-2.2, 3.5, 0.01);
+const CAMERA_SHAKE_LABEL_POSITION = new Vector3(-2.2, 3.4, 0.01);
 
-const CONFETTI_SWITCH_TRANSLATE_Y = 0;
-const CONFETTI_LABEL_POSITION = new Vector3(-2.2, 0, 0.01);
+const CONFETTI_SWITCH_TRANSLATE_Y = -500;
+const CONFETTI_LABEL_POSITION = new Vector3(-2.2, 0.95, 0.01);
 
-const POPUPS_SWITCH_TRANSLATE_Y = 1700;
-const POPUPS_LABEL_POSITION = new Vector3(-2.2, -3.5, 0.01);
+const POPUPS_SWITCH_TRANSLATE_Y = 700;
+const POPUPS_LABEL_POSITION = new Vector3(-2.2, -1.45, 0.01);
+
+const BACKGROUND_SWITCH_TRANSLATE_Y = 1900;
+const BACKGROUND_LABEL_POSITION = new Vector3(-2.2, -3.85, 0.01);
 
 const CLOSE_BUTTON_POSITION = new Vector3(0, -8, 0);
 
@@ -194,7 +197,7 @@ const Audio = ({ opacity }: { opacity: SpringValue<number> }) => {
 };
 
 const Effects = ({ opacity }: { opacity: SpringValue<number> }) => {
-  const {appState, setCameraShake, setConfetti, setPopups} = useContext(AppContext)!;
+  const {appState, setCameraShake, setConfetti, setPopups, setBackground} = useContext(AppContext)!;
 
   const onCameraShakeChange = useCallback((value: boolean): void => {
     setCameraShake(value);
@@ -208,6 +211,10 @@ const Effects = ({ opacity }: { opacity: SpringValue<number> }) => {
     setPopups(value);
   }, [setPopups]);
 
+  const onBackgroundChange = useCallback((value: boolean): void => {
+    setBackground(value);
+  }, [setBackground]);
+
   return (
     <>
       <ToggleSwitch translateY={CAMERA_SHAKE_SWITCH_TRANSLATE_Y} initialValue={appState.cameraShake} onChange={onCameraShakeChange} />
@@ -218,6 +225,9 @@ const Effects = ({ opacity }: { opacity: SpringValue<number> }) => {
 
       <ToggleSwitch translateY={POPUPS_SWITCH_TRANSLATE_Y} initialValue={appState.popups} onChange={onPopupsChange} />
       <LabelValue position={POPUPS_LABEL_POSITION} opacity={opacity} label={'Popups'} value={appState.popups ? 'ON' : 'OFF'} align={'left'} />
+
+      <ToggleSwitch translateY={BACKGROUND_SWITCH_TRANSLATE_Y} initialValue={appState.background} onChange={onBackgroundChange} />
+      <LabelValue position={BACKGROUND_LABEL_POSITION} opacity={opacity} label={'Background'} value={appState.background ? 'ON' : 'OFF'} align={'left'} />
     </>
   )
 };
