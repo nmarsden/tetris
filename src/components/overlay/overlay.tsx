@@ -27,14 +27,15 @@ const WELCOME_MESSAGE_POSITION = new Vector3(0, -1, 0.01);
 
 const SUB_HEADING_POSITION = new Vector3(0, 0.9, 0.1);
 
-const NEW_BEST_STAR_POSITION = new Vector3(0, -0.65, 0.05);
-const NEW_BEST_VALUE_POSITION = new Vector3(0, -0.75, 0.1);
+const STAR_POSITION = new Vector3(0, -0.65, 0.05);
+const SCORE_POSITION = new Vector3(0, -0.75, 0.1);
+const CONFETTI_POSITION = new Vector3(0, -2.2, 0);
 
 const OPTIONS_BUTTON_POSITION = new Vector3(-2.4, -2.5, 0);
 const HELP_BUTTON_POSITION = new Vector3(2.4, -2.5, 0);
 const CLOSE_BUTTON_POSITION  = new Vector3(0, -5, 0);
 
-type CustomTextType = 'SUB_HEADING' | 'MESSAGE' | 'BEST_SCORE';
+type CustomTextType = 'SUB_HEADING' | 'MESSAGE' | 'SCORE' | 'BEST_SCORE';
 
 type CustomTextSettings = {
   fontSize: number,
@@ -44,9 +45,10 @@ type CustomTextSettings = {
 };
 
 const CUSTOM_TEXT_SETTINGS = new Map<CustomTextType, CustomTextSettings>([
-  ['SUB_HEADING', { fontSize: 1.5, outlineWidth: 0.1, color: new Color(0xFFFFFF), outlineColor: new Color(0x555555) }],
-  ['MESSAGE', { fontSize: 0.7, outlineWidth: 0.04, color: new Color(0xFFFFFF), outlineColor: new Color(0xFFFFFF) }],
-  ['BEST_SCORE', { fontSize: 1.5, outlineWidth: 0.1, color: new Color(0x000000), outlineColor: new Color(0x000000) }]
+  ['SUB_HEADING', { fontSize: 1.5, outlineWidth: 0.1,  color: new Color(0xFFFFFF), outlineColor: new Color(0x555555) }],
+  ['MESSAGE',     { fontSize: 0.7, outlineWidth: 0.04, color: new Color(0xFFFFFF), outlineColor: new Color(0xFFFFFF) }],
+  ['SCORE',       { fontSize: 1.5, outlineWidth: 0.1,  color: new Color(0xFFFFFF), outlineColor: new Color(0xFFFFFF) }],
+  ['BEST_SCORE',  { fontSize: 1.5, outlineWidth: 0.1,  color: new Color(0x000000), outlineColor: new Color(0x000000) }]
 ]);
 
 const CustomText = ({ type, position, text, opacity }: { type: CustomTextType, position: Vector3, text: string, opacity: SpringValue<number> }) => {
@@ -89,7 +91,15 @@ const SETTINGS = new Map<OverlayMode, OverlaySettings>([
   [ 'GAME_OVER', { subHeading: 'GAME OVER', closeLabel: 'RETRY' } ]
 ]);
 
-const Overlay = ({ mode, onEnter, onClose, bestScore }: { mode: OverlayMode, onEnter: () => void, onClose: () => void, bestScore: number }) => {
+type OverlayProps = {
+  mode: OverlayMode,
+  onEnter: () => void,
+  onClose: () => void,
+  score: number,
+  bestScore: number
+};
+
+const Overlay = ({ mode, onEnter, onClose, score, bestScore }: OverlayProps) => {
   const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
   const [showModal, setShowModal] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -161,7 +171,7 @@ const Overlay = ({ mode, onEnter, onClose, bestScore }: { mode: OverlayMode, onE
 
   useEffect(() => {
     const settings = SETTINGS.get(mode) as OverlaySettings;
-    setSubHeading(showNewBestScore && mode === 'GAME_OVER' ? 'NEW BEST SCORE' : settings.subHeading);
+    setSubHeading(mode !== 'GAME_OVER' ? settings.subHeading : (showNewBestScore ? 'NEW BEST SCORE' : 'SCORE'));
     setCloseLabel(settings.closeLabel);
   }, [mode, showNewBestScore]);
 
@@ -231,15 +241,19 @@ const Overlay = ({ mode, onEnter, onClose, bestScore }: { mode: OverlayMode, onE
               <>
                 <CustomText type={'SUB_HEADING'} position={SUB_HEADING_POSITION} text={subHeading} opacity={opacity}/>
 
-                {mode === 'GAME_OVER' && showNewBestScore ? (
-                  <>
-                    <SpinningStars position={NEW_BEST_STAR_POSITION} opacity={opacity}/>
-                    <CustomText type='BEST_SCORE' position={NEW_BEST_VALUE_POSITION} text={`${bestScore}`} opacity={opacity}/>
-                    <group position-y={-2.2}>
-                      <Confetti depth={3} loop={true}/>
-                    </group>
-                  </>
-                  ) : null}
+                {mode === 'GAME_OVER' ? (
+                  showNewBestScore ? (
+                    <>
+                      <SpinningStars position={STAR_POSITION} opacity={opacity}/>
+                      <CustomText type='BEST_SCORE' position={SCORE_POSITION} text={`${bestScore}`} opacity={opacity}/>
+                      <group position={CONFETTI_POSITION}>
+                        <Confetti depth={3} loop={true}/>
+                      </group>
+                    </>
+                  ) : (
+                    <CustomText type='SCORE' position={SCORE_POSITION} text={`${score}`} opacity={opacity}/>
+                  )
+                ) : null}
 
                 <Button position={OPTIONS_BUTTON_POSITION} label={'OPTIONS'} type={'MEDIUM'} onButtonClick={onOptions}
                         opacity={opacity} enabled={enableButtons}/>

@@ -244,6 +244,7 @@ const App = () => {
               mode={overlayMode}
               onEnter={onOverlayEnter}
               onClose={onOverlayClosed}
+              score={gameState.score}
               bestScore={gameState.bestScore}
             />
             {/* Countdown */}

@@ -42,26 +42,26 @@ const Toast = ({ details, onExpired }: { details: ToastDetails, onExpired: () =>
       position-z={positionZ}
       scale={scale}
     >
-      {appState.popups ? <Text fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
-        <animated.meshStandardMaterial
-          metalness={1}
-          roughness={1}
-          color={0x000000}
-          opacity={opacity}
-          transparent={true}
-        />
-        {details.achievement}
-      </Text> : null }
-      {appState.popups && details.points > 0 ? <Text position-y={-1.5} fontSize={1} letterSpacing={0.1} outlineWidth={0.1} outlineColor={0xFFFFFF}>
-        <animated.meshStandardMaterial
-          metalness={1}
-          roughness={1}
-          color={0x000000}
-          opacity={opacity}
-          transparent={true}
-        />
-        {`+${details.points}`}
-      </Text> : null}
+      {appState.popups ? (
+        <Text
+          textAlign={'center'}
+          maxWidth={8}
+          lineHeight={1.2}
+          fontSize={1}
+          letterSpacing={0.1}
+          outlineWidth={0.1}
+          outlineColor={0xFFFFFF}
+        >
+          <animated.meshStandardMaterial
+            metalness={1}
+            roughness={1}
+            color={0x000000}
+            opacity={opacity}
+            transparent={true}
+          />
+          {details.achievement + (details.points > 0 ? `\n+${details.points}` : '')}
+        </Text>
+      ) : null }
       <Confetti />
     </animated.group>
   );
