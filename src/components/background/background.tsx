@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {useFrame} from "@react-three/fiber";
 import {useEffect, useMemo, useRef} from "react";
-import {InstancedMesh, Object3D} from "three";
+import {ExtrudeGeometryOptions, InstancedMesh, Object3D, Shape} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {animated, useSpring} from "@react-spring/three";
 
@@ -10,6 +10,25 @@ const dummy = new Object3D();
 
 const DARK_ORANGE = '#261501';
 const LIGHT_ORANGE = '#fa9955';
+
+const tShape = new Shape();
+tShape.moveTo(0, 0);
+tShape.lineTo(3, 0);
+tShape.lineTo(3, 1);
+tShape.lineTo(2, 1);
+tShape.lineTo(2, 2);
+tShape.lineTo(1, 2);
+tShape.lineTo(1, 1);
+tShape.lineTo(0, 1);
+tShape.lineTo(0, 0);
+
+const extrudeSettings: ExtrudeGeometryOptions = {
+  depth: 0.75,
+  bevelEnabled: true,
+  bevelThickness: 0.125,
+  bevelSize: 0.25,
+  bevelOffset: -0.25
+};
 
 const Background = ({ muted }: { muted: boolean }) => {
   const mesh = useRef<InstancedMesh>(null!);
@@ -65,7 +84,7 @@ const Background = ({ muted }: { muted: boolean }) => {
         // @ts-ignore
         args={[null, null, count]}
       >
-        <boxGeometry args={[1, 1, 1]} />
+        <extrudeGeometry args={[tShape, extrudeSettings]} />
         <animated.meshStandardMaterial
           color={color}
           metalness={0}
