@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {useFrame} from "@react-three/fiber";
-import {useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 import {InstancedMesh, Object3D} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
+import {animated, useSpring} from "@react-spring/three";
 
 const count = 500;
 const dummy = new Object3D();
 
-const Background = () => {
+const DARK_ORANGE = '#261501';
+const LIGHT_ORANGE = '#fa9955';
+
+const Background = ({ muted }: { muted: boolean }) => {
   const mesh = useRef<InstancedMesh>(null!);
+  const [{ color }, api] = useSpring(() => ({ from: { color: LIGHT_ORANGE }}));
 
   const particles = useMemo(() => {
     const temp = [];
@@ -44,6 +49,14 @@ const Background = () => {
     mesh.current.instanceMatrix.needsUpdate = true;
   });
 
+  useEffect(() => {
+    api.start(() => ({
+      from: { color: muted ? LIGHT_ORANGE : DARK_ORANGE},
+      to: { color: muted ? DARK_ORANGE : LIGHT_ORANGE },
+      config: { duration: 2000 }
+    }));
+  }, [api, muted]);
+
   // @ts-ignore
   return (
     <>
@@ -53,8 +66,8 @@ const Background = () => {
         args={[null, null, count]}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial
-          color="#261501" // dark orange
+        <animated.meshStandardMaterial
+          color={color}
           metalness={0}
           roughness={1}
         />

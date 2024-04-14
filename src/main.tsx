@@ -209,7 +209,7 @@ const App = () => {
       <Canvas onContextMenu={(e)=> e.preventDefault()}>
         <Suspense>
             <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} >
-              {appState.background ? <Background /> : null}
+              {appState.background ? <Background muted={overlayMode === 'CLOSED'} /> : null}
             </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
             <Playfield enableGrid={false}/>
