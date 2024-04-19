@@ -108,19 +108,18 @@ const sGeometry = new ExtrudeGeometry(sShape, extrudeSettings);
 const oGeometry = new ExtrudeGeometry(oShape, extrudeSettings);
 const jGeometry = new ExtrudeGeometry(jShape, extrudeSettings);
 
+const GEOMETRY_DURATION_SECS = 31.9;
+const GEOMETRY_ANIMATION_SPEED = 0.001;
 const GEOMETRIES = [zGeometry, lGeometry, tGeometry, sGeometry, oGeometry, jGeometry];
 // const GEOMETRIES = [zGeometry, lGeometry, tGeometry, iGeometry, sGeometry, oGeometry, jGeometry];
 let currentGeometryIndex = 0;
-let startTime = 0;
-const GEOMETRY_DURATION_SECS = 31.9;
+let geometryAnimationStartTime = 0;
+let geometryAnimationProgress = 0;
 let switchingGeometry = false;
 
 type Particle = {
-  t: number;
-  factor: number;
-  speed: number;
-  xFactor: number;
-  yFactor: number;
+  x: number;
+  y: number;
 };
 
 const AnimatedOutlines = animated(Outlines);
@@ -128,43 +127,6 @@ const AnimatedOutlines = animated(Outlines);
 interface Animation {
   update: (mesh: InstancedMesh, camera: Camera) => void;
 }
-
-// class FloatingAnimation implements Animation {
-//   particles: Particle[];
-//
-//   constructor() {
-//     this.particles = [];
-//     for (let i = 0; i < count; i++) {
-//       const t = Math.random() * 100;
-//       const factor = 20 + Math.random() * 100;
-//       const speed = 0.001;
-//       const xFactor = -50 + Math.random() * 100;
-//       const yFactor = -50 + Math.random() * 100;
-//       this.particles.push({ t, factor, speed, xFactor, yFactor });
-//     }
-//   }
-//
-//   update(mesh: InstancedMesh, camera: Camera) {
-//     this.particles.forEach((particle, i) => {
-//       const { factor, speed, xFactor, yFactor } = particle;
-//       const t = particle.t += speed / 2;
-//       const s = Math.cos(t);
-//
-//       const zFactor = TetrisConstants.z.main - camera.position.z - 5;
-//
-//       dummy.position.set(
-//         xFactor + Math.cos((t / 10) * factor) + (Math.sin(t) * factor) / 10,
-//         yFactor + Math.sin((t / 10) * factor) + (Math.cos(t * 2) * factor) / 10,
-//         zFactor + Math.cos((t / 10)) + (Math.sin(t * 3)) / 10
-//       )
-//       dummy.scale.setScalar(s);
-//       dummy.rotation.set(s * 5, s * 5, s * 5);
-//       dummy.updateMatrix();
-//       mesh.setMatrixAt(i, dummy.matrix);
-//     })
-//     mesh.instanceMatrix.needsUpdate = true;
-//   }
-// }
 
 class GridAnimation implements Animation {
   particles: Particle[];
@@ -178,39 +140,26 @@ class GridAnimation implements Animation {
     this.particles = [];
     for (let row=0; row < NUM_ROWS; row++) {
       for (let col = 0; col < NUM_COLS; col++) {
-        const t = 0;
-        const factor = 0;
-        const speed = 0.001;
-        const xFactor = -(X_RANGE * 0.5) + col * (X_RANGE / NUM_COLS);
-        const yFactor =-(Y_RANGE * 0.5) + row * (Y_RANGE / NUM_ROWS);
-        this.particles.push({ t, factor, speed, xFactor, yFactor });
+        const x = -(X_RANGE * 0.5) + col * (X_RANGE / NUM_COLS);
+        const y =-(Y_RANGE * 0.5) + row * (Y_RANGE / NUM_ROWS);
+        this.particles.push({ x, y });
       }
     }
   }
 
   update(mesh: InstancedMesh, camera: Camera) {
+    if (switchingGeometry) {
+      geometryAnimationProgress = 0;
+    } else {
+      geometryAnimationProgress += GEOMETRY_ANIMATION_SPEED;
+    }
+    const xOffset = switchingGeometry ? 0 : 10 * Math.sin(geometryAnimationProgress);
+    const angle = switchingGeometry ? 0 : Math.PI * 2 * Math.sin(geometryAnimationProgress);
+    const scale = switchingGeometry ? 0 : 0.01 + Math.sin(geometryAnimationProgress);
+    const z = TetrisConstants.z.main - camera.position.z - 5;
+
     this.particles.forEach((particle, i) => {
-      const { speed, xFactor, yFactor } = particle;
-
-      if (switchingGeometry) {
-        particle.t = 0;
-      } else {
-        particle.t += speed;
-      }
-      const t = particle.t;
-
-      const s = switchingGeometry ? 0 : Math.sin(t);
-      const angle = Math.PI * 2 * s;
-      const scale = 0.01 + s;
-
-      const zFactor = TetrisConstants.z.main - camera.position.z - 5;
-
-      dummy.position.set(
-        xFactor + (10 * s),
-        yFactor,
-        zFactor
-      )
-
+      dummy.position.set(particle.x + xOffset, particle.y, z);
       dummy.scale.set(scale, scale, scale);
       dummy.rotation.set(angle, angle, angle);
       dummy.updateMatrix();
@@ -245,12 +194,12 @@ const Background = ({ muted }: { muted: boolean }) => {
   useFrame(({ camera, clock}) => {
     animation.update(mesh.current, camera);
 
-    if (startTime === 0) {
-      startTime = clock.elapsedTime;
+    if (geometryAnimationStartTime === 0) {
+      geometryAnimationStartTime = clock.elapsedTime;
     }
-    const animationTime = clock.elapsedTime - startTime;
+    const animationTime = clock.elapsedTime - geometryAnimationStartTime;
     if (animationTime > GEOMETRY_DURATION_SECS) {
-      startTime = clock.elapsedTime;
+      geometryAnimationStartTime = clock.elapsedTime;
       switchGeometry();
     }
   });
