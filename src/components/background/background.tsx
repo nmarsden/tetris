@@ -2,6 +2,7 @@
 import {Camera, useFrame} from "@react-three/fiber";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {
+  Clock,
   ExtrudeGeometry,
   ExtrudeGeometryOptions,
   InstancedMesh,
@@ -103,19 +104,16 @@ const extrudeSettings: ExtrudeGeometryOptions = {
 const zGeometry = new ExtrudeGeometry(zShape, extrudeSettings);
 const lGeometry = new ExtrudeGeometry(lShape, extrudeSettings);
 const tGeometry = new ExtrudeGeometry(tShape, extrudeSettings);
-// const iGeometry = new ExtrudeGeometry(iShape, extrudeSettings);
+const iGeometry = new ExtrudeGeometry(iShape, extrudeSettings);
 const sGeometry = new ExtrudeGeometry(sShape, extrudeSettings);
 const oGeometry = new ExtrudeGeometry(oShape, extrudeSettings);
 const jGeometry = new ExtrudeGeometry(jShape, extrudeSettings);
 
-const GEOMETRY_DURATION_SECS = 31.9;
-const GEOMETRY_ANIMATION_SPEED = 0.001;
-const GEOMETRIES = [zGeometry, lGeometry, tGeometry, sGeometry, oGeometry, jGeometry];
-// const GEOMETRIES = [zGeometry, lGeometry, tGeometry, iGeometry, sGeometry, oGeometry, jGeometry];
-let currentGeometryIndex = 0;
+const GEOMETRY_DURATION_SECS = 20;
+const GEOMETRIES = [zGeometry, lGeometry, tGeometry, iGeometry, sGeometry, oGeometry, jGeometry];
+let currentGeometryIndex = 2;
 let geometryAnimationStartTime = 0;
-let geometryAnimationProgress = 0;
-let switchingGeometry = false;
+let geometryAnimationTime = 0;
 
 type Particle = {
   x: number;
@@ -125,7 +123,7 @@ type Particle = {
 const AnimatedOutlines = animated(Outlines);
 
 interface Animation {
-  update: (mesh: InstancedMesh, camera: Camera) => void;
+  update: (mesh: InstancedMesh, switchingGeometry: boolean, clock: Clock, camera: Camera) => void;
 }
 
 class GridAnimation implements Animation {
@@ -147,15 +145,16 @@ class GridAnimation implements Animation {
     }
   }
 
-  update(mesh: InstancedMesh, camera: Camera) {
+  update(mesh: InstancedMesh, switchingGeometry: boolean, clock: Clock, camera: Camera) {
     if (switchingGeometry) {
-      geometryAnimationProgress = 0;
+      geometryAnimationTime = 0;
     } else {
-      geometryAnimationProgress += GEOMETRY_ANIMATION_SPEED;
+      geometryAnimationTime = clock.elapsedTime - geometryAnimationStartTime
     }
-    const xOffset = switchingGeometry ? 0 : 10 * Math.sin(geometryAnimationProgress);
-    const angle = switchingGeometry ? 0 : Math.PI * 2 * Math.sin(geometryAnimationProgress);
-    const scale = switchingGeometry ? 0 : 0.01 + Math.sin(geometryAnimationProgress);
+    const sineFactor = Math.sin(Math.PI * (geometryAnimationTime / GEOMETRY_DURATION_SECS));
+    const xOffset = switchingGeometry ? 0 : 10 * sineFactor;
+    const angle = switchingGeometry ? 0 : Math.PI * 2 * (geometryAnimationTime / GEOMETRY_DURATION_SECS);
+    const scale = switchingGeometry ? 1 : Math.max(0.1, Math.min(1, 5 * sineFactor));
     const z = TetrisConstants.z.main - camera.position.z - 5;
 
     this.particles.forEach((particle, i) => {
@@ -175,9 +174,10 @@ const Background = ({ muted }: { muted: boolean }) => {
   const mesh = useRef<InstancedMesh>(null!);
   const [{ color }, api] = useSpring(() => ({ from: { color: LIGHT }}));
   const [geometry, setGeometry] = useState(GEOMETRIES[currentGeometryIndex]);
+  const [switchingGeometry, setSwitchingGeometry] = useState(false);
 
   const switchGeometry = useCallback(() => {
-    switchingGeometry = true;
+    setSwitchingGeometry(true);
 
     currentGeometryIndex++;
     if (currentGeometryIndex === GEOMETRIES.length) {
@@ -188,11 +188,11 @@ const Background = ({ muted }: { muted: boolean }) => {
     mesh.current.computeBoundingSphere();
     mesh.current.instanceMatrix.needsUpdate = true;
 
-    setTimeout(() => { switchingGeometry = false; }, 200);
+    setTimeout(() => { setSwitchingGeometry(false) }, 200);
   }, []);
 
   useFrame(({ camera, clock}) => {
-    animation.update(mesh.current, camera);
+    animation.update(mesh.current, switchingGeometry, clock, camera);
 
     if (geometryAnimationStartTime === 0) {
       geometryAnimationStartTime = clock.elapsedTime;
@@ -231,7 +231,7 @@ const Background = ({ muted }: { muted: boolean }) => {
           thickness={0.2}
           color={color}
           transparent={true}
-          opacity={1}
+          opacity={switchingGeometry ? 0 : 1}
         />
       </instancedMesh>
     </>
