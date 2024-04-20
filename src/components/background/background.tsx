@@ -17,7 +17,7 @@ const count = 500;
 const dummy = new Object3D();
 
 const DARK = '#333333';
-const DARK_ALT = '#261501';
+const DARK_ALT = '#462702';
 
 const LIGHT = '#cccccc';
 const LIGHT_ALT = '#FE8129';
@@ -154,10 +154,9 @@ class GridAnimation implements Animation {
     } else {
       geometryAnimationTime = clock.elapsedTime - geometryAnimationStartTime
     }
-    const sineFactor = Math.sin(Math.PI * (geometryAnimationTime / GEOMETRY_DURATION_SECS));
-    const xOffset = switchingGeometry ? 0 : 10 * sineFactor;
+    const xOffset = switchingGeometry ? 0 : 5 * Math.sin(2 * Math.PI * (geometryAnimationTime / GEOMETRY_DURATION_SECS));
     const angle = switchingGeometry ? 0 : Math.PI * 2 * (geometryAnimationTime / GEOMETRY_DURATION_SECS);
-    const scale = switchingGeometry ? 1 : Math.max(0.1, Math.min(1, 5 * sineFactor));
+    const scale = switchingGeometry ? 1 : Math.max(0, Math.min(1, 5 * Math.sin(Math.PI * (geometryAnimationTime / GEOMETRY_DURATION_SECS))));
     const z = TetrisConstants.z.main - camera.position.z - 5;
 
     this.particles.forEach((particle, i) => {
