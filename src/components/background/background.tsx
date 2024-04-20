@@ -17,7 +17,10 @@ const count = 500;
 const dummy = new Object3D();
 
 const DARK = '#333333';
+const DARK_ALT = '#261501';
+
 const LIGHT = '#cccccc';
+const LIGHT_ALT = '#FE8129';
 
 const zShape = new Shape();
 zShape.moveTo(0.5, 0);      // 0
@@ -205,10 +208,23 @@ const Background = ({ muted }: { muted: boolean }) => {
   });
 
   useEffect(() => {
+    api.stop();
     api.start(() => ({
       from: { color: muted ? LIGHT : DARK},
       to: { color: muted ? DARK : LIGHT },
-      config: { duration: 200 }
+      config: { duration: 200 },
+      onRest: () => {
+        api.start(() => ({
+          from: { color: muted ? DARK : LIGHT },
+          // @ts-ignore
+          to: async (next)=> {
+            await next({ color: muted ? DARK_ALT : LIGHT_ALT  })
+            await next({ color: muted ? DARK : LIGHT })
+          },
+          config: { duration: GEOMETRY_DURATION_SECS * 1000 * 0.125 },
+          loop: true
+        }));
+      }
     }));
   }, [api, muted]);
 
