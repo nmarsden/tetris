@@ -78,8 +78,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 // TODO top ten button
 //      - shows top ten: score, level, lines
 
-// TODO animate the showing/hiding of the Pause button
-
 // TODO stop the game when browser tab is not open
 //      - Resource: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
 

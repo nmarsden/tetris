@@ -4,6 +4,8 @@ import {PieceType} from "../../gameEngine.ts";
 import {GridUtils} from "../playfield/playfield.tsx";
 import {Button} from "../button/button.tsx";
 import {Vector3} from "three";
+import {useEffect} from "react";
+import {useSpring, animated, config} from "@react-spring/three";
 
 type SidebarProps = {
   score: number;
@@ -14,6 +16,25 @@ type SidebarProps = {
   isPauseButtonShown: boolean;
   onPause: () => void;
   isNewBestScore: boolean;
+};
+
+const PauseButton = ({ isShown, position, onPause }: { isShown: boolean, position: Vector3, onPause: () => void }) => {
+  const [{scale}, api] = useSpring(() => ({ from: { scale: 0 } }));
+
+  useEffect(() => {
+    api.start({
+      from: { scale: isShown ? 0 : 1 },
+      to: { scale: isShown ? 1 : 0 },
+      immediate: !isShown,
+      config: config.gentle
+    })
+  }, [isShown, api]);
+
+  return (
+    <animated.group scale={scale}>
+      <Button position={position} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} />;
+    </animated.group>
+  );
 };
 
 const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
@@ -29,7 +50,7 @@ const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonS
 
   return (
     <group position={sideBarPosition} rotation-y={Math.PI * -0.25} scale={1}>
-      {isPauseButtonShown ? <Button position={pausePosition} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} /> : null}
+      <PauseButton isShown={isPauseButtonShown} position={pausePosition} onPause={onPause} />
       <Info position={scorePosition} label={'SCORE'} value={score}/>
       <Info position={bestScorePosition} label={'SCORE'} value={bestScore} isBest={true} isFlash={isNewBestScore}/>
       <Info position={levelPosition}  label={'LEVEL'} value={level}/>
