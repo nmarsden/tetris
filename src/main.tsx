@@ -16,9 +16,10 @@ import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
 import { Sidebar } from './components/sidebar/sidebar.tsx';
-import {Overlay, OverlayMode} from "./components/overlay/overlay.tsx";
 import AppProvider, {AppContext} from "./components/context/AppContext.tsx";
 import {Background} from "./components/background/background.tsx";
+import {Toolbar, ToolbarMode} from "./components/toolbar/toolbar.tsx";
+import {Welcome, WelcomeMode} from "./components/welcome/welcome.tsx";
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
 
@@ -71,9 +72,16 @@ let timeoutId: ReturnType<typeof setTimeout>;
 //   T-Spin Double	 Yes
 //   T-Spin Triple	 Yes
 
-// TODO fix rendering issue with ghost piece after a hard drop
+// TODO about button
+//      - shows enter screen with TETRIS and welcome message
 
-// TODO about
+// TODO top ten button
+//      - shows top ten: score, level, lines
+
+// TODO animate the showing/hiding of the Pause button
+
+// TODO stop the game when browser tab is not open
+//      - Resource: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
 
 type StepMode = 'INIT' | 'START' | 'NEXT' | 'RESUME';
 
@@ -90,7 +98,8 @@ const App = () => {
   const [showCountdown, setShowCountdown] = useState(false);
   const [action, setActionField] = useKeyboardControls();
   const cameraAnimation = useRef<CameraAnimationRef>(null);
-  const [overlayMode, setOverlayMode] = useState<OverlayMode>('HOME');
+  const [welcomeMode, setWelcomeMode] = useState<WelcomeMode>('OPEN');
+  const [toolbarMode, setToolbarMode] = useState<ToolbarMode>('CLOSED');
 
   const step = useCallback((mode: StepMode = 'NEXT') => {
     const gameState = (GAME_ENGINE_METHOD.get(mode) as GameEngineMethod)();
@@ -110,13 +119,15 @@ const App = () => {
     timeoutId = setTimeout(() => { step(); }, (gameState.isLockMode || gameState.completedRows.length > 0) ? 500 : gameEngine.timePerRowInMSecs);
   }, []);
 
-  const onOverlayEnter = useCallback(() => {
+  const onWelcomeEnter = useCallback(() => {
+    setWelcomeMode('CLOSED');
+    setToolbarMode('HOME');
     Sound.getInstance().setMusicVolume(appState.musicVolume);
     Sound.getInstance().setSoundFXVolume(appState.soundFXVolume);
   }, [appState]);
 
-  const onOverlayClosed = useCallback(() => {
-    setOverlayMode('CLOSED');
+  const onPlay = useCallback(() => {
+    setToolbarMode('CLOSED');
     if (gameState.mode !== 'PAUSED') {
       step('INIT');
     }
@@ -195,11 +206,11 @@ const App = () => {
     switch (gameState.mode) {
       case 'PAUSED':
         cameraAnimation.current?.setCamBounds('OVERLAY');
-        setOverlayMode('PAUSED');
+        setToolbarMode('PAUSED');
         break;
       case 'GAME OVER':
         cameraAnimation.current?.setCamBounds('OVERLAY');
-        setOverlayMode('GAME_OVER');
+        setToolbarMode('GAME_OVER');
         break;
     }
   }, [gameState.mode]);
@@ -209,7 +220,7 @@ const App = () => {
       <Canvas onContextMenu={(e)=> e.preventDefault()}>
         <Suspense>
             <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} >
-              {appState.background ? <Background muted={overlayMode === 'CLOSED'} /> : null}
+              {appState.background ? <Background muted={true} /> : null}
             </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
             <Playfield enableGrid={false}/>
@@ -243,15 +254,12 @@ const App = () => {
               nextPieceType={gameState.nextPieceType}
               isPauseButtonShown={gameState.mode === 'PLAYING'}
               onPause={onPause}
+              isNewBestScore={gameState.mode === 'GAME OVER' && gameState.score === gameState.bestScore}
             />
-            {/* Overlay */}
-            <Overlay
-              mode={overlayMode}
-              onEnter={onOverlayEnter}
-              onClose={onOverlayClosed}
-              score={gameState.score}
-              bestScore={gameState.bestScore}
-            />
+            {/* Welcome */}
+            <Welcome mode={welcomeMode} onEnter={onWelcomeEnter} />
+            {/* Toolbar */}
+            <Toolbar mode={toolbarMode} onPlay={onPlay} />
             {/* Countdown */}
             {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
             {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}

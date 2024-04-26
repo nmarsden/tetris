@@ -13,9 +13,10 @@ type SidebarProps = {
   nextPieceType: PieceType | null;
   isPauseButtonShown: boolean;
   onPause: () => void;
+  isNewBestScore: boolean;
 };
 
-const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause }: SidebarProps) => {
+const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
   const sideBarPosition = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
 
   const sidebarX = 0;
@@ -30,7 +31,7 @@ const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonS
     <group position={sideBarPosition} rotation-y={Math.PI * -0.25} scale={1}>
       {isPauseButtonShown ? <Button position={pausePosition} label={'PAUSE'} type={'INFO'} onButtonClick={onPause} enableSound={false} /> : null}
       <Info position={scorePosition} label={'SCORE'} value={score}/>
-      <Info position={bestScorePosition} label={'SCORE'} value={bestScore} isBest={true}/>
+      <Info position={bestScorePosition} label={'SCORE'} value={bestScore} isBest={true} isFlash={isNewBestScore}/>
       <Info position={levelPosition}  label={'LEVEL'} value={level}/>
       <Info position={linesPosition} label={'LINES'} value={lines}/>
       <Info position={nextPosition} label={'NEXT'} value={nextPieceType}/>

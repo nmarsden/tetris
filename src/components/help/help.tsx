@@ -176,7 +176,7 @@ const Controls = ({ opacity }: { opacity: SpringValue<number> }) => {
 
 const CLOSED = {
   opacity: 0,
-  positionY: OVERLAY_POSITION.y + 22
+  positionY: OVERLAY_POSITION.y - 20
 };
 const OPEN = {
   opacity: 1,
@@ -196,7 +196,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
   const onButtonClick = useCallback(() => {
     api.start({
       to: CLOSED,
-      config: config.stiff,
+      config: { duration: 100 },
       onRest: () => onClose()
     });
   }, [api, onClose]);

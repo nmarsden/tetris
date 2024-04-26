@@ -46,7 +46,7 @@ const Label = ({ position, label } : { position: Vector3, label: string }) => {
   return <CustomText position={position} size={1} text={label} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
 };
 
-const Value = ({ position, value, isBest=false } : { position: Vector3, value: number | PieceType | null, isBest?: boolean }) => {
+const Value = ({ position, value, isBest, isFlash } : { position: Vector3, value: number | PieceType | null, isBest: boolean, isFlash: boolean }) => {
   const [{ opacity, scale }, api] = useSpring(() => ({
     from: { opacity: 1, scale: 1 }
   }));
@@ -73,8 +73,9 @@ const Value = ({ position, value, isBest=false } : { position: Vector3, value: n
         { opacity: 0.5, scale: 0.9, config: { duration: 250 } },
         { opacity: 1,   scale: 1,   config: { duration: 250 } }
       ],
+      loop: isFlash
     });
-  }, [value, api]);
+  }, [isFlash, value, api]);
 
   return (
     <>
@@ -98,18 +99,28 @@ const Value = ({ position, value, isBest=false } : { position: Vector3, value: n
             <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
             <CustomText position={textPosition} opacity={opacity} scale={scale} size={1} text={(value as number).toString(10)} color={0xFFFFFF} outlineColor={0xFFFFFF}/>
           </>
-        ) : null
+        ) : (
+          <Border position={borderPosition} width={valueBoxWidth} height={valueBoxHeight} />
+        )
       ))}
     </>
   )
 };
 
-const Info = ({ position, label, value, isBest=false } : { position: Vector3, label: string, value: number | PieceType | null, isBest?: boolean }) => {
+type InfoProps = {
+  position: Vector3;
+  label: string;
+  value: number | PieceType | null;
+  isBest?: boolean;
+  isFlash?: boolean;
+};
+
+const Info = ({ position, label, value, isBest=false, isFlash=false } : InfoProps) => {
   const valuePosition = position.clone().add({ x: 0, y: -0.8, z: 0 });
   return (
     <>
       {isBest ? null : <Label position={position} label={label} />}
-      <Value position={valuePosition} value={value} isBest={isBest} />
+      <Value position={valuePosition} value={value} isBest={isBest} isFlash={isFlash} />
     </>
   )
 }
