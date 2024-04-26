@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {useMemo} from "react";
+import {useEffect, useMemo} from "react";
 import {Line} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
 import {Vector3} from "three";
+import {animated, config, useSpring} from "@react-spring/three";
+
+const POSITION_Y_SHOWN = 0;
+const POSITION_Y_HIDDEN = 30;
 
 export type GridPos = {
   col: number;
@@ -53,7 +57,7 @@ const Grid = () => {
         const key = `${index}`;
         return (
           // @ts-ignore
-          <Line key={key} position={position} points={points} color={"grey"} lineWidth={3} dashed={false} opacity={0.1} transparent={true} />
+          <Line key={key} position={position} points={points} color={0x333333} lineWidth={2} dashed={false} opacity={1} transparent={true} />
         )
       })}
     </>
@@ -70,12 +74,23 @@ const Walls = () => {
   )
 };
 
-const Playfield = ({ enableGrid } : { enableGrid: boolean }) => {
+const Playfield = ({ isShown, enableGrid } : { isShown: boolean; enableGrid: boolean }) => {
+  const [{ positionY }, api] = useSpring(() => ({ positionY: POSITION_Y_HIDDEN }));
+
+  useEffect(() => {
+    api.start({
+      from: { positionY: isShown ? POSITION_Y_HIDDEN : POSITION_Y_SHOWN },
+      to: { positionY: isShown ? POSITION_Y_SHOWN : POSITION_Y_HIDDEN },
+      immediate: !isShown,
+      config: config.slow
+    })
+  }, [isShown, api]);
+
   return (
-    <>
+    <animated.group position-y={positionY}>
       { enableGrid ? <Grid /> : null }
       <Walls />
-    </>
+    </animated.group>
   );
 };
 

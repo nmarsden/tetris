@@ -7,7 +7,11 @@ import {Vector3} from "three";
 import {useEffect} from "react";
 import {useSpring, animated, config} from "@react-spring/three";
 
+const SIDEBAR_POSITION = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
+const SIDEBAR_POSITION_Y_HIDDEN = 35;
+
 type SidebarProps = {
+  isShown: boolean;
   score: number;
   bestScore: number;
   level: number;
@@ -37,8 +41,17 @@ const PauseButton = ({ isShown, position, onPause }: { isShown: boolean, positio
   );
 };
 
-const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
-  const sideBarPosition = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
+const Sidebar = ({ isShown, score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
+  const [{ positionY }, api] = useSpring(() => ({ positionY: SIDEBAR_POSITION_Y_HIDDEN }));
+
+  useEffect(() => {
+    api.start({
+      from: { positionY: isShown ? SIDEBAR_POSITION_Y_HIDDEN : SIDEBAR_POSITION.y },
+      to: { positionY: isShown ? SIDEBAR_POSITION.y : SIDEBAR_POSITION_Y_HIDDEN },
+      immediate: !isShown,
+      config: config.slow
+    })
+  }, [isShown, api]);
 
   const sidebarX = 0;
   const pausePosition =new Vector3(sidebarX, 0, 0);
@@ -49,14 +62,19 @@ const Sidebar = ({ score, bestScore, level, lines, nextPieceType, isPauseButtonS
   const nextPosition = new Vector3(sidebarX, -13.2, 0);
 
   return (
-    <group position={sideBarPosition} rotation-y={Math.PI * -0.25} scale={1}>
+    <animated.group
+      position-x={SIDEBAR_POSITION.x}
+      position-y={positionY}
+      position-z={SIDEBAR_POSITION.z}
+      rotation-y={Math.PI * -0.25}
+    >
       <PauseButton isShown={isPauseButtonShown} position={pausePosition} onPause={onPause} />
       <Info position={scorePosition} label={'SCORE'} value={score}/>
       <Info position={bestScorePosition} label={'SCORE'} value={bestScore} isBest={true} isFlash={isNewBestScore}/>
       <Info position={levelPosition}  label={'LEVEL'} value={level}/>
       <Info position={linesPosition} label={'LINES'} value={lines}/>
       <Info position={nextPosition} label={'NEXT'} value={nextPieceType}/>
-    </group>
+    </animated.group>
   )
 };
 

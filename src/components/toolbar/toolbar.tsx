@@ -81,14 +81,12 @@ const Toolbar = ({ mode, onPlay  }: ToolbarProps) => {
   }, []);
 
   useEffect(() => {
-    open();
-  }, [open]);
-
-  useEffect(() => {
     if (mode !== 'CLOSED') {
       setShowToolbar(true);
     }
-    if (mode === 'PAUSED') {
+    if (mode === 'HOME') {
+      open();
+    } else if (mode === 'PAUSED') {
       open();
       Sound.getInstance().stopMusic();
       Sound.getInstance().playSoundFX('PAUSE');

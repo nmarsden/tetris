@@ -221,7 +221,7 @@ const App = () => {
               {appState.background ? <Background muted={true} /> : null}
             </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
-            <Playfield enableGrid={false}/>
+            <Playfield isShown={welcomeMode === 'CLOSED'} enableGrid={false}/>
             {gameState.pieceAction === 'HARD DROP' ?
             <>
               {/* Active Piece */}
@@ -245,6 +245,7 @@ const App = () => {
             <Toasts toasts={gameState.toasts} />
             {/* Sidebar */}
             <Sidebar
+              isShown={welcomeMode === 'CLOSED'}
               score={gameState.score}
               bestScore={gameState.bestScore}
               level={gameState.level}
