@@ -1,7 +1,13 @@
 import {createContext, PropsWithChildren, useCallback, useEffect, useState} from 'react';
 
+export type Score = {
+  score: number;
+  level: number;
+  lines: number;
+};
+
 interface AppState {
-  bestScore: number;
+  bestScores: Score[];
   musicVolume: number;
   soundFXVolume: number;
   cameraShake: boolean;
@@ -13,7 +19,7 @@ interface AppState {
 
 interface AppContextProps {
   appState: AppState;
-  setBestScore: (bestScore: number) => void;
+  setBestScores: (bestScores: Score[]) => void;
   setMusicVolume: (musicVolume: number) => void;
   setSoundFXVolume: (musicVolume: number) => void;
   setCameraShake: (cameraShake: boolean) => void;
@@ -29,14 +35,21 @@ type AppProviderProps = { /* no props */ };
 const LOCAL_STORAGE_KEY = 'tetris';
 
 const INITIAL_STATE: AppState = {
-  bestScore: 0,
+  bestScores: [],
   musicVolume: 1,
   soundFXVolume: 1,
   cameraShake: true,
   confetti: true,
   popups: true,
   background: true,
-  version: 0.2
+  version: 0.3
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const setIfUndefined = (appState: any, field: string, value: number | boolean) : void => {
+  if (typeof appState[field] === 'undefined') {
+    appState[field] = value;
+  }
 };
 
 const getInitialAppState = () => {
@@ -47,15 +60,16 @@ const getInitialAppState = () => {
     const appState = item ? JSON.parse(item) : INITIAL_STATE;
 
     // Update old version of appState
-    if (typeof appState.version === 'undefined') {
-      appState.cameraShake = true;
-      appState.confetti = true;
-      appState.popups = true;
-      appState.version = 0.1;
-      storeAppState(appState);
-    } else if (appState.version === 0.1) {
-      appState.background = true;
-      appState.version = 0.2
+    if (typeof appState.version === 'undefined' || appState.version < 0.3) {
+      setIfUndefined(appState, 'cameraShake', true);
+      setIfUndefined(appState, 'confetti', true);
+      setIfUndefined(appState, 'popups', true);
+      setIfUndefined(appState, 'background', true);
+      if (typeof appState.bestScore !== 'undefined') {
+        appState.bestScores = [{ score: appState.bestScore, level: -1, lines: -1 }];
+        appState.bestScore = undefined;
+      }
+      appState.version = 0.3;
       storeAppState(appState);
     }
     return appState;
@@ -77,8 +91,8 @@ const AppProvider = ({ children }: PropsWithChildren<AppProviderProps>) => {
     storeAppState(appState);
   }, [appState]);
 
-  const setBestScore = useCallback((bestScore: number) => {
-    setAppState((prevState) => ({...prevState, bestScore}));
+  const setBestScores = useCallback((bestScores: Score[]) => {
+    setAppState((prevState) => ({...prevState, bestScores: [...bestScores]}));
   }, []);
 
   const setMusicVolume = useCallback((musicVolume: number) => {
@@ -108,7 +122,7 @@ const AppProvider = ({ children }: PropsWithChildren<AppProviderProps>) => {
   return (
     <AppContext.Provider value={{
       appState,
-      setBestScore,
+      setBestScores,
       setMusicVolume,
       setSoundFXVolume,
       setCameraShake,

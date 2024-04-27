@@ -10,7 +10,7 @@ import {useEffect} from "react";
 const Trophy = ({ position } : { position: Vector3 }) => {
   const texture = useTexture('/tetris/image/trophy.png')
   return (
-    <Plane position={position} args={[0.8, 0.8]}>
+    <Plane position={position} args={[0.7, 0.7]}>
       <meshStandardMaterial
         metalness={1}
         roughness={1}

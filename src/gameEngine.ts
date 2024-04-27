@@ -2,6 +2,7 @@ import {GridPos, GridUtils} from "./components/playfield/playfield.tsx";
 import {Color} from "three";
 import {TetrisConstants} from "./tetrisConstants.ts";
 import {Action} from "./hooks/useKeyboardControls.ts";
+import {Score} from "./components/context/AppContext.tsx";
 
 export type GameMode = 'HOME' | 'INIT' | 'PLAYING' | 'PAUSED' | 'GAME OVER';
 
@@ -132,6 +133,7 @@ type GameState = {
   isLockMode: boolean;
   score: number;
   bestScore: number;
+  bestScores: Score[];
   isNewBestScore: boolean;
   level: number;
   lines: number;
@@ -156,14 +158,16 @@ class GameEngine {
     isLockMode: false,
     score: 0,
     bestScore: 0,
+    bestScores: [],
     isNewBestScore: false,
     level: 0,
     lines: 0,
     toasts: []
   };
 
-  initialState(bestScore: number): GameState {
-    this.gameState.bestScore = bestScore;
+  initialState(bestScores: Score[]): GameState {
+    this.gameState.bestScores = bestScores;
+    this.gameState.bestScore = bestScores.length === 0 ? 0 : bestScores[0].score;
     return this.gameState;
   }
 
@@ -289,6 +293,7 @@ class GameEngine {
           // check if game over
           if (this.isGameOver(newPiece)) {
             this.gameState.mode = 'GAME OVER';
+            this.updateBestScores();
             return this.gameState;
           }
 
@@ -350,6 +355,7 @@ class GameEngine {
       // check if game over
       if (this.isGameOver(newPiece)) {
         this.gameState.mode = 'GAME OVER';
+        this.updateBestScores();
         return this.gameState;
       }
 
@@ -644,6 +650,19 @@ class GameEngine {
       }
       this.gameState.isNewBestScore = true;
     }
+  }
+
+  private updateBestScores(): void {
+    const index = this.gameState.bestScores.findIndex((item) => this.gameState.score > item.score);
+    if (index >= 0) {
+      this.gameState.bestScores.splice(index, 0, { score: this.gameState.score, level: this.gameState.level, lines: this.gameState.lines });
+      if (this.gameState.bestScores.length > 10) {
+        this.gameState.bestScores.pop();
+      }
+    } else if (this.gameState.bestScores.length < 10) {
+      this.gameState.bestScores.push({ score: this.gameState.score, level: this.gameState.level, lines: this.gameState.lines });
+    }
+    this.gameState.bestScores = [...this.gameState.bestScores];
   }
 
   private addToast(row: number, achievement: Achievement, points: number): void {

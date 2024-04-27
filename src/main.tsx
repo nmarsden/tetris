@@ -4,7 +4,7 @@ import {createRoot} from 'react-dom/client'
 import {Canvas} from '@react-three/fiber'
 import {Environment, Loader, OrbitControls, PerspectiveCamera} from "@react-three/drei";
 import {suspend} from 'suspend-react'
-import {Suspense, useCallback, useContext, useEffect, useRef, useState} from "react";
+import {Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {GameEngine, GameEngineMethod, GameMode, LockedColorUtils} from "./gameEngine.ts";
 import {Piece} from "./components/piece/piece.tsx";
 import {Block, BlockMode} from "./components/block/block.tsx";
@@ -75,9 +75,6 @@ let timeoutId: ReturnType<typeof setTimeout>;
 // TODO about button
 //      - shows enter screen with TETRIS and welcome message
 
-// TODO top ten button
-//      - shows top ten: score, level, lines
-
 // TODO stop the game when browser tab is not open
 //      - Resource: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
 
@@ -91,8 +88,9 @@ const GAME_ENGINE_METHOD = new Map<StepMode, GameEngineMethod>([
 ]);
 
 const App = () => {
-  const {appState, setBestScore} = useContext(AppContext)!;
-  const [gameState, setGameState] = useState(gameEngine.initialState(appState.bestScore));
+  const {appState, setBestScores} = useContext(AppContext)!;
+  const initialState = useMemo(() => gameEngine.initialState(appState.bestScores), []);
+  const [gameState, setGameState] = useState(initialState);
   const [showCountdown, setShowCountdown] = useState(false);
   const [action, setActionField] = useKeyboardControls();
   const cameraAnimation = useRef<CameraAnimationRef>(null);
@@ -196,9 +194,8 @@ const App = () => {
   }, [gameState.level]);
 
   useEffect(() => {
-    if (gameState.bestScore === 0) return;
-    setBestScore(gameState.bestScore);
-  }, [gameState.bestScore, setBestScore]);
+    setBestScores(gameState.bestScores);
+  }, [gameState.bestScores, setBestScores]);
 
   useEffect(() => {
     switch (gameState.mode) {
@@ -221,7 +218,8 @@ const App = () => {
               {appState.background ? <Background muted={true} /> : null}
             </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
-            <Playfield isShown={welcomeMode === 'CLOSED'} enableGrid={false}/>
+          {/* TODO fix bug: hidden playfield can be seen when making the window narrow */}
+          <Playfield isShown={welcomeMode === 'CLOSED'} enableGrid={false}/>
             {gameState.pieceAction === 'HARD DROP' ?
             <>
               {/* Active Piece */}
@@ -244,6 +242,7 @@ const App = () => {
             {/* Toasts */}
             <Toasts toasts={gameState.toasts} />
             {/* Sidebar */}
+            {/* TODO fix bug: hidden sidebar can be seen when making the window narrow */}
             <Sidebar
               isShown={welcomeMode === 'CLOSED'}
               score={gameState.score}
@@ -258,7 +257,8 @@ const App = () => {
             {/* Welcome */}
             <Welcome mode={welcomeMode} onEnter={onWelcomeEnter} />
             {/* Toolbar */}
-            <Toolbar mode={toolbarMode} onPlay={onPlay} />
+            {/* TODO fix bug: hidden toolbar can be seen when making the window narrow - ensure opacity of wireframe and plane are animated to zero */}
+            <Toolbar mode={toolbarMode} score={gameState.score} onPlay={onPlay} />
             {/* Countdown */}
             {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}
             {gameState.mode === 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneResume} /> : null}
