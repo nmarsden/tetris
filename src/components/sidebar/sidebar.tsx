@@ -8,7 +8,6 @@ import {useEffect} from "react";
 import {useSpring, animated, config} from "@react-spring/three";
 
 const SIDEBAR_POSITION = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
-const SIDEBAR_POSITION_Y_HIDDEN = 35;
 
 type SidebarProps = {
   isShown: boolean;
@@ -42,14 +41,14 @@ const PauseButton = ({ isShown, position, onPause }: { isShown: boolean, positio
 };
 
 const Sidebar = ({ isShown, score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
-  const [{ positionY }, api] = useSpring(() => ({ positionY: SIDEBAR_POSITION_Y_HIDDEN }));
+  const [{ scale }, api] = useSpring(() => ({ scale: 0 }));
 
   useEffect(() => {
     api.start({
-      from: { positionY: isShown ? SIDEBAR_POSITION_Y_HIDDEN : SIDEBAR_POSITION.y },
-      to: { positionY: isShown ? SIDEBAR_POSITION.y : SIDEBAR_POSITION_Y_HIDDEN },
+      from: { scale: isShown ? 0 : 1 },
+      to: { scale: isShown ? 1 : 0 },
       immediate: !isShown,
-      config: config.slow
+      config: config.stiff
     })
   }, [isShown, api]);
 
@@ -63,10 +62,9 @@ const Sidebar = ({ isShown, score, bestScore, level, lines, nextPieceType, isPau
 
   return (
     <animated.group
-      position-x={SIDEBAR_POSITION.x}
-      position-y={positionY}
-      position-z={SIDEBAR_POSITION.z}
+      position={SIDEBAR_POSITION}
       rotation-y={Math.PI * -0.25}
+      scale={scale}
     >
       <PauseButton isShown={isPauseButtonShown} position={pausePosition} onPause={onPause} />
       <Info position={scorePosition} label={'SCORE'} value={score}/>

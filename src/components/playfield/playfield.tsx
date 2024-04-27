@@ -5,9 +5,6 @@ import {TetrisConstants} from "../../tetrisConstants.ts";
 import {Vector3} from "three";
 import {animated, config, useSpring} from "@react-spring/three";
 
-const POSITION_Y_SHOWN = 0;
-const POSITION_Y_HIDDEN = 30;
-
 export type GridPos = {
   col: number;
   row: number;
@@ -75,19 +72,19 @@ const Walls = () => {
 };
 
 const Playfield = ({ isShown, enableGrid } : { isShown: boolean; enableGrid: boolean }) => {
-  const [{ positionY }, api] = useSpring(() => ({ positionY: POSITION_Y_HIDDEN }));
+  const [{ scale }, api] = useSpring(() => ({ scale: 0 }));
 
   useEffect(() => {
     api.start({
-      from: { positionY: isShown ? POSITION_Y_HIDDEN : POSITION_Y_SHOWN },
-      to: { positionY: isShown ? POSITION_Y_SHOWN : POSITION_Y_HIDDEN },
+      from: { scale: isShown ? 0 : 1 },
+      to: { scale: isShown ? 1 : 0 },
       immediate: !isShown,
-      config: config.slow
+      config: config.stiff
     })
   }, [isShown, api]);
 
   return (
-    <animated.group position-y={positionY}>
+    <animated.group scale={scale}>
       { enableGrid ? <Grid /> : null }
       <Walls />
     </animated.group>

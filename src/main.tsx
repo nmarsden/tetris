@@ -218,7 +218,6 @@ const App = () => {
               {appState.background ? <Background muted={true} /> : null}
             </PerspectiveCamera>
             <CameraAnimation ref={cameraAnimation}/>
-          {/* TODO fix bug: hidden playfield can be seen when making the window narrow */}
           <Playfield isShown={welcomeMode === 'CLOSED'} enableGrid={false}/>
             {gameState.pieceAction === 'HARD DROP' ?
             <>
@@ -242,7 +241,6 @@ const App = () => {
             {/* Toasts */}
             <Toasts toasts={gameState.toasts} />
             {/* Sidebar */}
-            {/* TODO fix bug: hidden sidebar can be seen when making the window narrow */}
             <Sidebar
               isShown={welcomeMode === 'CLOSED'}
               score={gameState.score}
@@ -257,7 +255,6 @@ const App = () => {
             {/* Welcome */}
             <Welcome mode={welcomeMode} onEnter={onWelcomeEnter} />
             {/* Toolbar */}
-            {/* TODO fix bug: hidden toolbar can be seen when making the window narrow - ensure opacity of wireframe and plane are animated to zero */}
             <Toolbar mode={toolbarMode} score={gameState.score} onPlay={onPlay} />
             {/* Countdown */}
             {gameState.mode !== 'PAUSED' && showCountdown ? <Countdown onCountdownDone={onCountdownDoneStart} /> : null}

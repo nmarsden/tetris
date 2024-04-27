@@ -10,7 +10,7 @@ const BANNER_DEPTH = 4;
 
 const BANNER_POSITION = GridUtils.gridPosToScreen({ col: 5, row: 10 }).add({x: 0, y: 0, z: BANNER_DEPTH * 0.5});
 
-const TEXT_POSITION = new Vector3(0, -0.1, (BANNER_DEPTH * 0.5) + 0.1);
+const TEXT_POSITION = new Vector3(0, 0, (BANNER_DEPTH * 0.5) + 0.1);
 
 const CustomText = ({ position, text }: { position: Vector3, text: string }) => {
   return (

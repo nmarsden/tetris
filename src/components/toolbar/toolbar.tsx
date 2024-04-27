@@ -7,7 +7,7 @@ import { Options } from "../options/options.tsx";
 import {Help} from "../help/help.tsx";
 import {Vector3} from "three";
 import {Sound} from "../../sound.ts";
-import {Line} from "@react-three/drei";
+import {Edges} from "@react-three/drei";
 import {Banner} from "../banner/banner.tsx";
 import {BestScores} from "../bestScores/bestScores.tsx";
 import {AppContext} from "../context/AppContext.tsx";
@@ -24,11 +24,11 @@ const CLOSE_BUTTON_POSITION  = new Vector3(3.6, 0, 0);
 
 const CLOSED = {
   opacity: 0,
-  positionY: MODAL_POSITION.y - 10
+  scale: 0
 };
 const OPEN = {
   opacity: 1,
-  positionY: MODAL_POSITION.y
+  scale: 1
 };
 
 export type ToolbarMode = 'CLOSED' | 'HOME' | 'PAUSED' | 'GAME_OVER';
@@ -41,7 +41,7 @@ type ToolbarProps = {
 
 const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
   const {appState} = useContext(AppContext)!;
-  const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
+  const [{ opacity, scale }, api] = useSpring(() => ({ from: CLOSED }));
   const [showToolbar, setShowToolbar] = useState(false);
   const [showBestScores, setShowBestScores] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -52,6 +52,7 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
   const open = useCallback(() => {
     setShowToolbar(true);
     api.start({
+      from: CLOSED,
       to: OPEN,
       config: config.gentle
     });
@@ -60,6 +61,7 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
   const onPlayButtonClick = useCallback(() => {
     onPlay()
     api.start({
+      from: OPEN,
       to: CLOSED,
       config: config.stiff,
       onRest: () => {
@@ -126,19 +128,23 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
           {mode === 'PAUSED' ? <Banner text={'PAUSED'} /> : null}
           {mode === 'GAME_OVER' ? <Banner text={gameOverBanner} /> : null}
           {/*Toolbar*/}
-          <animated.mesh
-            position-x={MODAL_POSITION.x}
-            position-y={positionY}
-            position-z={MODAL_POSITION.z}
+          <animated.group
+            position={MODAL_POSITION}
+            scale={scale}
           >
-            <planeGeometry args={[MODAL_WIDTH, MODAL_HEIGHT]}/>
-            <animated.meshStandardMaterial
-              metalness={1}
-              roughness={1}
-              transparent={true}
-              color={'#000F2e'}
-              opacity={0.5}
-            />
+            {/*Modal*/}
+            <mesh>
+              <planeGeometry args={[MODAL_WIDTH, MODAL_HEIGHT]}/>
+              <animated.meshStandardMaterial
+                metalness={1}
+                roughness={1}
+                transparent={true}
+                color={'#000F2e'}
+                opacity={opacity}
+              />
+              <Edges linewidth={3} threshold={15} color={'white'} />
+            </mesh>
+            {/*Buttons*/}
             <Button
               position={BEST_SCORES_BUTTON_POSITION}
               icon={'bestScores.png'}
@@ -171,12 +177,7 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
               opacity={opacity}
               enabled={enableButtons}
             />
-            {/*Border*/}
-            <Line position={[MODAL_WIDTH * -0.5, MODAL_HEIGHT * 0.5,  0]} points={[[0, 0], [MODAL_WIDTH, 0]]} color={"grey"} lineWidth={2} dashed={false} />
-            <Line position={[MODAL_WIDTH * -0.5, MODAL_HEIGHT * -0.5, 0]} points={[[0, 0], [MODAL_WIDTH, 0]]} color={"grey"} lineWidth={2} dashed={false} />
-            <Line position={[MODAL_WIDTH * -0.5, MODAL_HEIGHT * 0.5,  0]} points={[[0, 0], [0, -MODAL_HEIGHT]]} color={"grey"} lineWidth={2} dashed={false} />
-            <Line position={[MODAL_WIDTH * 0.5,  MODAL_HEIGHT * 0.5,  0]} points={[[0, 0], [0, -MODAL_HEIGHT]]} color={"grey"} lineWidth={2} dashed={false} />
-          </animated.mesh>
+          </animated.group>
         </>
       ) : null}
       {showBestScores ? <BestScores onClose={onBestScoresClose}/> : null}
