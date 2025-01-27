@@ -11,6 +11,7 @@ import {Edges} from "@react-three/drei";
 import {Banner} from "../banner/banner.tsx";
 import {BestScores} from "../bestScores/bestScores.tsx";
 import {AppContext} from "../context/AppContext.tsx";
+import {useControls} from "leva";
 
 const MODAL_WIDTH = TetrisConstants.gameWidth;
 const MODAL_HEIGHT = 3;
@@ -48,6 +49,9 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
   const [showHelp, setShowHelp] = useState(false);
   const [enableButtons, setEnableButtons] = useState(true);
   const [gameOverBanner, setGameOverBanner] = useState('');
+  const { toolbar } = useControls({
+    toolbar: true
+  });
 
   const open = useCallback(() => {
     setShowToolbar(true);
@@ -131,6 +135,7 @@ const Toolbar = ({ mode, score, onPlay  }: ToolbarProps) => {
           <animated.group
             position={MODAL_POSITION}
             scale={scale}
+            visible={toolbar}
           >
             {/*Modal*/}
             <mesh>

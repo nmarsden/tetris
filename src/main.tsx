@@ -15,13 +15,17 @@ import {Toasts} from "./components/toast/toast.tsx";
 import {Touch} from "./components/touch/touch.tsx";
 import {Sound} from "./sound.ts";
 import {CAMERA_POSITION, CameraAnimation, CameraAnimationRef} from './components/cameraAnimation/cameraAnimation.tsx';
-import { Sidebar } from './components/sidebar/sidebar.tsx';
+import {Sidebar} from './components/sidebar/sidebar.tsx';
 import AppProvider, {AppContext} from "./components/context/AppContext.tsx";
 import {Background} from "./components/background/background.tsx";
 import {Toolbar, ToolbarMode} from "./components/toolbar/toolbar.tsx";
 import {Welcome, WelcomeMode} from "./components/welcome/welcome.tsx";
+import {useControls, Leva} from 'leva'
+import {Perf} from 'r3f-perf'
 // @ts-ignore
 const warehouse = import('@pmndrs/assets/hdri/warehouse.exr').then((module) => module.default)
+
+const isDebug = window.location.hash === '#debug';
 
 const gameEngine = new GameEngine();
 
@@ -74,9 +78,41 @@ let timeoutId: ReturnType<typeof setTimeout>;
 
 // TODO about button
 //      - shows enter screen with TETRIS and welcome message
+//      - built with: R3F, HowlerJS, React Spring,
 
-// TODO stop the game when browser tab is not open
-//      - Resource: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+// TODO show the game icon (t-block) in the sidebar
+
+// TODO optimize performance
+//   * Resources:
+//     - https://threejs-journey.com/lessons/performance-tips#
+//     - https://r3f.docs.pmnd.rs/advanced/pitfalls
+//   - add leva
+//      * Resource: https://github.com/pmndrs/leva
+//   - add r3f-perf
+//      * Resource: https://github.com/utsuboco/r3f-perf
+//   - add #debug
+//      * Resource: https://threejs-journey.com/lessons/code-structuring-for-bigger-projects#debug
+//      - show leva
+//      - show r3f-perf
+//   - reduce polygons
+//      - re-use geometries
+//        * Resource: https://threejs-journey.com/lessons/create-a-game-with-r3f#geometries
+//      - re-use materials
+//   - do not mount/unmount things
+//     - create all blocks at the start & use visible to hide non-rendered blocks
+//   - optimise images
+//   - stop the game when browser tab is not open
+//      * Resource: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+
+// Performance observations
+// - number of geometries and draw calls keep rising as more blocks are played
+// - a new game does not reset the number of geometries
+// - a lot of triangles
+//   - 3D text for title
+//   - buttons
+//   - blocks
+// - enabling all the effects reduces the framerate by about 40-50%
+// - there is a dip in framerate every time a block moves down
 
 type StepMode = 'INIT' | 'START' | 'NEXT' | 'RESUME';
 
@@ -88,6 +124,10 @@ const GAME_ENGINE_METHOD = new Map<StepMode, GameEngineMethod>([
 ]);
 
 const App = () => {
+  const { perf, ghostPiece } = useControls({
+    perf: true,
+    ghostPiece: true
+  });
   const {appState, setBestScores} = useContext(AppContext)!;
   const initialState = useMemo(() => gameEngine.initialState(appState.bestScores), []);
   const [gameState, setGameState] = useState(initialState);
@@ -212,7 +252,11 @@ const App = () => {
 
   return (
     <>
-      <Canvas onContextMenu={(e)=> e.preventDefault()}>
+      <Leva hidden={!isDebug} />
+      <Canvas
+        onContextMenu={(e)=> e.preventDefault()}
+      >
+        {perf && isDebug ? <Perf position={'top-left'} /> : null}
         <Suspense>
             <PerspectiveCamera makeDefault={true} position={CAMERA_POSITION} fov={70} >
               {appState.background ? <Background muted={true} /> : null}
@@ -229,7 +273,7 @@ const App = () => {
               {/* Active Piece */}
               {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.piece.pos} type={gameState.piece.type} isLock={gameState.isLockMode} /> : null}
               {/* Ghost Piece */}
-              {isShowPiece(gameState.completedRows, gameState.mode) ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
+              {isShowPiece(gameState.completedRows, gameState.mode) && ghostPiece ? <Piece gridPos={gameState.ghostPiece.pos} type={gameState.ghostPiece.type} isGhost={true} /> : null}
             </>}
             {/* Stack */}
             {gameState.lockedColors.map((lockedColor, index) => {

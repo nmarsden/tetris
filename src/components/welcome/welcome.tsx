@@ -5,6 +5,7 @@ import {animated, config, SpringValue, useSpring} from "@react-spring/three";
 import {useCallback, useEffect, useState} from "react";
 import {Button} from "../button/button.tsx";
 import {Color, Vector3} from "three";
+import {useControls} from "leva";
 
 const WELCOME_MESSAGE = [
   'WELCOME TO THE BLOCK PARTY.',
@@ -71,6 +72,9 @@ type WelcomeProps = {
 const Welcome = ({ mode, onEnter }: WelcomeProps) => {
   const [{ opacity, positionY }, api] = useSpring(() => ({ from: CLOSED }));
   const [showModal, setShowModal] = useState(false);
+  const { title } = useControls('Welcome', {
+    title: true
+  });
 
   const open = useCallback(() => {
     api.start({
@@ -120,30 +124,32 @@ const Welcome = ({ mode, onEnter }: WelcomeProps) => {
             />
             <Wireframe simplify={true} stroke={'white'} backfaceStroke={'white'} thickness={0.01}/>
 
-            <Float speed={2}>
-              <Text3D
-                position={TEXT_POSITION}
-                castShadow={false}
-                curveSegments={8}
-                bevelEnabled
-                bevelSize={0.25}
-                bevelThickness={0.5}
-                height={0.2}
-                lineHeight={0.6}
-                letterSpacing={0.01}
-                size={3.1}
-                font="/tetris/Inter_Bold.json"
-              >
-                {'TETRIS'}
-                <animated.meshStandardMaterial
-                  metalness={0.25}
-                  roughness={0.75}
-                  color={TetrisConstants.color.orange}
-                  transparent={true}
-                  opacity={opacity}
-                />
-              </Text3D>
-            </Float>
+            {title ? (
+              <Float speed={2}>
+                <Text3D
+                  position={TEXT_POSITION}
+                  castShadow={false}
+                  curveSegments={8}
+                  bevelEnabled
+                  bevelSize={0.25}
+                  bevelThickness={0.5}
+                  height={0.2}
+                  lineHeight={0.6}
+                  letterSpacing={0.01}
+                  size={3.1}
+                  font="/tetris/Inter_Bold.json"
+                >
+                  {'TETRIS'}
+                  <animated.meshStandardMaterial
+                    metalness={0.25}
+                    roughness={0.75}
+                    color={TetrisConstants.color.orange}
+                    transparent={true}
+                    opacity={opacity}
+                  />
+                </Text3D>
+              </Float>
+            ) : null}
             {WELCOME_MESSAGE.map((text, index) => {
               const position = WELCOME_MESSAGE_POSITION.clone().add({x: 0, y: -index * 1.2, z: 0});
               return <CustomText type='MESSAGE' key={`${index}`} position={position} text={text}

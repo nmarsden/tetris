@@ -6,6 +6,7 @@ import {Button} from "../button/button.tsx";
 import {Vector3} from "three";
 import {useEffect} from "react";
 import {useSpring, animated, config} from "@react-spring/three";
+import {useControls} from "leva";
 
 const SIDEBAR_POSITION = GridUtils.gridPosToScreen({col: TetrisConstants.sideBarCol, row: TetrisConstants.gridHeight}).add({ x:0, y:0, z:0 });
 
@@ -42,7 +43,9 @@ const PauseButton = ({ isShown, position, onPause }: { isShown: boolean, positio
 
 const Sidebar = ({ isShown, score, bestScore, level, lines, nextPieceType, isPauseButtonShown, onPause, isNewBestScore }: SidebarProps) => {
   const [{ scale }, api] = useSpring(() => ({ scale: 0 }));
-
+  const { sidebar } = useControls({
+    sidebar: true
+  });
   useEffect(() => {
     api.start({
       from: { scale: isShown ? 0 : 1 },
@@ -65,6 +68,7 @@ const Sidebar = ({ isShown, score, bestScore, level, lines, nextPieceType, isPau
       position={SIDEBAR_POSITION}
       rotation-y={Math.PI * -0.25}
       scale={scale}
+      visible={sidebar}
     >
       <PauseButton isShown={isPauseButtonShown} position={pausePosition} onPause={onPause} />
       <Info position={scorePosition} label={'SCORE'} value={score}/>

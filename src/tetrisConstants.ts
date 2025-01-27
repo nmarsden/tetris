@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import {Color} from "three";
+import {BoxGeometry, Color} from "three";
 
 const NUM_COLS = 10;
 const NUM_ROWS = 20;
@@ -57,5 +57,6 @@ export const TetrisConstants = {
     overlay1Offset: 1.1,  // toast
     overlay3Offset: 2,  // countdown & overlay (gameOver, home, & paused)
     overlay4Offset: 5   // help & options
-  }
+  },
+  boxGeometry: new BoxGeometry(1, 1, 1)
 };

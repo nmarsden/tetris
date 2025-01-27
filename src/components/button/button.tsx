@@ -1,10 +1,11 @@
 import {Vector3, Color, Texture, Mesh} from "three";
 import {Decal, Plane, RoundedBox, Text, useTexture} from "@react-three/drei";
 import {TetrisConstants} from "../../tetrisConstants.ts";
-import {useCallback, useMemo, useRef} from "react";
+import {PropsWithChildren, useCallback, useMemo, useRef} from "react";
 import {Sound} from "../../sound.ts";
 import {ThreeEvent} from "@react-three/fiber/dist/declarations/src/core/events.js";
 import {SpringValue, animated, useSpringValue, useSpring} from "@react-spring/three";
+import {useControls} from "leva";
 
 export type ButtonType = 'SMALL' | 'LARGE' | 'MEDIUM' | 'INFO' | 'TAB' | 'TAB_UNSELECTED';
 
@@ -40,6 +41,38 @@ type ButtonProps = {
 
 const AnimatedRoundedBox = animated(RoundedBox);
 
+type CustomBoxProps = {
+  positionZ: SpringValue<number>;
+  width: number;
+  roundedBox: boolean;
+  onPointerDown: (event: ThreeEvent<PointerEvent>) => void;
+};
+
+const CustomBox = ({ positionZ, width, roundedBox, onPointerDown, children }: PropsWithChildren<CustomBoxProps>) => {
+  return roundedBox ? (
+    <AnimatedRoundedBox
+      position-z={positionZ}
+      args={[width, TetrisConstants.cellSize * 2, TetrisConstants.cellSize * 0.5]} // Width, height, depth. Default is [1, 1, 1]
+      radius={0.2} // Radius of the rounded corners. Default is 0.05
+      smoothness={4} // The number of curve segments. Default is 4
+      bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
+      creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
+      onPointerDown={onPointerDown}
+    >
+      {children}
+    </AnimatedRoundedBox>
+  ) : (
+    <animated.mesh
+      position-z={positionZ}
+      scale={[width * 0.9, TetrisConstants.cellSize * 2 * 0.9, TetrisConstants.cellSize * 0.5 * 0.9]} // Width, height, depth. Default is [1, 1, 1]
+      geometry={TetrisConstants.boxGeometry}
+      onPointerDown={onPointerDown}
+    >
+      {children}
+    </animated.mesh>
+  )
+}
+
 const Button = ({ position, icon, label, type='LARGE', opacity, onButtonClick, enableSound=true, enabled=true }: ButtonProps) => {
   const mesh = useRef<Mesh>(null!);
   const texture = useTexture(icon ? `/tetris/image/${icon}` : []);
@@ -56,6 +89,14 @@ const Button = ({ position, icon, label, type='LARGE', opacity, onButtonClick, e
     from: { positionZ: 0 },
     config: { duration: 100 }
   }))
+  const { roundedBox } = useControls('Buttons', {
+    roundedBox: true
+  });
+  const { labelScale, iconScale } : { labelScale: [number, number, number], iconScale: [number, number, number] } = useMemo(() => {
+    const labelScale: [number, number, number] = roundedBox ? [1, 1, 1] : [1 / (width * 0.9), 1 / (TetrisConstants.cellSize * 2 * 0.9), 1 / (TetrisConstants.cellSize * 0.5 * 0.9)];
+    const iconScale: [number, number, number] = roundedBox ? [1.4, 1.4, 1.4] : [1.4 / (width * 0.9), 1.4 / (TetrisConstants.cellSize * 2 * 0.9), 1.4 / (TetrisConstants.cellSize * 0.5 * 0.9)];
+    return { labelScale, iconScale };
+  }, [ roundedBox ])
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -73,13 +114,10 @@ const Button = ({ position, icon, label, type='LARGE', opacity, onButtonClick, e
   }, [api, enableSound, enabled, onButtonClick]);
 
   return <group scale={scale} position={position}>
-    <AnimatedRoundedBox
-      position-z={positionZ}
-      args={[width, TetrisConstants.cellSize * 2, TetrisConstants.cellSize * 0.5]} // Width, height, depth. Default is [1, 1, 1]
-      radius={0.2} // Radius of the rounded corners. Default is 0.05
-      smoothness={4} // The number of curve segments. Default is 4
-      bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
-      creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
+    <CustomBox
+      positionZ={positionZ}
+      width={width}
+      roundedBox={roundedBox}
       onPointerDown={onPointerDown}
     >
       {label ? (
@@ -91,7 +129,7 @@ const Button = ({ position, icon, label, type='LARGE', opacity, onButtonClick, e
             transparent={true}
             opacity={buttonOpacity}
           />
-          <Text key={type} position={[0, 0, 0.51]} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth}
+          <Text key={type} position={[0, 0, 0.51]} scale={labelScale} fontSize={fontSize} letterSpacing={0.1} outlineWidth={outlineWidth}
                 outlineColor={outlineColor}>
             <animated.meshStandardMaterial
               metalness={1}
@@ -120,11 +158,11 @@ const Button = ({ position, icon, label, type='LARGE', opacity, onButtonClick, e
               transparent={true}
               opacity={0}
             />
-            <Decal mesh={mesh} debug={false} map={texture as Texture} scale={1.4} position={[0, 0.1, 0]} rotation={[Math.PI * 0, Math.PI * 0, Math.PI * 0]} />
+            <Decal mesh={mesh} debug={false} map={texture as Texture} scale={iconScale} position={[0, 0, 0]} rotation={[Math.PI * 0, Math.PI * 0, Math.PI * 0]} />
           </Plane>
         </>
       )}
-    </AnimatedRoundedBox>
+    </CustomBox>
   </group>
 }
 

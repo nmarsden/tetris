@@ -2,8 +2,9 @@
 import {animated, config, SpringValue, useSpring, useSpringValue} from "@react-spring/three";
 import {Color} from "three";
 import {TetrisConstants} from "../../tetrisConstants.ts";
-import {useEffect} from "react";
+import {PropsWithChildren, useEffect} from "react";
 import {Outlines, RoundedBox} from "@react-three/drei";
+import {useControls} from "leva";
 
 export type BlockMode = 'STANDARD' | 'GHOST' | 'LOCK' | 'CLEAR' | 'SHIFT_ONE' | 'SHIFT_TWO' | 'SHIFT_THREE' | 'SHIFT_FOUR';
 
@@ -14,9 +15,44 @@ const DURATION = 500;
 
 const AnimatedOutlines = animated(Outlines)
 
-const Block = ({ position, color, mode='STANDARD', outlineOpacity } : { position: [number, number, number], color: Color, mode?: BlockMode, outlineOpacity?: SpringValue<number> }) => {
+type CustomBoxProps = {
+  scale: number;
+  roundedBox: boolean;
+};
+
+const CustomBox = ({ scale, roundedBox, children }: PropsWithChildren<CustomBoxProps>) => {
+  return roundedBox ? (
+    <RoundedBox
+      args={[TetrisConstants.cellSize, TetrisConstants.cellSize, TetrisConstants.cellSize]} // Width, height, depth. Default is [1, 1, 1]
+      radius={0.2} // Radius of the rounded corners. Default is 0.05
+      smoothness={4} // The number of curve segments. Default is 4
+      bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
+      creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
+      scale={scale}
+    >
+      {children}
+    </RoundedBox>
+  ) : (
+    <mesh
+      geometry={TetrisConstants.boxGeometry}
+      scale={TetrisConstants.cellSize * scale * 0.9}
+    >
+      {children}
+    </mesh>
+  )
+}
+
+const Block = ({ position, color, mode = 'STANDARD', outlineOpacity }: {
+  position: [number, number, number],
+  color: Color,
+  mode?: BlockMode,
+  outlineOpacity?: SpringValue<number>
+}) => {
   const defaultOutlineOpacity = useSpringValue(1);
   const ghostOutlineOpacity = outlineOpacity === null ? defaultOutlineOpacity : outlineOpacity;
+  const { roundedBox } = useControls('Blocks', {
+    roundedBox: true
+  });
 
   const [{ opacity, rotationZ, positionY, scale}, api] = useSpring(() => ({
     from: { opacity: mode === 'GHOST' ? 0.2 : 1, rotationZ: 0, positionY: 0, scale: 1 },
@@ -43,14 +79,7 @@ const Block = ({ position, color, mode='STANDARD', outlineOpacity } : { position
       scale={scale}
     >
       <animated.mesh position-y={positionY}>
-        <RoundedBox
-          args={[TetrisConstants.cellSize, TetrisConstants.cellSize, TetrisConstants.cellSize]} // Width, height, depth. Default is [1, 1, 1]
-          radius={0.2} // Radius of the rounded corners. Default is 0.05
-          smoothness={4} // The number of curve segments. Default is 4
-          bevelSegments={4} // The number of bevel segments. Default is 4, setting it to 0 removes the bevel, as a result the texture is applied to the whole geometry.
-          creaseAngle={0.4} // Smooth normals everywhere except faces that meet at an angle greater than the crease angle
-          scale={mode === 'GHOST' ? 0.9 : 1}
-        >
+        <CustomBox scale={mode === 'GHOST' ? 0.9 : 1} roundedBox={roundedBox}>
           <animated.meshStandardMaterial
             metalness={0.45}
             roughness={0.75}
@@ -59,7 +88,7 @@ const Block = ({ position, color, mode='STANDARD', outlineOpacity } : { position
             transparent={true}
           />
           {mode === 'GHOST' ? <AnimatedOutlines thickness={0.05} color="white" transparent={true} opacity={ghostOutlineOpacity}/> : null}
-        </RoundedBox>
+        </CustomBox>
       </animated.mesh>
     </animated.group>
   )
